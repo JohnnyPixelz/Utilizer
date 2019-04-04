@@ -7,6 +7,30 @@
     <groupId>io.github.johnnypixelz</groupId>
     <artifactId>utilizer</artifactId>
     <version>0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>Utilizer</name>
+    <description>Powerful but easy to use library for Bukkit Plugin Development.</description>
+    <url>https://github.com/JohnnyPixelz/Utilizer</url>
 
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>1.8.8-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
 </project>
