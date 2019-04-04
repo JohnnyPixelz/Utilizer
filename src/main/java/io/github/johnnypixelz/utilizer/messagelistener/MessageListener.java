@@ -1,7 +1,5 @@
 package io.github.johnnypixelz.utilizer.messagelistener;
 
-import com.sun.istack.internal.NotNull;
-import com.sun.istack.internal.Nullable;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,20 +15,18 @@ public class MessageListener implements Listener {
     /**
      * The player that MessageListener will listen to
      */
-    @NotNull
     private Player player;
 
     /**
      * The consumer that will be called once a player sends a message
      */
-    @Nullable
     private Consumer<AsyncPlayerChatEvent> onChatEvent;
 
     /**
      * @param plugin the main plugin instance
      * @param player the player that MessageListener will listen to
      */
-    public MessageListener(@NotNull Plugin plugin, Player player) {
+    public MessageListener(Plugin plugin, Player player) {
         this.player = player;
 
         Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -39,7 +35,7 @@ public class MessageListener implements Listener {
     /**
      * Set the consumer that should be called whenever the player sends a message
      */
-    public void setOnChatEvent(@NotNull Consumer<AsyncPlayerChatEvent> onChatEvent) {
+    public void setOnChatEvent(Consumer<AsyncPlayerChatEvent> onChatEvent) {
         this.onChatEvent = onChatEvent;
     }
 
@@ -49,7 +45,7 @@ public class MessageListener implements Listener {
      * @param event the chat event
      */
     @EventHandler(ignoreCancelled = true)
-    public void onAsyncChatEvent(@NotNull AsyncPlayerChatEvent event) {
+    public void onAsyncChatEvent(AsyncPlayerChatEvent event) {
         if (!player.getUniqueId().equals(event.getPlayer().getUniqueId())) return;
 
         if (onChatEvent != null) {
