@@ -1,4 +1,4 @@
-package io.github.johnnypixelz.utilizer.messagelistener;
+package io.github.johnnypixelz.utilizer.chat;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -6,14 +6,15 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 
 import java.util.function.Consumer;
 
-public class MessageListener implements Listener {
+public class ChatInput implements Listener {
 
     /**
-     * The player that MessageListener will listen to
+     * The player that ChatInput will listen to
      */
     private Player player;
 
@@ -24,9 +25,9 @@ public class MessageListener implements Listener {
 
     /**
      * @param plugin the main plugin instance
-     * @param player the player that MessageListener will listen to
+     * @param player the player that ChatInput will listen to
      */
-    public MessageListener(Plugin plugin, Player player) {
+    public ChatInput(Plugin plugin, Player player) {
         this.player = player;
 
         Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -50,6 +51,19 @@ public class MessageListener implements Listener {
 
         if (onChatEvent != null) {
             onChatEvent.accept(event);
+            onChatEvent = null;
+            HandlerList.unregisterAll(this);
+        }
+    }
+
+    /**
+     * Handles player disconnections
+     *
+     * @param event the disconnect event
+     */
+    @EventHandler
+    public void onPlayerDisconnect(PlayerQuitEvent event) {
+        if (player.getUniqueId().equals(event.getPlayer().getUniqueId())) {
             onChatEvent = null;
             HandlerList.unregisterAll(this);
         }
