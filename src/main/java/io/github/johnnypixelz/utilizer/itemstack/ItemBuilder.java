@@ -43,6 +43,7 @@ public class ItemBuilder {
     public ItemBuilder(Material material) {
         if(material == null) material = Material.AIR;
         this.item = new ItemStack(material);
+        this.meta = item.getItemMeta();
         this.material = material;
     }
 
@@ -52,6 +53,7 @@ public class ItemBuilder {
         if(((amount > material.getMaxStackSize()) || (amount <= 0)) && (!unsafeStackSize)) amount = 1;
         this.amount = amount;
         this.item = new ItemStack(material, amount);
+        this.meta = item.getItemMeta();
         this.material = material;
     }
 
@@ -60,6 +62,7 @@ public class ItemBuilder {
         if(material == null) material = Material.AIR;
         Validate.notNull(displayname, "The Displayname is null.");
         this.item = new ItemStack(material, amount);
+        this.meta = item.getItemMeta();
         this.material = material;
         if(((amount > material.getMaxStackSize()) || (amount <= 0)) && (!unsafeStackSize)) amount = 1;
         this.amount = amount;
@@ -71,6 +74,7 @@ public class ItemBuilder {
         if(material == null) material = Material.AIR;
         Validate.notNull(displayname, "The Displayname is null.");
         this.item = new ItemStack(material);
+        this.meta = item.getItemMeta();
         this.material = material;
         this.displayname = displayname;
     }
@@ -79,8 +83,7 @@ public class ItemBuilder {
     public ItemBuilder(ItemStack item) {
         Validate.notNull(item, "The Item is null.");
         this.item = item;
-        if(item.hasItemMeta())
-            this.meta = item.getItemMeta();
+        this.meta = item.getItemMeta();
         this.material = item.getType();
         this.amount = item.getAmount();
         this.data = item.getData();
