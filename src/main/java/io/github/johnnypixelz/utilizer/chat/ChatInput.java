@@ -3,11 +3,12 @@ package io.github.johnnypixelz.utilizer.chat;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.function.Consumer;
 
@@ -19,16 +20,27 @@ public class ChatInput implements Listener {
     private Player player;
 
     /**
+     * The plugin's instance
+     */
+    private JavaPlugin instance;
+
+    /**
      * The consumer that will be called once a player sends a message
      */
     private Consumer<AsyncPlayerChatEvent> onChatEvent;
 
     /**
+     * The consumer that will be called once a player sends a message but is also synchronized
+     */
+    private Consumer<AsyncPlayerChatEvent> onChatEventSynchronized;
+
+    /**
      * @param plugin the main plugin instance
      * @param player the player that ChatInput will listen to
      */
-    public ChatInput(Plugin plugin, Player player) {
+    public ChatInput(JavaPlugin plugin, Player player) {
         this.player = player;
+        this.instance = plugin;
 
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
@@ -41,19 +53,32 @@ public class ChatInput implements Listener {
     }
 
     /**
+     * Set the consumer that should be called whenever the player sends a message but is also synchronized
+     */
+    public void setOnChatEventSynchronized(Consumer<AsyncPlayerChatEvent> onChatEventSynchronized) {
+        this.onChatEventSynchronized = onChatEventSynchronized;
+    }
+
+    /**
      * Handles the messages sent
      *
      * @param event the chat event
      */
-    @EventHandler(ignoreCancelled = true)
-    public void onAsyncChatEvent(AsyncPlayerChatEvent event) {
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+    private void onAsyncChatEvent(AsyncPlayerChatEvent event) {
         if (!player.getUniqueId().equals(event.getPlayer().getUniqueId())) return;
 
         if (onChatEvent != null) {
             onChatEvent.accept(event);
-            onChatEvent = null;
-            HandlerList.unregisterAll(this);
+            event.setCancelled(true);
         }
+
+        if (onChatEventSynchronized != null) {
+            Bukkit.getScheduler().runTask(instance, () -> onChatEventSynchronized.accept(event));
+            event.setCancelled(true);
+        }
+
+        HandlerList.unregisterAll(this);
     }
 
     /**
@@ -62,9 +87,8 @@ public class ChatInput implements Listener {
      * @param event the disconnect event
      */
     @EventHandler
-    public void onPlayerDisconnect(PlayerQuitEvent event) {
+    private void onPlayerDisconnect(PlayerQuitEvent event) {
         if (player.getUniqueId().equals(event.getPlayer().getUniqueId())) {
-            onChatEvent = null;
             HandlerList.unregisterAll(this);
         }
     }
