@@ -64,7 +64,7 @@ public class ChatInput implements Listener {
      *
      * @param event the chat event
      */
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     private void onAsyncChatEvent(AsyncPlayerChatEvent event) {
         if (!player.getUniqueId().equals(event.getPlayer().getUniqueId())) return;
 
