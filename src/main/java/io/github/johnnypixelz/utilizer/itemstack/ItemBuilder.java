@@ -496,13 +496,16 @@ public class ItemBuilder {
         item.setType(material);
         item.setAmount(amount);
         item.setDurability(damage);
-        meta = item.getItemMeta();
+
         if(data != null) {
             item.setData(data);
         }
         if(enchantments.size() > 0) {
             item.addUnsafeEnchantments(enchantments);
         }
+
+        meta = item.getItemMeta();
+
         if(displayname != null) {
             meta.setDisplayName(displayname);
         }
