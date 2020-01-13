@@ -3,10 +3,8 @@ package io.github.johnnypixelz.utilizer.file;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.github.johnnypixelz.utilizer.provider.Provider;
-import jdk.internal.jline.internal.TestAccessible;
 
 import java.io.*;
-import java.util.HashMap;
 
 public class Persistence {
     private static Gson gson = new Gson();
@@ -16,6 +14,16 @@ public class Persistence {
 
         try {
             return gson.fromJson(new FileReader(file), new TypeToken<T>(){}.getType());
+        } catch (FileNotFoundException ignored) {
+            return null;
+        }
+    }
+
+    public static <T> T loadFile(String fileName, TypeToken<T> token) {
+        File file = new File(Provider.getPlugin().getDataFolder().getPath() + File.separator + fileName + ".json");
+
+        try {
+            return gson.fromJson(new FileReader(file), token.getType());
         } catch (FileNotFoundException ignored) {
             return null;
         }

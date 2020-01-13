@@ -1,5 +1,6 @@
 package io.github.johnnypixelz.utilizer.numbers;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
@@ -54,9 +55,13 @@ public class NumberFormat {
     static {
         suffixes.put(1_000L, "k");
         suffixes.put(1_000_000L, "M");
-        suffixes.put(1_000_000_000L, "G");
+        suffixes.put(1_000_000_000L, "B");
         suffixes.put(1_000_000_000_000L, "T");
-        suffixes.put(1_000_000_000_000_000L, "P");
-        suffixes.put(1_000_000_000_000_000_000L, "E");
+        suffixes.put(1_000_000_000_000_000L, "q");
+        suffixes.put(1_000_000_000_000_000_000L, "Q");
+    }
+
+    public static String toFormatted(long value) {
+        return java.text.NumberFormat.getInstance(Locale.US).format(value);
     }
 }

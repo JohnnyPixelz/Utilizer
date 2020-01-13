@@ -2,59 +2,56 @@ package io.github.johnnypixelz.utilizer.cooldown;
 
 import io.github.johnnypixelz.utilizer.provider.Provider;
 import org.bukkit.Bukkit;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Consumer;
 
-public class DynamicCooldown extends Cooldown {
+public class DynamicCooldown<T> extends Cooldown<T> {
     private BukkitTask cooldownTask;
-    private Consumer<UUID> onDone;
-    private Consumer<UUID> onDoneAsync;
+    private Consumer<T> onDone;
+    private Consumer<T> onDoneAsync;
 
     public DynamicCooldown() {
         cooldownTask = Bukkit.getScheduler().runTaskTimerAsynchronously(Provider.getPlugin(), () -> {
-            List<UUID> toRemove = new ArrayList<>();
+            List<T> toRemove = new ArrayList<>();
 
-            cooldowns.forEach((uuid, ms) -> {
+            cooldowns.forEach((t, ms) -> {
                 if (ms < System.currentTimeMillis()) {
-                    toRemove.add(uuid);
+                    toRemove.add(t);
                 }
             });
 
-            toRemove.forEach(uuid -> remove(uuid));
+            toRemove.forEach(this::remove);
         }, 0, 1);
     }
 
-    private void remove(UUID uuid) {
+    @Override
+    public void remove(T t) {
         if (onDone != null) {
-            Bukkit.getScheduler().runTask(Provider.getPlugin(), () -> onDone.accept(uuid));
+            Bukkit.getScheduler().runTask(Provider.getPlugin(), () -> onDone.accept(t));
         }
 
         if (onDoneAsync != null) {
-            onDoneAsync.accept(uuid);
+            onDoneAsync.accept(t);
         }
-        cooldowns.remove(uuid);
+        cooldowns.remove(t);
     }
 
-    @EventHandler
-    private void onPlayerLeave(PlayerQuitEvent event) {
-        remove(event.getPlayer().getUniqueId());
+    public void removeWithoutExecuting(T t) {
+        cooldowns.remove(t);
     }
 
     public void terminate() {
         cooldownTask.cancel();
     }
 
-    public void setOnDone(Consumer<UUID> onDone) {
+    public void setOnDone(Consumer<T> onDone) {
         this.onDone = onDone;
     }
 
-    public void setOnDoneAsync(Consumer<UUID> onDoneAsync) {
+    public void setOnDoneAsync(Consumer<T> onDoneAsync) {
         this.onDoneAsync = onDoneAsync;
     }
 
