@@ -5,7 +5,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class InventoryUtils {
 
-    public void giveItem(Player player, ItemStack stack, int amount, boolean overflow) {
+    public static void giveItem(Player player, ItemStack stack, int amount, boolean overflow) {
         if (amount <= 64) {
             stack.setAmount(amount);
 
@@ -28,7 +28,7 @@ public class InventoryUtils {
         }
     }
 
-    public void giveItem(Player player, ItemStack stack, boolean overflow) {
+    public static void giveItem(Player player, ItemStack stack, boolean overflow) {
         if (isInventoryFull(player) && overflow) {
             dropItemNaturally(player, stack);
         } else {
