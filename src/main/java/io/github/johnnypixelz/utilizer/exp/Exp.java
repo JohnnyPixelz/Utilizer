@@ -3,7 +3,7 @@ package io.github.johnnypixelz.utilizer.exp;
 import org.bukkit.entity.Player;
 
 // Acquired from EssentialsX
-public class SetExpFix {
+public class Exp {
     //This method is used to update both the recorded total experience and displayed total experience.
     //We reset both types to prevent issues.
     public static void setTotalExperience(final Player player, final int exp) {

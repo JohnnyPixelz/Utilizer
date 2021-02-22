@@ -1,30 +1,33 @@
 package io.github.johnnypixelz.utilizer.inventory;
 
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public class InventoryUtils {
 
     public static void giveItem(Player player, ItemStack stack, int amount, boolean overflow) {
+        ItemStack uStack = stack.clone();
         if (amount <= 64) {
-            stack.setAmount(amount);
+            uStack.setAmount(amount);
 
-            giveItem(player, stack, overflow);
+            giveItem(player, uStack, overflow);
         } else {
             int stacks = amount / 64;
             int leftover = amount % 64;
 
-            stack.setAmount(64);
+            uStack.setAmount(64);
 
             for (int i = 0; i < stacks; i++) {
-                giveItem(player, stack, overflow);
+                giveItem(player, uStack.clone(), overflow);
             }
 
-            stack.setAmount(leftover);
+            uStack.setAmount(leftover);
 
             if (leftover == 0) return;
 
-            giveItem(player, stack, overflow);
+            giveItem(player, uStack.clone(), overflow);
         }
     }
 
@@ -40,11 +43,11 @@ public class InventoryUtils {
         return player.getInventory().firstEmpty() == -1;
     }
 
-    public static void dropItem(Player player, ItemStack stack) {
-        player.getWorld().dropItem(player.getLocation(), stack);
+    public static Item dropItem(Entity entity, ItemStack stack) {
+        return entity.getWorld().dropItem(entity.getLocation(), stack);
     }
 
-    public static void dropItemNaturally(Player player, ItemStack stack) {
-        player.getWorld().dropItemNaturally(player.getLocation(), stack);
+    public static Item dropItemNaturally(Entity entity, ItemStack stack) {
+        return entity.getWorld().dropItemNaturally(entity.getLocation(), stack);
     }
 }

@@ -1,6 +1,7 @@
 package io.github.johnnypixelz.utilizer.plugin;
 
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -10,6 +11,10 @@ import java.util.Objects;
 public class UtilPlugin extends JavaPlugin {
     private static UtilPlugin plugin;
 
+    /**
+     * Returns the main plugin's instance
+     * @return Plugin's instance
+     */
     public static UtilPlugin getInstance() {
         if (plugin == null) {
             plugin = (UtilPlugin) JavaPlugin.getProvidingPlugin(UtilPlugin.class);
@@ -24,6 +29,16 @@ public class UtilPlugin extends JavaPlugin {
         return listener;
     }
 
+    public <T extends Listener> T unregisterListener(T listener) {
+        Objects.requireNonNull(listener, "listener");
+        HandlerList.unregisterAll(listener);
+        return listener;
+    }
+
+    public void unregisterAllListeners() {
+        HandlerList.unregisterAll(this);
+    }
+
     public boolean isPluginPresent(String name) {
         return getServer().getPluginManager().getPlugin(name) != null;
     }
@@ -34,6 +49,13 @@ public class UtilPlugin extends JavaPlugin {
         return (T) getServer().getPluginManager().getPlugin(name);
     }
 
+    /**
+     * Attempts to find and return a file with a name that matches
+     * the given variable, and returns the file object.
+     *
+     * @param name
+     * @return Associated file
+     */
     private File getRelativeFile(String name) {
         getDataFolder().mkdirs();
         return new File(getDataFolder(), name);

@@ -51,7 +51,7 @@ public class RainbowText {
         }
         updateFancy();
     }
-    private void updateFancy(){
+    private void updateFancy() {
         int spot = place;
         String fancyText = "";
         for(char l : text.toCharArray()){

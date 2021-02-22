@@ -23,4 +23,8 @@ public enum PaneType {
     PaneType(final int data) {
         this.data = data;
     }
+
+    public int getData() {
+        return data;
+    }
 }
