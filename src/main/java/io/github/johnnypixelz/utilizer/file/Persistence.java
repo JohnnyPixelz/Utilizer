@@ -43,5 +43,8 @@ public class Persistence {
         return true;
     }
 
+    public static void setGson(Gson gson) {
+        Persistence.gson = gson;
+    }
     
 }
