@@ -32,8 +32,22 @@ public class Persistence {
     public static boolean saveFile(String fileName, Object object) {
         Provider.getPlugin().getDataFolder().mkdirs();
         try {
-            FileWriter writer = new FileWriter(new File(Provider.getPlugin().getDataFolder().getPath() + File.separator + fileName + ".json"));
+            FileWriter writer = new FileWriter(Provider.getPlugin().getDataFolder().getPath() + File.separator + fileName + ".json");
             gson.toJson(object, writer);
+            writer.close();
+        } catch (FileNotFoundException ignored) {
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public static <T> boolean saveFile(String fileName, Object object, TypeToken<T> token) {
+        Provider.getPlugin().getDataFolder().mkdirs();
+        try {
+            FileWriter writer = new FileWriter(Provider.getPlugin().getDataFolder().getPath() + File.separator + fileName + ".json");
+            gson.toJson(object, token.getType(), writer);
             writer.close();
         } catch (FileNotFoundException ignored) {
         } catch (IOException ex) {
