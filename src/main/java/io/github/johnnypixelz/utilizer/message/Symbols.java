@@ -2,7 +2,9 @@ package io.github.johnnypixelz.utilizer.message;
 
 public class Symbols {
 
-    public static final char cross = '✘';
-    public static final char tick = '✔';
-    public static final char thickCross = '✖';
+    public static final char CHECK_MARK = '✔';
+    public static final char CROSS = '✖';
+    public static final char LEFT_DOUBLE_ARROW = '«';
+    public static final char RIGHT_DOUBLE_ARROW = '»';
+    public static final char SQUARE_ROOT = '√';
 }
