@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 
 public class Dependencies {
 
+    @Deprecated
     public static boolean PlaceholderAPI() {
         return Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
     }
