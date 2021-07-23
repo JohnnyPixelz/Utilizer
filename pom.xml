@@ -13,7 +13,7 @@
 
     <distributionManagement>
         <repository>
-            <id>local-repository</id>
+            <id>tzoni-repo</id>
             <url>https://repo.tzoni.me/releases</url>
         </repository>
     </distributionManagement>
