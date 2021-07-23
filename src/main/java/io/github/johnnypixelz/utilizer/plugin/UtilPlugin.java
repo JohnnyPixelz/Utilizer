@@ -29,9 +29,25 @@ public class UtilPlugin extends JavaPlugin {
         return listener;
     }
 
+    public Listener[] registerListener(Listener... listener) {
+        Objects.requireNonNull(listener, "listener");
+        for (Listener listener1 : listener) {
+            getServer().getPluginManager().registerEvents(listener1, this);
+        }
+        return listener;
+    }
+
     public <T extends Listener> T unregisterListener(T listener) {
         Objects.requireNonNull(listener, "listener");
         HandlerList.unregisterAll(listener);
+        return listener;
+    }
+
+    public Listener[] unregisterListener(Listener... listener) {
+        Objects.requireNonNull(listener, "listener");
+        for (Listener listener1 : listener) {
+            HandlerList.unregisterAll(listener1);
+        }
         return listener;
     }
 
@@ -40,6 +56,7 @@ public class UtilPlugin extends JavaPlugin {
     }
 
     public boolean isPluginPresent(String name) {
+        Objects.requireNonNull(name, "name");
         return getServer().getPluginManager().getPlugin(name) != null;
     }
 
@@ -53,10 +70,11 @@ public class UtilPlugin extends JavaPlugin {
      * Attempts to find and return a file with a name that matches
      * the given variable, and returns the file object.
      *
-     * @param name
+     * @param name File name
      * @return Associated file
      */
     private File getRelativeFile(String name) {
+        Objects.requireNonNull(name, "name");
         getDataFolder().mkdirs();
         return new File(getDataFolder(), name);
     }
