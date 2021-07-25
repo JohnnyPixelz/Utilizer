@@ -1,30 +1,33 @@
 package io.github.johnnypixelz.utilizer.itemstack;
 
+import com.cryptomorin.xseries.XMaterial;
+
 public enum PaneType {
-    WHITE(0),
-    ORANGE(1),
-    MAGENTA(2),
-    LIGHT_BLUE(3),
-    YELLOW(4),
-    LIME(5),
-    PINK(6),
-    GRAY(7),
-    LIGHT_GRAY(8),
-    CYAN(9),
-    PURPLE(10),
-    BLUE(11),
-    BROWN(12),
-    GREEN(13),
-    RED(14),
-    BLACK(15);
+    WHITE(XMaterial.WHITE_STAINED_GLASS_PANE),
+    ORANGE(XMaterial.ORANGE_STAINED_GLASS_PANE),
+    MAGENTA(XMaterial.MAGENTA_STAINED_GLASS_PANE),
+    LIGHT_BLUE(XMaterial.LIGHT_BLUE_STAINED_GLASS_PANE),
+    YELLOW(XMaterial.YELLOW_STAINED_GLASS_PANE),
+    LIME(XMaterial.LIME_STAINED_GLASS_PANE),
+    PINK(XMaterial.PINK_STAINED_GLASS_PANE),
+    GRAY(XMaterial.GRAY_STAINED_GLASS_PANE),
+    LIGHT_GRAY(XMaterial.LIGHT_GRAY_STAINED_GLASS_PANE),
+    CYAN(XMaterial.CYAN_STAINED_GLASS_PANE),
+    PURPLE(XMaterial.PURPLE_STAINED_GLASS_PANE),
+    BLUE(XMaterial.BLUE_STAINED_GLASS_PANE),
+    BROWN(XMaterial.BROWN_STAINED_GLASS_PANE),
+    GREEN(XMaterial.GREEN_STAINED_GLASS_PANE),
+    RED(XMaterial.RED_STAINED_GLASS_PANE),
+    BLACK(XMaterial.BLACK_STAINED_GLASS_PANE);
 
-    public final int data;
 
-    PaneType(final int data) {
-        this.data = data;
+    private final XMaterial material;
+
+    PaneType(final XMaterial material) {
+        this.material = material;
     }
 
-    public int getData() {
-        return data;
+    public XMaterial getMaterial() {
+        return material;
     }
 }
