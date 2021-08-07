@@ -88,6 +88,23 @@ public class ItemEditor {
         return this;
     }
 
+    public ItemEditor removeLore() {
+        if (!stack.hasItemMeta()) {
+            return this;
+        }
+
+        ItemMeta itemMeta = stack.getItemMeta();
+
+        if (!itemMeta.hasLore()) {
+            return this;
+        }
+
+        itemMeta.setLore(null);
+
+        stack.setItemMeta(itemMeta);
+        return this;
+    }
+
     public ItemEditor setFlags(@NotNull ItemFlag... flags) {
         ItemMeta itemMeta = stack.getItemMeta();
 
@@ -108,6 +125,11 @@ public class ItemEditor {
         }
 
         stack.setItemMeta(itemMeta);
+        return this;
+    }
+
+    public ItemEditor setAmount(int amount) {
+        stack.setAmount(amount);
         return this;
     }
 

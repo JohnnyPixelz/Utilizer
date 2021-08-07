@@ -126,6 +126,23 @@ public class Items {
         return stack;
     }
 
+    public static ItemStack removeLore(@NotNull ItemStack stack) {
+        if (!stack.hasItemMeta()) {
+            return stack;
+        }
+
+        ItemMeta itemMeta = stack.getItemMeta();
+
+        if (!itemMeta.hasLore()) {
+            return stack;
+        }
+
+        itemMeta.setLore(null);
+
+        stack.setItemMeta(itemMeta);
+        return stack;
+    }
+
     public static ItemStack setFlags(@NotNull ItemStack stack, @NotNull ItemFlag... flags) {
         ItemMeta itemMeta = stack.getItemMeta();
 

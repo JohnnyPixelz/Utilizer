@@ -27,6 +27,12 @@
             <id>placeholderapi</id>
             <url>http://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
+
+        <!-- BELOW ARE REPOSITORIES UNUSED BY UTILIZER -->
+        <repository>
+            <id>essentials</id>
+            <url>https://repo.essentialsx.net/releases/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -51,6 +57,14 @@
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>21.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- BELOW ARE DEPENDENCIES UNUSED BY UTILIZER -->
+        <dependency>
+            <groupId>net.ess3</groupId>
+            <artifactId>EssentialsX</artifactId>
+            <version>2.17.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -92,9 +106,25 @@
                                     <shadedPattern>io.github.johnnypixelz.utilizer.shade.xseries</shadedPattern>
                                 </relocation>
                             </relocations>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/**</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
             </plugin>
         </plugins>
     </build>
