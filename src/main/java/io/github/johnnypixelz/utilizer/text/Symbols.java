@@ -1,4 +1,4 @@
-package io.github.johnnypixelz.utilizer.message;
+package io.github.johnnypixelz.utilizer.text;
 
 public class Symbols {
 

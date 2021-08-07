@@ -1,6 +1,6 @@
 package io.github.johnnypixelz.utilizer.cooldown;
 
-import io.github.johnnypixelz.utilizer.provider.Provider;
+import io.github.johnnypixelz.utilizer.plugin.Provider;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
 

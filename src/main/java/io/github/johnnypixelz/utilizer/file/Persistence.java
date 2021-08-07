@@ -2,7 +2,7 @@ package io.github.johnnypixelz.utilizer.file;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import io.github.johnnypixelz.utilizer.provider.Provider;
+import io.github.johnnypixelz.utilizer.plugin.Provider;
 
 import java.io.*;
 

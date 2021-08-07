@@ -1,4 +1,4 @@
-package io.github.johnnypixelz.utilizer.message;
+package io.github.johnnypixelz.utilizer.text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,18 +12,18 @@ public class TextUtils {
         int targetLines = (int) Math.ceil(words.length / (double) maxWords);
         int wordsPerLine = words.length / targetLines;
 
-        String data = "";
+        StringBuilder data = new StringBuilder();
         int counter = 0;
         for (String word : words) {
             if (counter == wordsPerLine) {
-                data += "\n";
+                data.append("\n");
                 counter = 0;
             }
-            data += word + " ";
+            data.append(word).append(" ");
             counter++;
         }
 
-        for (String line : data.split("\n")) {
+        for (String line : data.toString().split("\n")) {
             lore.add(line);
         }
 

@@ -1,11 +1,11 @@
-package io.github.johnnypixelz.utilizer.numbers;
+package io.github.johnnypixelz.utilizer.text;
 
 import java.util.Locale;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-public class NumberFormat {
+public class Numbers {
 
     private final static TreeMap<Integer, String> map = new TreeMap<>();
 

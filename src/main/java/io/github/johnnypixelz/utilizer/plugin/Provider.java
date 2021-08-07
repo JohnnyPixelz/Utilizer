@@ -1,4 +1,4 @@
-package io.github.johnnypixelz.utilizer.provider;
+package io.github.johnnypixelz.utilizer.plugin;
 
 import org.bukkit.plugin.java.JavaPlugin;
 

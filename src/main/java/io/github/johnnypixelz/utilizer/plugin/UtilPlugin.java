@@ -4,9 +4,9 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.Objects;
 
 public class UtilPlugin extends JavaPlugin {
     private static UtilPlugin plugin;
@@ -23,28 +23,24 @@ public class UtilPlugin extends JavaPlugin {
         return plugin;
     }
 
-    public <T extends Listener> T registerListener(T listener) {
-        Objects.requireNonNull(listener, "listener");
+    public <T extends Listener> T registerListener(@NotNull T listener) {
         getServer().getPluginManager().registerEvents(listener, this);
         return listener;
     }
 
-    public Listener[] registerListener(Listener... listener) {
-        Objects.requireNonNull(listener, "listener");
+    public Listener[] registerListener(@NotNull Listener... listener) {
         for (Listener listener1 : listener) {
             getServer().getPluginManager().registerEvents(listener1, this);
         }
         return listener;
     }
 
-    public <T extends Listener> T unregisterListener(T listener) {
-        Objects.requireNonNull(listener, "listener");
+    public <T extends Listener> T unregisterListener(@NotNull T listener) {
         HandlerList.unregisterAll(listener);
         return listener;
     }
 
-    public Listener[] unregisterListener(Listener... listener) {
-        Objects.requireNonNull(listener, "listener");
+    public Listener[] unregisterListener(@NotNull Listener... listener) {
         for (Listener listener1 : listener) {
             HandlerList.unregisterAll(listener1);
         }
@@ -55,14 +51,11 @@ public class UtilPlugin extends JavaPlugin {
         HandlerList.unregisterAll(this);
     }
 
-    public boolean isPluginPresent(String name) {
-        Objects.requireNonNull(name, "name");
+    public boolean isPluginPresent(@NotNull String name) {
         return getServer().getPluginManager().getPlugin(name) != null;
     }
 
-    public <T> T getPlugin(String name, Class<T> pluginClass) {
-        Objects.requireNonNull(name, "name");
-        Objects.requireNonNull(pluginClass, "pluginClass");
+    public <T> T getPlugin(@NotNull String name, @NotNull Class<T> pluginClass) {
         return (T) getServer().getPluginManager().getPlugin(name);
     }
 
@@ -73,14 +66,12 @@ public class UtilPlugin extends JavaPlugin {
      * @param name File name
      * @return Associated file
      */
-    private File getRelativeFile(String name) {
-        Objects.requireNonNull(name, "name");
+    private File getRelativeFile(@NotNull String name) {
         getDataFolder().mkdirs();
         return new File(getDataFolder(), name);
     }
 
-    public File getBundledFile(String name) {
-        Objects.requireNonNull(name, "name");
+    public File getBundledFile(@NotNull String name) {
         File file = getRelativeFile(name);
         if (!file.exists()) {
             saveResource(name, false);
@@ -88,8 +79,7 @@ public class UtilPlugin extends JavaPlugin {
         return file;
     }
 
-    public YamlConfiguration loadConfig(String file) {
-        Objects.requireNonNull(file, "file");
+    public YamlConfiguration loadConfig(@NotNull String file) {
         return YamlConfiguration.loadConfiguration(getBundledFile(file));
     }
 
