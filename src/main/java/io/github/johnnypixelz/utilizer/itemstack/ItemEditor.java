@@ -2,6 +2,7 @@ package io.github.johnnypixelz.utilizer.itemstack;
 
 import io.github.johnnypixelz.utilizer.text.Colors;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -118,13 +119,44 @@ public class ItemEditor {
     public ItemEditor addFlags(@NotNull ItemFlag... flags) {
         ItemMeta itemMeta = stack.getItemMeta();
 
-        for (ItemFlag flag : flags) {
-            if (itemMeta.hasItemFlag(flag)) continue;
-
-            itemMeta.addItemFlags(flag);
-        }
+        itemMeta.addItemFlags(flags);
 
         stack.setItemMeta(itemMeta);
+        return this;
+    }
+
+    public ItemEditor removeFlags(@NotNull ItemFlag... flags) {
+        ItemMeta itemMeta = stack.getItemMeta();
+
+        itemMeta.removeItemFlags(flags);
+
+        stack.setItemMeta(itemMeta);
+        return this;
+    }
+
+    public ItemEditor clearFlags() {
+        ItemMeta itemMeta = stack.getItemMeta();
+
+        itemMeta.removeItemFlags(itemMeta.getItemFlags().toArray(new ItemFlag[0]));
+
+        stack.setItemMeta(itemMeta);
+        return this;
+    }
+
+    public ItemEditor glow() {
+        stack.addUnsafeEnchantment(stack.getType() != Material.BOW ? Enchantment.ARROW_INFINITE : Enchantment.LUCK, 10);
+        addFlags(ItemFlag.HIDE_ENCHANTS);
+        return this;
+    }
+
+    public ItemEditor setGlow(boolean glow) {
+        if (glow) {
+            return glow();
+        }
+
+        stack.removeEnchantment(stack.getType() == Material.BOW ? Enchantment.LUCK : Enchantment.ARROW_INFINITE);
+        removeFlags(ItemFlag.HIDE_ENCHANTS);
+
         return this;
     }
 
