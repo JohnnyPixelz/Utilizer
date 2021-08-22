@@ -6,7 +6,7 @@
 
     <groupId>io.github.johnnypixelz</groupId>
     <artifactId>Utilizer</artifactId>
-    <version>0.11</version>
+    <version>0.12.0</version>
     <packaging>jar</packaging>
     <description>Powerful but easy to use library for Bukkit Plugin Development</description>
     <url>https://github.com/JohnnyPixelz/Utilizer</url>
@@ -23,15 +23,15 @@
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
+
+        <!-- BELOW ARE REPOSITORIES UNUSED BY UTILIZER -->
         <repository>
             <id>placeholderapi</id>
             <url>http://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
-
-        <!-- BELOW ARE REPOSITORIES UNUSED BY UTILIZER -->
         <repository>
-            <id>essentials</id>
-            <url>https://repo.essentialsx.net/releases/</url>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 
@@ -40,12 +40,6 @@
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
             <version>1.8.8-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>me.clip</groupId>
-            <artifactId>placeholderapi</artifactId>
-            <version>2.10.10</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -67,9 +61,15 @@
 
         <!-- BELOW ARE DEPENDENCIES UNUSED BY UTILIZER -->
         <dependency>
-            <groupId>net.ess3</groupId>
-            <artifactId>EssentialsX</artifactId>
-            <version>2.17.0</version>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>2.10.10</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.MilkBowl</groupId>
+            <artifactId>VaultAPI</artifactId>
+            <version>1.7</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
