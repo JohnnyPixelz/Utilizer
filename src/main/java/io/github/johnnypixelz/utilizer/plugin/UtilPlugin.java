@@ -15,7 +15,7 @@ public class UtilPlugin extends JavaPlugin {
      * Returns the main plugin's instance
      * @return Plugin's instance
      */
-    public static UtilPlugin getInstance() {
+    public static synchronized UtilPlugin getInstance() {
         if (plugin == null) {
             plugin = (UtilPlugin) JavaPlugin.getProvidingPlugin(UtilPlugin.class);
         }
