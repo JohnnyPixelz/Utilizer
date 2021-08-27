@@ -106,6 +106,16 @@ public class ItemEditor {
         return this;
     }
 
+    public ItemEditor setFlags(@NotNull List<ItemFlag> flags) {
+        ItemMeta itemMeta = stack.getItemMeta();
+
+        itemMeta.getItemFlags().forEach(itemMeta::removeItemFlags);
+        flags.forEach(itemMeta::addItemFlags);
+
+        stack.setItemMeta(itemMeta);
+        return this;
+    }
+
     public ItemEditor setFlags(@NotNull ItemFlag... flags) {
         ItemMeta itemMeta = stack.getItemMeta();
 
@@ -116,10 +126,28 @@ public class ItemEditor {
         return this;
     }
 
+    public ItemEditor addFlags(@NotNull List<ItemFlag> flags) {
+        ItemMeta itemMeta = stack.getItemMeta();
+
+        flags.forEach(itemMeta::addItemFlags);
+
+        stack.setItemMeta(itemMeta);
+        return this;
+    }
+
     public ItemEditor addFlags(@NotNull ItemFlag... flags) {
         ItemMeta itemMeta = stack.getItemMeta();
 
         itemMeta.addItemFlags(flags);
+
+        stack.setItemMeta(itemMeta);
+        return this;
+    }
+
+    public ItemEditor removeFlags(@NotNull List<ItemFlag> flags) {
+        ItemMeta itemMeta = stack.getItemMeta();
+
+        flags.forEach(itemMeta::removeItemFlags);
 
         stack.setItemMeta(itemMeta);
         return this;

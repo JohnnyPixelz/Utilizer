@@ -144,6 +144,16 @@ public class Items {
         return stack;
     }
 
+    public static ItemStack setFlags(@NotNull ItemStack stack, @NotNull List<ItemFlag> flags) {
+        ItemMeta itemMeta = stack.getItemMeta();
+
+        itemMeta.getItemFlags().forEach(itemMeta::removeItemFlags);
+        flags.forEach(itemMeta::addItemFlags);
+
+        stack.setItemMeta(itemMeta);
+        return stack;
+    }
+
     public static ItemStack setFlags(@NotNull ItemStack stack, @NotNull ItemFlag... flags) {
         ItemMeta itemMeta = stack.getItemMeta();
 
@@ -154,10 +164,28 @@ public class Items {
         return stack;
     }
 
+    public static ItemStack addFlags(@NotNull ItemStack stack, @NotNull List<ItemFlag> flags) {
+        ItemMeta itemMeta = stack.getItemMeta();
+
+        flags.forEach(itemMeta::addItemFlags);
+
+        stack.setItemMeta(itemMeta);
+        return stack;
+    }
+
     public static ItemStack addFlags(@NotNull ItemStack stack, @NotNull ItemFlag... flags) {
         ItemMeta itemMeta = stack.getItemMeta();
 
         itemMeta.addItemFlags(flags);
+
+        stack.setItemMeta(itemMeta);
+        return stack;
+    }
+
+    public static ItemStack removeFlags(@NotNull ItemStack stack, @NotNull List<ItemFlag> flags) {
+        ItemMeta itemMeta = stack.getItemMeta();
+
+        flags.forEach(itemMeta::removeItemFlags);
 
         stack.setItemMeta(itemMeta);
         return stack;
