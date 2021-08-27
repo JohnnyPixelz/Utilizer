@@ -44,7 +44,7 @@ public class ConfirmationBoxProvider implements InventoryProvider {
     public void show(Player player) {
         SmartInventory.Builder builder = SmartInventory.builder()
                 .provider(this)
-                .title(Colors.color(this.title == null ? "&7Confirmation Prompt" : this.title))
+                .title(Colors.color(this.title == null ? "Confirmation Prompt" : this.title))
                 .size(3, 9);
 
         if (onClose != null) {
@@ -62,7 +62,7 @@ public class ConfirmationBoxProvider implements InventoryProvider {
         ItemStack confirmStack = Items.edit(PremadeItems.getPane(PaneType.GREEN))
                 .setDisplayName("&aConfirm")
                 .getItem();
-        ItemStack declineStack = Items.edit(PremadeItems.getPane(PaneType.GREEN))
+        ItemStack declineStack = Items.edit(PremadeItems.getPane(PaneType.RED))
                 .setDisplayName("&cDecline")
                 .getItem();
 
