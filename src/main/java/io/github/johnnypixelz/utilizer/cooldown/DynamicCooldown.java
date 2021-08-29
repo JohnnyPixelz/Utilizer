@@ -9,17 +9,17 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class DynamicCooldown<T> extends Cooldown<T> {
-    private BukkitTask cooldownTask;
-    private Consumer<T> onDone;
-    private Consumer<T> onDoneAsync;
+    private final transient BukkitTask cooldownTask;
+    private transient Consumer<T> onDone;
+    private transient Consumer<T> onDoneAsync;
 
     public DynamicCooldown() {
         cooldownTask = Bukkit.getScheduler().runTaskTimerAsynchronously(Provider.getPlugin(), () -> {
             List<T> toRemove = new ArrayList<>();
 
-            cooldowns.forEach((t, ms) -> {
+            cooldownMap.forEach((object, ms) -> {
                 if (ms < System.currentTimeMillis()) {
-                    toRemove.add(t);
+                    toRemove.add(object);
                 }
             });
 
@@ -28,19 +28,19 @@ public class DynamicCooldown<T> extends Cooldown<T> {
     }
 
     @Override
-    public void remove(T t) {
+    public void remove(T object) {
         if (onDone != null) {
-            Bukkit.getScheduler().runTask(Provider.getPlugin(), () -> onDone.accept(t));
+            Bukkit.getScheduler().runTask(Provider.getPlugin(), () -> onDone.accept(object));
         }
 
         if (onDoneAsync != null) {
-            onDoneAsync.accept(t);
+            onDoneAsync.accept(object);
         }
-        cooldowns.remove(t);
+        cooldownMap.remove(object);
     }
 
-    public void removeWithoutExecuting(T t) {
-        cooldowns.remove(t);
+    public void removeWithoutExecuting(T object) {
+        cooldownMap.remove(object);
     }
 
     public void terminate() {

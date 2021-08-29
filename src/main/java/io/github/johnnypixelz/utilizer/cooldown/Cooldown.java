@@ -6,30 +6,34 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Cooldown<T> implements Listener {
-    protected Map<T, Long> cooldowns = new ConcurrentHashMap<>();
+    protected Map<T, Long> cooldownMap = new ConcurrentHashMap<>();
 
-    public void set(T t, Long ms) {
-        cooldowns.put(t, System.currentTimeMillis() + ms);
+    public void set(T object, Long ms) {
+        cooldownMap.put(object, System.currentTimeMillis() + ms);
     }
 
-    public void add(T t, Long ms) {
-        if (isOnCooldown(t)) {
-            cooldowns.put(t, cooldowns.get(t) + ms);
+    public void add(T object, Long ms) {
+        if (isOnCooldown(object)) {
+            cooldownMap.put(object, cooldownMap.get(object) + ms);
         } else {
-            set(t, ms);
+            set(object, ms);
         }
     }
 
-    public void remove(T t) {
-        cooldowns.remove(t);
+    public void remove(T object) {
+        cooldownMap.remove(object);
     }
 
-    public boolean isOnCooldown(T t) {
-        if (!cooldowns.containsKey(t)) return false;
-        return cooldowns.get(t) > System.currentTimeMillis();
+    public boolean isOnCooldown(T object) {
+        if (!cooldownMap.containsKey(object)) return false;
+        return cooldownMap.get(object) > System.currentTimeMillis();
     }
 
-    public long getCooldown(T t) {
-        return cooldowns.get(t);
+    public long getCooldown(T object) {
+        return cooldownMap.get(object);
+    }
+
+    public Map<T, Long> getCooldownMap() {
+        return cooldownMap;
     }
 }
