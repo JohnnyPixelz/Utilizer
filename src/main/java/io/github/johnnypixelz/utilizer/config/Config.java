@@ -7,6 +7,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.function.Consumer;
 
 public class Config {
     private final File file;
@@ -20,6 +21,11 @@ public class Config {
 
     public Config watch() {
         fileWatcher = FileWatcher.watchFile(file, file -> reload());
+        return this;
+    }
+
+    public Config watch(Consumer<File> callback) {
+        fileWatcher = FileWatcher.watchFile(file, callback);
         return this;
     }
 
@@ -39,6 +45,19 @@ public class Config {
             Provider.getPlugin()
                     .getLogger()
                     .severe("Unable to load configuration file " + file.getName());
+            e.printStackTrace();
+        }
+
+        return this;
+    }
+
+    public Config save() {
+        try {
+            config.save(file);
+        } catch (IOException e) {
+            Provider.getPlugin()
+                    .getLogger()
+                    .severe("Unable to save configuration file " + file.getName());
             e.printStackTrace();
         }
 

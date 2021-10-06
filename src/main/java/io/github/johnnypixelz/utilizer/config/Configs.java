@@ -5,6 +5,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,7 +43,15 @@ public class Configs {
 
         File file = new File(dataFolder, config);
         if (!file.exists()) {
-            Provider.getPlugin().saveResource(config, false);
+            try {
+                Provider.getPlugin().saveResource(config, false);
+            } catch (IllegalArgumentException ignored) {
+                try {
+                    file.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         Config configObj = new Config(file);
