@@ -3,6 +3,7 @@ package io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi;
 import io.github.johnnypixelz.utilizer.plugin.Provider;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.clip.placeholderapi.expansion.Relational;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -61,31 +62,29 @@ public class Expansion extends PlaceholderExpansion implements Relational {
 
     @Override
     public String onPlaceholderRequest(@Nullable Player player, @NotNull String params) {
-        ExpansionCallback expansionCallback = null;
         for (String param : placeholders.keySet()) {
             if (!params.startsWith(param)) continue;
 
-            expansionCallback = placeholders.get(param);
-            break;
+            params = params.length() == param.length() ? "" : params.substring(param.length() + 1);
+
+            ExpansionCallback callback = placeholders.get(param);
+            return callback.run(player, params);
         }
 
-        if (expansionCallback == null) return null;
-
-        return expansionCallback.run(player, params);
+        return null;
     }
 
     @Override
     public String onPlaceholderRequest(@Nullable Player player, @Nullable Player otherPlayer, @NotNull String params) {
-        RelationalExpansionCallback expansionCallback = null;
         for (String param : placeholders.keySet()) {
             if (!params.startsWith(param)) continue;
 
-            expansionCallback = relationalPlaceholders.get(param);
-            break;
+            params = params.length() == param.length() ? "" : params.substring(param.length() + 1);
+
+            RelationalExpansionCallback callback = relationalPlaceholders.get(param);
+            return callback.run(player, otherPlayer, params);
         }
 
-        if (expansionCallback == null) return null;
-
-        return expansionCallback.run(player, otherPlayer, params);
+        return null;
     }
 }
