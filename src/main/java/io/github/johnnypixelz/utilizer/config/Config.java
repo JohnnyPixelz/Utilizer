@@ -13,6 +13,7 @@ public class Config {
     private final File file;
     private final YamlConfiguration config;
     private FileWatcher fileWatcher;
+    private Runnable onReload;
 
     public Config(File file) {
         this.file = file;
@@ -38,6 +39,11 @@ public class Config {
         return this;
     }
 
+    public Config onReload(Runnable onReload) {
+        this.onReload = onReload;
+        return this;
+    }
+
     public Config reload() {
         try {
             config.load(file);
@@ -48,6 +54,7 @@ public class Config {
             e.printStackTrace();
         }
 
+        if (onReload != null) onReload.run();
         return this;
     }
 
