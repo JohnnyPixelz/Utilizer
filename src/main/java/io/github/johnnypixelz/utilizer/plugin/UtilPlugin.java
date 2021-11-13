@@ -3,16 +3,21 @@ package io.github.johnnypixelz.utilizer.plugin;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
-public class UtilPlugin extends JavaPlugin {
+public class UtilPlugin extends JavaPlugin implements Listener {
     private static UtilPlugin plugin;
+    private final List<Manager> managerList = new ArrayList<>();
 
     /**
      * Returns the main plugin's instance
+     *
      * @return Plugin's instance
      */
     public static synchronized UtilPlugin getInstance() {
@@ -21,6 +26,32 @@ public class UtilPlugin extends JavaPlugin {
         }
 
         return plugin;
+    }
+
+    public <T extends Manager> T registerManager(@NotNull T manager) {
+        manager.load();
+        managerList.add(manager);
+        if (manager instanceof Listener) {
+            registerListener((Listener) manager);
+        }
+
+        return manager;
+    }
+
+    public Manager[] registerManager(@NotNull Manager... manager) {
+        for (Manager man : manager) {
+            man.load();
+            managerList.add(man);
+            if (man instanceof Listener) {
+                registerListener((Listener) man);
+            }
+        }
+
+        return manager;
+    }
+
+    public List<Manager> getManagerList() {
+        return managerList;
     }
 
     public <T extends Listener> T registerListener(@NotNull T listener) {
@@ -48,7 +79,7 @@ public class UtilPlugin extends JavaPlugin {
     }
 
     public void unregisterAllListeners() {
-        HandlerList.unregisterAll(this);
+        HandlerList.unregisterAll((Plugin) this);
     }
 
     public boolean isPluginPresent(@NotNull String name) {
