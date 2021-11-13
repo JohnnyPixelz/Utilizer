@@ -24,7 +24,7 @@ public class Numbers {
         map.put(5, "V");
         map.put(4, "IV");
         map.put(1, "I");
-
+        map.put(Integer.MIN_VALUE, "ERR");
     }
 
     public final static String toRoman(int number) {
