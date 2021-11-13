@@ -74,9 +74,11 @@ public class Expansion extends PlaceholderExpansion implements Relational {
         return null;
     }
 
+
+
     @Override
     public String onPlaceholderRequest(@Nullable Player player, @Nullable Player otherPlayer, @NotNull String params) {
-        for (String param : placeholders.keySet()) {
+        for (String param : relationalPlaceholders.keySet()) {
             if (!params.startsWith(param)) continue;
 
             params = params.length() == param.length() ? "" : params.substring(param.length() + 1);
