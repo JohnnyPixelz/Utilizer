@@ -6,7 +6,7 @@
 
     <groupId>io.github.johnnypixelz</groupId>
     <artifactId>Utilizer</artifactId>
-    <version>0.12.5</version>
+    <version>0.13.0</version>
     <packaging>jar</packaging>
     <description>Powerful but easy to use library for Bukkit Plugin Development</description>
     <url>https://github.com/JohnnyPixelz/Utilizer</url>
@@ -48,8 +48,8 @@
             <version>8.2.0</version>
         </dependency>
         <dependency>
-            <groupId>fr.minuskube.inv</groupId>
-            <artifactId>smart-invs</artifactId>
+            <groupId>me.tzoni</groupId>
+            <artifactId>SmartInvs</artifactId>
             <version>2.0</version>
         </dependency>
         <dependency>
@@ -84,6 +84,9 @@
                     <source>1.8</source>
                     <target>1.8</target>
                     <proc>none</proc>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>
