@@ -1,9 +1,6 @@
 package io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi;
 
-import io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi.callback.ParameterizedPlaceholderCallback;
-import io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi.callback.ParameterizedRelationalPlaceholderCallback;
-import io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi.callback.PlaceholderCallback;
-import io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi.callback.RelationalPlaceholderCallback;
+import io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi.callback.*;
 import io.github.johnnypixelz.utilizer.plugin.Provider;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.clip.placeholderapi.expansion.Relational;
@@ -21,12 +18,14 @@ public class Expansion extends PlaceholderExpansion implements Relational {
     private final HashMap<String, ParameterizedPlaceholderCallback> parameterizedPlaceholders;
     private final HashMap<String, RelationalPlaceholderCallback> relationalPlaceholders;
     private final HashMap<String, ParameterizedRelationalPlaceholderCallback> parameterizedRelationalPlaceholders;
+    private final HashMap<String, SystemPlaceholderCallback> systemPlaceholders;
 
     public Expansion() {
         placeholders = new HashMap<>();
         parameterizedPlaceholders = new HashMap<>();
         relationalPlaceholders = new HashMap<>();
         parameterizedRelationalPlaceholders = new HashMap<>();
+        systemPlaceholders = new HashMap<>();
     }
 
     public HashMap<String, PlaceholderCallback> getPlaceholderMap() {
@@ -43,6 +42,10 @@ public class Expansion extends PlaceholderExpansion implements Relational {
 
     public HashMap<String, ParameterizedRelationalPlaceholderCallback> getParameterizedRelationalPlaceholderMap() {
         return parameterizedRelationalPlaceholders;
+    }
+
+    public HashMap<String, SystemPlaceholderCallback> getSystemPlaceholderMap() {
+        return systemPlaceholders;
     }
 
     @Override
@@ -77,6 +80,11 @@ public class Expansion extends PlaceholderExpansion implements Relational {
 
     @Override
     public String onPlaceholderRequest(@Nullable Player player, @NotNull String params) {
+        SystemPlaceholderCallback systemPlaceholderCallback = systemPlaceholders.get(params);
+        if (systemPlaceholderCallback != null) systemPlaceholderCallback.run();
+
+        if (player == null) return "";
+
         PlaceholderCallback placeholderCallback = placeholders.get(params);
         if (placeholderCallback != null) placeholderCallback.run(player);
 
@@ -92,10 +100,10 @@ public class Expansion extends PlaceholderExpansion implements Relational {
         return null;
     }
 
-
-
     @Override
     public String onPlaceholderRequest(@Nullable Player player, @Nullable Player otherPlayer, @NotNull String params) {
+        if (player == null || otherPlayer == null) return "";
+
         RelationalPlaceholderCallback relationalPlaceholderCallback = relationalPlaceholders.get(params);
         if (relationalPlaceholderCallback != null) relationalPlaceholderCallback.run(player, otherPlayer);
 

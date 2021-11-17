@@ -1,9 +1,6 @@
 package io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi;
 
-import io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi.callback.ParameterizedPlaceholderCallback;
-import io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi.callback.ParameterizedRelationalPlaceholderCallback;
-import io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi.callback.PlaceholderCallback;
-import io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi.callback.RelationalPlaceholderCallback;
+import io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi.callback.*;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -56,6 +53,16 @@ public class PlaceholderAPIWrapper {
         }
 
         expansion.getParameterizedRelationalPlaceholderMap().put(params, callback);
+        return this;
+    }
+
+    @NotNull
+    public PlaceholderAPIWrapper registerSystemPlaceholder(@NotNull String params, @NotNull SystemPlaceholderCallback callback) {
+        if (expansion == null) {
+            initializeExpansion();
+        }
+
+        expansion.getSystemPlaceholderMap().put(params, callback);
         return this;
     }
 
