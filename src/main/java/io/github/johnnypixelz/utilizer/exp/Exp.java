@@ -4,8 +4,8 @@ import org.bukkit.entity.Player;
 
 // Acquired from EssentialsX
 public class Exp {
-    //This method is used to update both the recorded total experience and displayed total experience.
-    //We reset both types to prevent issues.
+    // This method is used to update both the recorded total experience and displayed total experience.
+    // We reset both types to prevent issues.
     public static void setTotalExperience(final Player player, final int exp) {
         if (exp < 0) {
             throw new IllegalArgumentException("Experience is negative!");
@@ -14,8 +14,8 @@ public class Exp {
         player.setLevel(0);
         player.setTotalExperience(0);
 
-        //This following code is technically redundant now, as bukkit now calulcates levels more or less correctly
-        //At larger numbers however... player.getExp(3000), only seems to give 2999, putting the below calculations off.
+        // This following code is technically redundant now, as bukkit now calulcates levels more or less correctly
+        // At larger numbers however... player.getExp(3000), only seems to give 2999, putting the below calculations off.
         int amount = exp;
         while (amount > 0) {
             final int expToLevel = getExpAtLevel(player);
@@ -36,12 +36,12 @@ public class Exp {
         return getExpAtLevel(player.getLevel());
     }
 
-    //new Exp Math from 1.8
+    // new Exp Math from 1.8
     public static int getExpAtLevel(final int level) {
         if (level <= 15) {
             return (2 * level) + 7;
         }
-        if ((level >= 16) && (level <= 30)) {
+        if (level <= 30) {
             return (5 * level) - 38;
         }
         return (9 * level) - 158;
@@ -65,7 +65,7 @@ public class Exp {
     //This method is required because the bukkit player.getTotalExperience() method, shows exp that has been 'spent'.
     //Without this people would be able to use exp and then still sell it.
     public static int getTotalExperience(final Player player) {
-        int exp = (int) Math.round(getExpAtLevel(player) * player.getExp());
+        int exp = Math.round(getExpAtLevel(player) * player.getExp());
         int currentLevel = player.getLevel();
 
         while (currentLevel > 0) {
@@ -79,7 +79,7 @@ public class Exp {
     }
 
     public static int getExpUntilNextLevel(final Player player) {
-        int exp = (int) Math.round(getExpAtLevel(player) * player.getExp());
+        int exp = Math.round(getExpAtLevel(player) * player.getExp());
         int nextLevel = player.getLevel();
         return getExpAtLevel(nextLevel) - exp;
     }
