@@ -29,19 +29,19 @@ public class Expansion extends PlaceholderExpansion implements Relational {
         parameterizedRelationalPlaceholders = new HashMap<>();
     }
 
-    public HashMap<String, PlaceholderCallback> getPlaceholdes() {
+    public HashMap<String, PlaceholderCallback> getPlaceholderMap() {
         return placeholders;
     }
 
-    public HashMap<String, ParameterizedPlaceholderCallback> getParameterizedPlaceholders() {
+    public HashMap<String, ParameterizedPlaceholderCallback> getParameterizedPlaceholderMap() {
         return parameterizedPlaceholders;
     }
 
-    public HashMap<String, RelationalPlaceholderCallback> getRelationalPlaceholders() {
+    public HashMap<String, RelationalPlaceholderCallback> getRelationalPlaceholderMap() {
         return relationalPlaceholders;
     }
 
-    public HashMap<String, ParameterizedRelationalPlaceholderCallback> getParameterizedRelationalPlaceholders() {
+    public HashMap<String, ParameterizedRelationalPlaceholderCallback> getParameterizedRelationalPlaceholderMap() {
         return parameterizedRelationalPlaceholders;
     }
 

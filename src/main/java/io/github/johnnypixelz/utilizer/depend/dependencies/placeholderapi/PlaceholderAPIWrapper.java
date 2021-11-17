@@ -25,7 +25,7 @@ public class PlaceholderAPIWrapper {
             initializeExpansion();
         }
 
-        expansion.getPlaceholdes().put(params, callback);
+        expansion.getPlaceholderMap().put(params, callback);
         return this;
     }
 
@@ -35,7 +35,7 @@ public class PlaceholderAPIWrapper {
             initializeExpansion();
         }
 
-        expansion.getParameterizedPlaceholders().put(params, callback);
+        expansion.getParameterizedPlaceholderMap().put(params, callback);
         return this;
     }
 
@@ -45,7 +45,7 @@ public class PlaceholderAPIWrapper {
             initializeExpansion();
         }
 
-        expansion.getRelationalPlaceholders().put(params, callback);
+        expansion.getRelationalPlaceholderMap().put(params, callback);
         return this;
     }
 
@@ -55,7 +55,7 @@ public class PlaceholderAPIWrapper {
             initializeExpansion();
         }
 
-        expansion.getParameterizedRelationalPlaceholders().put(params, callback);
+        expansion.getParameterizedRelationalPlaceholderMap().put(params, callback);
         return this;
     }
 
