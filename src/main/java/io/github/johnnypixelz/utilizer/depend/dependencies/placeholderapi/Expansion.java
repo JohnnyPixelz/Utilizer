@@ -1,9 +1,12 @@
 package io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi;
 
+import io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi.callback.ParameterizedPlaceholderCallback;
+import io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi.callback.ParameterizedRelationalPlaceholderCallback;
+import io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi.callback.PlaceholderCallback;
+import io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi.callback.RelationalPlaceholderCallback;
 import io.github.johnnypixelz.utilizer.plugin.Provider;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.clip.placeholderapi.expansion.Relational;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,20 +17,32 @@ import java.util.HashMap;
 import java.util.List;
 
 public class Expansion extends PlaceholderExpansion implements Relational {
-    private final HashMap<String, ExpansionCallback> placeholders;
-    private final HashMap<String, RelationalExpansionCallback> relationalPlaceholders;
+    private final HashMap<String, PlaceholderCallback> placeholders;
+    private final HashMap<String, ParameterizedPlaceholderCallback> parameterizedPlaceholders;
+    private final HashMap<String, RelationalPlaceholderCallback> relationalPlaceholders;
+    private final HashMap<String, ParameterizedRelationalPlaceholderCallback> parameterizedRelationalPlaceholders;
 
     public Expansion() {
         placeholders = new HashMap<>();
+        parameterizedPlaceholders = new HashMap<>();
         relationalPlaceholders = new HashMap<>();
+        parameterizedRelationalPlaceholders = new HashMap<>();
     }
 
-    public HashMap<String, ExpansionCallback> getPlaceholderMap() {
+    public HashMap<String, PlaceholderCallback> getPlaceholdes() {
         return placeholders;
     }
 
-    public HashMap<String, RelationalExpansionCallback> getRelationalPlaceholderMap() {
+    public HashMap<String, ParameterizedPlaceholderCallback> getParameterizedPlaceholders() {
+        return parameterizedPlaceholders;
+    }
+
+    public HashMap<String, RelationalPlaceholderCallback> getRelationalPlaceholders() {
         return relationalPlaceholders;
+    }
+
+    public HashMap<String, ParameterizedRelationalPlaceholderCallback> getParameterizedRelationalPlaceholders() {
+        return parameterizedRelationalPlaceholders;
     }
 
     @Override
@@ -62,12 +77,15 @@ public class Expansion extends PlaceholderExpansion implements Relational {
 
     @Override
     public String onPlaceholderRequest(@Nullable Player player, @NotNull String params) {
-        for (String param : placeholders.keySet()) {
+        PlaceholderCallback placeholderCallback = placeholders.get(params);
+        if (placeholderCallback != null) placeholderCallback.run(player);
+
+        for (String param : parameterizedPlaceholders.keySet()) {
             if (!params.startsWith(param)) continue;
 
             params = params.length() == param.length() ? "" : params.substring(param.length() + 1);
 
-            ExpansionCallback callback = placeholders.get(param);
+            ParameterizedPlaceholderCallback callback = parameterizedPlaceholders.get(param);
             return callback.run(player, params);
         }
 
@@ -78,12 +96,15 @@ public class Expansion extends PlaceholderExpansion implements Relational {
 
     @Override
     public String onPlaceholderRequest(@Nullable Player player, @Nullable Player otherPlayer, @NotNull String params) {
-        for (String param : relationalPlaceholders.keySet()) {
+        RelationalPlaceholderCallback relationalPlaceholderCallback = relationalPlaceholders.get(params);
+        if (relationalPlaceholderCallback != null) relationalPlaceholderCallback.run(player, otherPlayer);
+
+        for (String param : parameterizedRelationalPlaceholders.keySet()) {
             if (!params.startsWith(param)) continue;
 
             params = params.length() == param.length() ? "" : params.substring(param.length() + 1);
 
-            RelationalExpansionCallback callback = relationalPlaceholders.get(param);
+            ParameterizedRelationalPlaceholderCallback callback = parameterizedRelationalPlaceholders.get(param);
             return callback.run(player, otherPlayer, params);
         }
 

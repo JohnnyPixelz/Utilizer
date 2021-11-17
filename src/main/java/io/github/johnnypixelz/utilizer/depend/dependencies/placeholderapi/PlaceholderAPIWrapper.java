@@ -1,5 +1,9 @@
 package io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi;
 
+import io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi.callback.ParameterizedPlaceholderCallback;
+import io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi.callback.ParameterizedRelationalPlaceholderCallback;
+import io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi.callback.PlaceholderCallback;
+import io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi.callback.RelationalPlaceholderCallback;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -16,22 +20,42 @@ public class PlaceholderAPIWrapper {
     }
 
     @NotNull
-    public PlaceholderAPIWrapper registerPlaceholder(@NotNull String params, @NotNull ExpansionCallback callback) {
+    public PlaceholderAPIWrapper registerPlaceholder(@NotNull String params, @NotNull PlaceholderCallback callback) {
         if (expansion == null) {
             initializeExpansion();
         }
 
-        expansion.getPlaceholderMap().put(params, callback);
+        expansion.getPlaceholdes().put(params, callback);
         return this;
     }
 
     @NotNull
-    public PlaceholderAPIWrapper registerRelationalPlaceholder(@NotNull String params, @NotNull RelationalExpansionCallback callback) {
+    public PlaceholderAPIWrapper registerParameterizedPlaceholder(@NotNull String params, @NotNull ParameterizedPlaceholderCallback callback) {
         if (expansion == null) {
             initializeExpansion();
         }
 
-        expansion.getRelationalPlaceholderMap().put(params, callback);
+        expansion.getParameterizedPlaceholders().put(params, callback);
+        return this;
+    }
+
+    @NotNull
+    public PlaceholderAPIWrapper registerRelationalPlaceholder(@NotNull String params, @NotNull RelationalPlaceholderCallback callback) {
+        if (expansion == null) {
+            initializeExpansion();
+        }
+
+        expansion.getRelationalPlaceholders().put(params, callback);
+        return this;
+    }
+
+    @NotNull
+    public PlaceholderAPIWrapper registerParameterizedRelationalPlaceholder(@NotNull String params, @NotNull ParameterizedRelationalPlaceholderCallback callback) {
+        if (expansion == null) {
+            initializeExpansion();
+        }
+
+        expansion.getParameterizedRelationalPlaceholders().put(params, callback);
         return this;
     }
 
