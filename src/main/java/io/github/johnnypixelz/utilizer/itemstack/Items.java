@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Items {
@@ -224,6 +225,42 @@ public class Items {
         stack.removeEnchantment(stack.getType() == Material.BOW ? Enchantment.LUCK : Enchantment.ARROW_INFINITE);
         removeFlags(stack, ItemFlag.HIDE_ENCHANTS);
 
+        return stack;
+    }
+
+    public static ItemStack map(@NotNull ItemStack stack, @NotNull Function<String, String> mapper) {
+        mapName(stack, mapper);
+        mapLore(stack, mapper);
+
+        return stack;
+    }
+
+    public static ItemStack mapName(@NotNull ItemStack stack, @NotNull Function<String, String> mapper) {
+        if (!stack.hasItemMeta()) return stack;
+
+        ItemMeta itemMeta = stack.getItemMeta();
+
+        itemMeta.setDisplayName(mapper.apply(itemMeta.getDisplayName()));
+
+        stack.setItemMeta(itemMeta);
+        return stack;
+    }
+
+    public static ItemStack mapLore(@NotNull ItemStack stack, @NotNull Function<String, String> mapper) {
+        if (!stack.hasItemMeta()) return stack;
+
+        ItemMeta itemMeta = stack.getItemMeta();
+
+        if (!itemMeta.hasLore()) return stack;
+        List<String> lore = itemMeta.getLore();
+
+        for (int index = 0; index < lore.size(); index++) {
+            lore.set(index, mapper.apply(lore.get(index)));
+        }
+
+        itemMeta.setLore(lore);
+
+        stack.setItemMeta(itemMeta);
         return stack;
     }
 

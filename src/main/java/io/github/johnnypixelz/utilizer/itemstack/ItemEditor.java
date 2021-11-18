@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ItemEditor {
@@ -190,6 +191,42 @@ public class ItemEditor {
 
     public ItemEditor setAmount(int amount) {
         stack.setAmount(amount);
+        return this;
+    }
+
+    public ItemEditor map(@NotNull Function<String, String> mapper) {
+        mapName(mapper);
+        mapLore(mapper);
+
+        return this;
+    }
+
+    public ItemEditor mapName(@NotNull Function<String, String> mapper) {
+        if (!stack.hasItemMeta()) return this;
+
+        ItemMeta itemMeta = stack.getItemMeta();
+
+        itemMeta.setDisplayName(mapper.apply(itemMeta.getDisplayName()));
+
+        stack.setItemMeta(itemMeta);
+        return this;
+    }
+
+    public ItemEditor mapLore(@NotNull Function<String, String> mapper) {
+        if (!stack.hasItemMeta()) return this;
+
+        ItemMeta itemMeta = stack.getItemMeta();
+
+        if (!itemMeta.hasLore()) return this;
+        List<String> lore = itemMeta.getLore();
+
+        for (int index = 0; index < lore.size(); index++) {
+            lore.set(index, mapper.apply(lore.get(index)));
+        }
+
+        itemMeta.setLore(lore);
+
+        stack.setItemMeta(itemMeta);
         return this;
     }
 
