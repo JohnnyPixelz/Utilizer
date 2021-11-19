@@ -81,12 +81,13 @@ public class Expansion extends PlaceholderExpansion implements Relational {
     @Override
     public String onPlaceholderRequest(@Nullable Player player, @NotNull String params) {
         SystemPlaceholderCallback systemPlaceholderCallback = systemPlaceholders.get(params);
-        if (systemPlaceholderCallback != null) systemPlaceholderCallback.run();
+        if (systemPlaceholderCallback != null) return systemPlaceholderCallback.run();
+
 
         if (player == null) return "";
 
         PlaceholderCallback placeholderCallback = placeholders.get(params);
-        if (placeholderCallback != null) placeholderCallback.run(player);
+        if (placeholderCallback != null) return placeholderCallback.run(player);
 
         for (String param : parameterizedPlaceholders.keySet()) {
             if (!params.startsWith(param)) continue;
@@ -105,7 +106,7 @@ public class Expansion extends PlaceholderExpansion implements Relational {
         if (player == null || otherPlayer == null) return "";
 
         RelationalPlaceholderCallback relationalPlaceholderCallback = relationalPlaceholders.get(params);
-        if (relationalPlaceholderCallback != null) relationalPlaceholderCallback.run(player, otherPlayer);
+        if (relationalPlaceholderCallback != null) return relationalPlaceholderCallback.run(player, otherPlayer);
 
         for (String param : parameterizedRelationalPlaceholders.keySet()) {
             if (!params.startsWith(param)) continue;
