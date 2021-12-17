@@ -93,8 +93,8 @@ public class Reflection {
      * @param <T> The type of the class
      * @return The list of matching classes
      */
-    public static <T> List<Class<? extends T>> getExtendingClasses(@NotNull Class<T> clazz) {
-        List<Class<? extends T>> list = new ArrayList<>();
+    public static <T> List<Class<T>> getExtendingClasses(@NotNull Class<T> clazz) {
+        List<Class<T>> list = new ArrayList<>();
         try {
             ClassLoader loader = Provider.getPlugin().getClass().getClassLoader();
             JarFile file = new JarFile(new File(Provider.getPlugin().getClass().getProtectionDomain().getCodeSource().getLocation().toURI()));
@@ -118,11 +118,52 @@ public class Reflection {
                 if (!clazz.isAssignableFrom(c) || Modifier.isAbstract(c.getModifiers()) || c.isInterface()) {
                     continue;
                 }
-                list.add((Class<? extends T>) c);
+                list.add((Class<T>) c);
             }
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
+        return list;
+    }
+
+    public static <T> List<T> getInstantiatedExtendingClasses(@NotNull Class<T> clazz) {
+        List<T> list = new ArrayList<>();
+        try {
+            ClassLoader loader = Provider.getPlugin().getClass().getClassLoader();
+            JarFile file = new JarFile(new File(Provider.getPlugin().getClass().getProtectionDomain().getCodeSource().getLocation().toURI()));
+            Enumeration<JarEntry> entries = file.entries();
+            while (entries.hasMoreElements()) {
+                JarEntry entry = entries.nextElement();
+                if (entry.isDirectory()) {
+                    continue;
+                }
+                String name = entry.getName();
+                if (!name.endsWith(".class")) {
+                    continue;
+                }
+                name = name.substring(0, name.length() - 6).replace("/", ".");
+                Class<?> c;
+                try {
+                    c = Class.forName(name, true, loader);
+                } catch (ClassNotFoundException | NoClassDefFoundError ex) {
+                    continue;
+                }
+                if (!clazz.isAssignableFrom(c) || Modifier.isAbstract(c.getModifiers()) || c.isInterface()) {
+                    continue;
+                }
+
+                try {
+                    Constructor<?> constructor = clazz.getConstructor();
+                    T obj = (T) constructor.newInstance();
+                    list.add(obj);
+                } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                    throw new IllegalStateException("Class " + clazz.getName() + " does not have a default constructor or could not be loaded", e);
+                }
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+
         return list;
     }
 }
