@@ -67,7 +67,7 @@ public class Messages {
     }
 
     @NotNull
-    public Message cfg(@NotNull String config, @NotNull String configPath) {
+    public static Message cfg(@NotNull String config, @NotNull String configPath) {
         FileConfiguration fileConfiguration = Configs.get(config);
 
         Message message = new Message();
