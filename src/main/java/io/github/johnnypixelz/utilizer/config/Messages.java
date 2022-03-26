@@ -2,9 +2,9 @@ package io.github.johnnypixelz.utilizer.config;
 
 import com.cryptomorin.xseries.XSound;
 import io.github.johnnypixelz.utilizer.text.Colors;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -12,57 +12,57 @@ import java.util.function.Function;
 
 public class Messages {
 
-    public static void send(Player player, String message) {
-        player.sendMessage(Colors.color(message));
+    public static void send(CommandSender commandSender, String message) {
+        commandSender.sendMessage(Colors.color(message));
     }
 
-    public static void send(Player player, List<String> message) {
+    public static void send(CommandSender commandSender, List<String> message) {
         for (String line : message) {
-            send(player, line);
+            send(commandSender, line);
         }
     }
 
-    public static void send(Player player, String... message) {
+    public static void send(CommandSender commandSender, String... message) {
         for (String line : message) {
-            send(player, line);
+            send(commandSender, line);
         }
     }
 
-    public static void send(List<Player> players, String message) {
-        for (Player player : players) {
-            send(player, message);
+    public static void send(List<CommandSender> commandSenders, String message) {
+        for (CommandSender commandSender : commandSenders) {
+            send(commandSender, message);
         }
     }
 
-    public static void send(List<Player> players, List<String> message) {
-        for (Player player : players) {
-            send(player, message);
+    public static void send(List<CommandSender> commandSenders, List<String> message) {
+        for (CommandSender commandSender : commandSenders) {
+            send(commandSender, message);
         }
     }
 
-    public static void send(List<Player> players, String... message) {
-        for (Player player : players) {
-            send(player, message);
+    public static void send(List<CommandSender> commandSenders, String... message) {
+        for (CommandSender commandSender : commandSenders) {
+            send(commandSender, message);
         }
     }
 
-    public static void send(Player player, String message, Function<String, String> mapper) {
-        send(player, mapper.apply(message));
+    public static void send(CommandSender commandSender, String message, Function<String, String> mapper) {
+        send(commandSender, mapper.apply(message));
     }
 
-    public static void send(Player player, List<String> messages, Function<String, String> mapper) {
+    public static void send(CommandSender commandSender, List<String> messages, Function<String, String> mapper) {
         for (String line : messages) {
-            send(player, mapper.apply(line));
+            send(commandSender, mapper.apply(line));
         }
     }
 
-    public static void send(List<Player> players, String message, Function<String, String> mapper) {
-        send(players, mapper.apply(message));
+    public static void send(List<CommandSender> commandSenders, String message, Function<String, String> mapper) {
+        send(commandSenders, mapper.apply(message));
     }
 
-    public static void send(List<Player> players, List<String> messages, Function<String, String> mapper) {
+    public static void send(List<CommandSender> commandSenders, List<String> messages, Function<String, String> mapper) {
         for (String line : messages) {
-            send(players, mapper.apply(line));
+            send(commandSenders, mapper.apply(line));
         }
     }
 

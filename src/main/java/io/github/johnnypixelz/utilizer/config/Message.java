@@ -4,6 +4,7 @@ import com.cryptomorin.xseries.messages.ActionBar;
 import com.cryptomorin.xseries.messages.Titles;
 import io.github.johnnypixelz.utilizer.text.Colors;
 import org.bukkit.Sound;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,16 +21,20 @@ public class Message {
     private String actionbar;
 
     @NotNull
-    public Message send(@NotNull Player player) {
+    public Message send(@NotNull CommandSender commandSender) {
         if (message != null) {
-            player.sendMessage(Colors.color(message));
+            commandSender.sendMessage(Colors.color(message));
         }
 
         if (messageList != null) {
             for (String line : messageList) {
-                player.sendMessage(Colors.color(line));
+                commandSender.sendMessage(Colors.color(line));
             }
         }
+
+        if (!(commandSender instanceof Player)) return this;
+
+        Player player = (Player) commandSender;
 
         if (sound != null) {
             player.playSound(player.getLocation(), sound, 1, 1);
@@ -51,9 +56,9 @@ public class Message {
     }
 
     @NotNull
-    public Message send(@NotNull List<Player> players) {
-        for (Player player : players) {
-            send(player);
+    public Message send(@NotNull List<CommandSender> commandSenders) {
+        for (CommandSender commandSender : commandSenders) {
+            send(commandSender);
         }
 
         return this;
