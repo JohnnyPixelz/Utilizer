@@ -66,6 +66,18 @@ public class PlaceholderAPIWrapper {
         return this;
     }
 
+    public PlaceholderAPIWrapper resetRegisteredPlaceholders() {
+        if (expansion != null) {
+            expansion.getSystemPlaceholderMap().clear();
+            expansion.getPlaceholderMap().clear();
+            expansion.getParameterizedPlaceholderMap().clear();
+            expansion.getRelationalPlaceholderMap().clear();
+            expansion.getParameterizedRelationalPlaceholderMap().clear();
+        }
+
+        return this;
+    }
+
     @NotNull
     public String setPlaceholders(@NotNull Player player, @NotNull String text) {
         return PlaceholderAPI.setPlaceholders(player, text);

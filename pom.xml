@@ -6,10 +6,15 @@
 
     <groupId>io.github.johnnypixelz</groupId>
     <artifactId>Utilizer</artifactId>
-    <version>0.13.10</version>
+    <version>0.15.0</version>
     <packaging>jar</packaging>
     <description>Powerful but easy to use library for Bukkit Plugin Development</description>
     <url>https://github.com/JohnnyPixelz/Utilizer</url>
+
+    <properties>
+        <maven.compiler.source>16</maven.compiler.source>
+        <maven.compiler.target>16</maven.compiler.target>
+    </properties>
 
     <distributionManagement>
         <repository>
@@ -27,7 +32,11 @@
         <!-- BELOW ARE REPOSITORIES UNUSED BY UTILIZER -->
         <repository>
             <id>placeholderapi</id>
-            <url>http://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+        </repository>
+        <repository>
+            <id>worldedit</id>
+            <url>https://maven.enginehub.org/repo/</url>
         </repository>
         <repository>
             <id>jitpack.io</id>
@@ -39,7 +48,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.8.8-R0.1-SNAPSHOT</version>
+            <version>1.17.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -58,6 +67,41 @@
             <version>21.0.1</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>3.4.5</version>
+            <scope>compile</scope>
+            <optional>true</optional>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>2.7.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.2.10</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>me.lucko</groupId>
+            <artifactId>sql-streams</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq</artifactId>
+            <version>3.17.3</version>
+        </dependency>
 
         <!-- BELOW ARE DEPENDENCIES UNUSED BY UTILIZER -->
         <dependency>
@@ -72,6 +116,12 @@
             <version>1.7</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.sk89q.worldedit</groupId>
+            <artifactId>worldedit-bukkit</artifactId>
+            <version>7.3.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -81,8 +131,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>16</source>
+                    <target>16</target>
                     <proc>none</proc>
                     <compilerArgs>
                         <arg>-parameters</arg>
@@ -100,7 +150,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
+                <version>3.4.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -117,6 +167,18 @@
                                 <relocation>
                                     <pattern>fr.minuskube.inv</pattern>
                                     <shadedPattern>io.github.johnnypixelz.utilizer.shade.smartinvs</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.zaxxer.hikari</pattern>
+                                    <shadedPattern>io.github.johnnypixelz.utilizer.shade.hikaricp</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.jooq</pattern>
+                                    <shadedPattern>io.github.johnnypixelz.utilizer.shade.jooq</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>be.bendem.sqlstreams</pattern>
+                                    <shadedPattern>io.github.johnnypixelz.utilizer.shade.sqlstreams</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>

@@ -27,6 +27,7 @@ import java.util.Map;
  * @contributor Kev575
  * @contributor JohnnyPixelz
  */
+@Deprecated
 public class ItemBuilder {
 
     private ItemStack item;
@@ -224,7 +225,7 @@ public class ItemBuilder {
     /**
      * Adds a list of {@link org.bukkit.enchantments.Enchantment} to the ItemStack
      *
-     * @param enchantments Map containing Enchantment and Level for the ItemStack
+     * @param enchantments Arena containing Enchantment and Level for the ItemStack
      */
     public ItemBuilder enchant(Map<Enchantment, Integer> enchantments) {
         Validate.notNull(enchantments, "The Enchantments are null.");
@@ -284,7 +285,7 @@ public class ItemBuilder {
      * Adds a String at a specified position in the Lore of the ItemStack
      *
      * @param line  Line of the Lore for the ItemStack
-     * @param index Position in the Lore for the ItemStack
+     * @param index Point in the Lore for the ItemStack
      */
     public ItemBuilder lore(String line, int index) {
         Validate.notNull(line, "The Line is null.");
@@ -599,7 +600,7 @@ public class ItemBuilder {
         }
 
         if (unbreakable) {
-            meta.spigot().setUnbreakable(true);
+//            meta.spigot().setUnbreakable(true);
         }
 
         item.setItemMeta(meta);

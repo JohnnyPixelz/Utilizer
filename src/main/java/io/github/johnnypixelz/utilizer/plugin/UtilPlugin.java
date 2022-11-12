@@ -11,7 +11,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UtilPlugin extends JavaPlugin implements Listener {
+public abstract class UtilPlugin extends JavaPlugin implements Listener {
     private static UtilPlugin plugin;
     private final List<Manager> managerList = new ArrayList<>();
 

@@ -28,19 +28,19 @@ public class Messages {
         }
     }
 
-    public static void send(List<CommandSender> commandSenders, String message) {
+    public static void send(List<? extends CommandSender> commandSenders, String message) {
         for (CommandSender commandSender : commandSenders) {
             send(commandSender, message);
         }
     }
 
-    public static void send(List<CommandSender> commandSenders, List<String> message) {
+    public static void send(List<? extends CommandSender> commandSenders, List<String> message) {
         for (CommandSender commandSender : commandSenders) {
             send(commandSender, message);
         }
     }
 
-    public static void send(List<CommandSender> commandSenders, String... message) {
+    public static void send(List<? extends CommandSender> commandSenders, String... message) {
         for (CommandSender commandSender : commandSenders) {
             send(commandSender, message);
         }
@@ -56,11 +56,11 @@ public class Messages {
         }
     }
 
-    public static void send(List<CommandSender> commandSenders, String message, Function<String, String> mapper) {
+    public static void send(List<? extends CommandSender> commandSenders, String message, Function<String, String> mapper) {
         send(commandSenders, mapper.apply(message));
     }
 
-    public static void send(List<CommandSender> commandSenders, List<String> messages, Function<String, String> mapper) {
+    public static void send(List<? extends CommandSender> commandSenders, List<String> messages, Function<String, String> mapper) {
         for (String line : messages) {
             send(commandSenders, mapper.apply(line));
         }
@@ -107,6 +107,18 @@ public class Messages {
                         if (!section.isString(key)) break;
                         String soundString = section.getString(key);
                         XSound.matchXSound(soundString).ifPresent(xSound -> message.setSound(xSound.parseSound()));
+                        break;
+                    case "fade-in":
+                        if (!section.isInt(key)) break;
+                        message.getTitleSettings().setTitleFadeIn(section.getInt(key));
+                        break;
+                    case "stay":
+                        if (!section.isInt(key)) break;
+                        message.getTitleSettings().setTitleStay(section.getInt(key));
+                        break;
+                    case "fade-out":
+                        if (!section.isInt(key)) break;
+                        message.getTitleSettings().setTitleFadeOut(section.getInt(key));
                         break;
                 }
             }

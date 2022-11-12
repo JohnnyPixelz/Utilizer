@@ -11,6 +11,7 @@ import io.github.johnnypixelz.utilizer.smartinvs.listener.InventoryCloseListener
 import io.github.johnnypixelz.utilizer.text.Colors;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -21,40 +22,11 @@ public class ConfirmationBoxProvider implements InventoryProvider {
     private ItemStack preview;
     private String title;
 
-    public ConfirmationBoxProvider setOnConfirm(Consumer<Player> onConfirm) {
-        this.onConfirm = onConfirm;
-        return this;
+    public static ConfirmationBoxProviderBuilder builder() {
+        return new ConfirmationBoxProviderBuilder();
     }
 
-    public ConfirmationBoxProvider setOnDecline(Consumer<Player> onDecline) {
-        this.onDecline = onDecline;
-        return this;
-    }
-
-    public ConfirmationBoxProvider setOnClose(Consumer<Player> onClose) {
-        this.onClose = onClose;
-        return this;
-    }
-
-    public ConfirmationBoxProvider setPreview(ItemStack stack) {
-        preview = stack;
-        return this;
-    }
-
-    public void show(Player player) {
-        SmartInventory.Builder builder = SmartInventory.builder()
-                .provider(this)
-                .title(Colors.color(this.title == null ? "Confirmation Prompt" : this.title))
-                .size(3, 9);
-
-        if (onClose != null) {
-            builder.listener(new InventoryCloseListener(event -> {
-                if (onClose == null) return;
-                onClose.accept((Player) event.getPlayer());
-            }));
-        }
-
-        builder.build().open(player);
+    private ConfirmationBoxProvider() {
     }
 
     @Override
@@ -90,5 +62,55 @@ public class ConfirmationBoxProvider implements InventoryProvider {
     @Override
     public void update(Player player, InventoryContents contents) {
 
+    }
+
+    public static class ConfirmationBoxProviderBuilder {
+        private final ConfirmationBoxProvider provider;
+
+        private ConfirmationBoxProviderBuilder() {
+            this.provider = new ConfirmationBoxProvider();
+        }
+
+        public ConfirmationBoxProviderBuilder setOnConfirm(Consumer<Player> onConfirm) {
+            provider.onConfirm = onConfirm;
+            return this;
+        }
+
+        public ConfirmationBoxProviderBuilder setOnDecline(Consumer<Player> onDecline) {
+            provider.onDecline = onDecline;
+            return this;
+        }
+
+        public ConfirmationBoxProviderBuilder setOnClose(Consumer<Player> onClose) {
+            provider.onClose = onClose;
+            return this;
+        }
+
+        public ConfirmationBoxProviderBuilder setPreview(ItemStack stack) {
+            provider.preview = stack;
+            return this;
+        }
+
+        public ConfirmationBoxProviderBuilder setTitle(String title) {
+            provider.title = title;
+            return this;
+        }
+
+        @NotNull
+        public SmartInventory build() {
+            SmartInventory.Builder builder = SmartInventory.builder()
+                    .provider(provider)
+                    .size(3, 9)
+                    .title(Colors.color(provider.title == null ? "Confirmation Prompt" : provider.title));
+
+            if (provider.onClose != null) {
+                builder.listener(new InventoryCloseListener(event -> {
+                    if (provider.onClose == null) return;
+                    provider.onClose.accept((Player) event.getPlayer());
+                }));
+            }
+
+            return builder.build();
+        }
     }
 }

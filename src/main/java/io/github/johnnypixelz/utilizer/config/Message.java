@@ -11,6 +11,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Message {
     private String message;
@@ -19,6 +21,7 @@ public class Message {
     private String title;
     private String subtitle;
     private String actionbar;
+    private TitleSettings titleSettings = new TitleSettings();
 
     @NotNull
     public Message send(@NotNull CommandSender commandSender) {
@@ -41,10 +44,21 @@ public class Message {
         }
 
         if (title != null) {
-            if (subtitle != null) {
-                Titles.sendTitle(player, Colors.color(title), Colors.color(subtitle));
+            if (titleSettings != null) {
+                Titles.sendTitle(
+                        player,
+                        titleSettings.getTitleFadeIn(),
+                        titleSettings.getTitleStay(),
+                        titleSettings.getTitleFadeOut(),
+                        Colors.color(title),
+                        subtitle == null ? "" : Colors.color(subtitle)
+                );
             } else {
-                Titles.sendTitle(player, Colors.color(title), null);
+                if (subtitle != null) {
+                    Titles.sendTitle(player, Colors.color(title), Colors.color(subtitle));
+                } else {
+                    Titles.sendTitle(player, Colors.color(title), "");
+                }
             }
         }
 
@@ -56,7 +70,7 @@ public class Message {
     }
 
     @NotNull
-    public Message send(@NotNull List<CommandSender> commandSenders) {
+    public Message send(@NotNull List<? extends CommandSender> commandSenders) {
         for (CommandSender commandSender : commandSenders) {
             send(commandSender);
         }
@@ -91,6 +105,20 @@ public class Message {
 
         if (actionbar != null) {
             actionbar = mapper.apply(actionbar);
+        }
+
+        return this;
+    }
+
+    @NotNull
+    public Message map(@NotNull String target, @NotNull List<String> replacement) {
+        if (messageList != null) {
+            messageList = messageList.stream()
+                    .flatMap(placeholderLine -> {
+                        if (!placeholderLine.contains(target)) return Stream.of(placeholderLine);
+                        return replacement.stream().map(line -> placeholderLine.replace(target, line));
+                    })
+                    .collect(Collectors.toList());
         }
 
         return this;
@@ -155,4 +183,15 @@ public class Message {
         this.actionbar = actionbar;
         return this;
     }
+
+    @NotNull
+    public TitleSettings getTitleSettings() {
+        return titleSettings;
+    }
+
+    public Message setTitleSettings(TitleSettings titleSettings) {
+        this.titleSettings = titleSettings;
+        return this;
+    }
+
 }

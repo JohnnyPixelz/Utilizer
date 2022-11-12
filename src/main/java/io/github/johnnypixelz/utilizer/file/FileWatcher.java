@@ -1,5 +1,6 @@
 package io.github.johnnypixelz.utilizer.file;
 
+import io.github.johnnypixelz.utilizer.event.StatefulEventEmitter;
 import io.github.johnnypixelz.utilizer.plugin.Provider;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -9,16 +10,15 @@ import java.util.function.Consumer;
 
 public class FileWatcher extends BukkitRunnable {
     private long originalModified;
-    private File file;
-    private Consumer<File> callback;
+    private final File file;
+    private final StatefulEventEmitter<File> onSave;
 
     private FileWatcher(File file, Consumer<File> callback) {
         this.file = file;
-        originalModified = file.lastModified();
-        this.callback = callback;
+        this.originalModified = file.lastModified();
+        this.onSave = new StatefulEventEmitter<>();
+        onSave.listen(callback);
     }
-
-    private FileWatcher() {}
 
     public static FileWatcher watchFile(File file, Consumer<File> callback) {
         FileWatcher watcher = new FileWatcher(file, callback);
@@ -36,7 +36,7 @@ public class FileWatcher extends BukkitRunnable {
     public void run() {
         if (originalModified != file.lastModified()) {
             originalModified = file.lastModified();
-            Bukkit.getScheduler().runTask(Provider.getPlugin(), () -> callback.accept(file));
+            Bukkit.getScheduler().runTask(Provider.getPlugin(), () -> onSave.emit(file));
         }
     }
 }

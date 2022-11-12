@@ -83,7 +83,6 @@ public class Expansion extends PlaceholderExpansion implements Relational {
         SystemPlaceholderCallback systemPlaceholderCallback = systemPlaceholders.get(params);
         if (systemPlaceholderCallback != null) return systemPlaceholderCallback.run();
 
-
         if (player == null) return "";
 
         PlaceholderCallback placeholderCallback = placeholders.get(params);
@@ -108,10 +107,13 @@ public class Expansion extends PlaceholderExpansion implements Relational {
         RelationalPlaceholderCallback relationalPlaceholderCallback = relationalPlaceholders.get(params);
         if (relationalPlaceholderCallback != null) return relationalPlaceholderCallback.run(player, otherPlayer);
 
-        for (String param : parameterizedRelationalPlaceholders.keySet()) {
-            if (!params.startsWith(param)) continue;
+        final String[] splitParams = params.split("_");
+        String firstParam = splitParams[0];
 
-            params = params.length() == param.length() ? "" : params.substring(param.length() + 1);
+        for (String param : parameterizedRelationalPlaceholders.keySet()) {
+            if (!firstParam.equalsIgnoreCase(param)) continue;
+
+            params = splitParams.length == 1 ? "" : params.substring(firstParam.length() + 1);
 
             ParameterizedRelationalPlaceholderCallback callback = parameterizedRelationalPlaceholders.get(param);
             return callback.run(player, otherPlayer, params);

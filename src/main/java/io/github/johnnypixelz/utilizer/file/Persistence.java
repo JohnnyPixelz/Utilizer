@@ -72,5 +72,10 @@ public class Persistence {
     public static void setGson(Gson gson) {
         Persistence.gson = gson;
     }
-    
+
+    @NotNull
+    public static Gson getGson() {
+        return gson;
+    }
+
 }

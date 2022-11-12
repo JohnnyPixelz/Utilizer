@@ -10,11 +10,15 @@ import java.util.function.Predicate;
 
 public class ItemCurrency {
 
+    public static int amount(Player player, Predicate<ItemStack> predicate) {
+        return Arrays.stream(player.getInventory().getContents())
+                .filter(Objects::nonNull)
+                .filter(predicate)
+                .mapToInt(ItemStack::getAmount).sum();
+    }
+
     public static boolean has(Player player, Predicate<ItemStack> predicate, int amount) {
-
-        int sum = Arrays.stream(player.getInventory().getContents()).filter(Objects::nonNull).filter(predicate).mapToInt(ItemStack::getAmount).sum();
-
-        return sum >= amount;
+        return amount(player, predicate) >= amount;
     }
 
     public static boolean withdraw(Player player, Predicate<ItemStack> predicate, int amount) {

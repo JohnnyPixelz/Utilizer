@@ -2,11 +2,12 @@ package io.github.johnnypixelz.utilizer.reflection;
 
 import io.github.johnnypixelz.utilizer.plugin.Provider;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -14,36 +15,17 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class Reflection {
-    private static Class Packet;
-    private static Class CraftPlayer;
-    private static Class EntityPlayer;
-    private static Method getHandle;
-    private static Method sendPacket;
-    private static Field playerConnection;
-
-    static {
-        try {
-            Packet = getNMSClass("Packet");
-            CraftPlayer = getCraftBukkitClass("entity.CraftPlayer");
-            EntityPlayer = getNMSClass("EntityPlayer");
-            getHandle = CraftPlayer.getMethod("getHandle");
-            sendPacket = getNMSClass("PlayerConnection").getMethod("sendPacket", Packet);
-            playerConnection = EntityPlayer.getField("playerConnection");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Get NMS class using reflection
+     *
      * @param name Name of the class
      * @return Class
      */
     public static Class<?> getNMSClass(String name) {
         try {
             return Class.forName("net.minecraft.server." + getVersion() + "." + name);
-        }
-        catch(ClassNotFoundException ex) {
+        } catch (ClassNotFoundException ex) {
             ex.printStackTrace();
             //Do something
         }
@@ -53,7 +35,7 @@ public class Reflection {
     public static Class<?> getCraftBukkitClass(String name) {
         try {
             return Class.forName("org.bukkit.craftbukkit." + getVersion() + "." + name);
-        } catch(ClassNotFoundException ex) {
+        } catch (ClassNotFoundException ex) {
             ex.printStackTrace();
             //Do something
         }
@@ -64,18 +46,11 @@ public class Reflection {
         return Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
     }
 
-    public static void sendPacket(Player player, Object packet) {
-        try {
-            sendPacket.invoke(playerConnection.get(getHandle.invoke(player)), packet);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     /**
      * Gets a new instance from the provided class
+     *
      * @param clazz The class
-     * @param <T> The type of the class
+     * @param <T>   The type of the class
      * @return The new instance of the class, or null if error
      */
     public static <T> T getInstanceFromClass(@NotNull Class<T> clazz) {
@@ -89,8 +64,9 @@ public class Reflection {
 
     /**
      * Gets all non-abstract, non-interface classes which extend a certain class within a plugin
+     *
      * @param clazz The class
-     * @param <T> The type of the class
+     * @param <T>   The type of the class
      * @return The list of matching classes
      */
     public static <T> List<Class<T>> getExtendingClasses(@NotNull Class<T> clazz) {

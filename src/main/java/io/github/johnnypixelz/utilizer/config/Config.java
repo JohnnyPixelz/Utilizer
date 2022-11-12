@@ -1,9 +1,10 @@
 package io.github.johnnypixelz.utilizer.config;
 
+import io.github.johnnypixelz.utilizer.event.StatefulEventEmitter;
 import io.github.johnnypixelz.utilizer.file.FileWatcher;
 import io.github.johnnypixelz.utilizer.plugin.Provider;
+import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,13 +12,16 @@ import java.util.function.Consumer;
 
 public class Config {
     private final File file;
-    private final YamlConfiguration config;
+    private final UtilConfiguration config;
     private FileWatcher fileWatcher;
-    private Runnable onReload;
+    private final StatefulEventEmitter<File> onSave;
+    private final StatefulEventEmitter<Configuration> onReload;
 
     public Config(File file) {
         this.file = file;
-        config = YamlConfiguration.loadConfiguration(file);
+        this.config = UtilConfiguration.loadConfiguration(file);
+        this.onReload = new StatefulEventEmitter<>();
+        this.onSave = new StatefulEventEmitter<>();
     }
 
     public Config watch() {
@@ -26,7 +30,7 @@ public class Config {
     }
 
     public Config watch(Consumer<File> callback) {
-        fileWatcher = FileWatcher.watchFile(file, callback);
+        fileWatcher = FileWatcher.watchFile(file, onSave::emit);
         return this;
     }
 
@@ -40,7 +44,12 @@ public class Config {
     }
 
     public Config onReload(Runnable onReload) {
-        this.onReload = onReload;
+        this.onReload.listen(yamlConfiguration -> onReload.run());
+        return this;
+    }
+
+    public Config onReload(Consumer<Configuration> onReload) {
+        this.onReload.listen(onReload);
         return this;
     }
 
@@ -54,7 +63,7 @@ public class Config {
             e.printStackTrace();
         }
 
-        if (onReload != null) onReload.run();
+        onReload.emit(config);
         return this;
     }
 
@@ -75,7 +84,7 @@ public class Config {
         return file;
     }
 
-    public YamlConfiguration getConfig() {
+    public UtilConfiguration getConfig() {
         return config;
     }
 }

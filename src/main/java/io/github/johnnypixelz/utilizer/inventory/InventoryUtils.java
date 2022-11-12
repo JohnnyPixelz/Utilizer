@@ -5,6 +5,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+@Deprecated
 public class InventoryUtils {
 
     public static void giveItem(Player player, ItemStack stack, int amount, boolean overflow) {

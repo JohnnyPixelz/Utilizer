@@ -1,4 +1,4 @@
-package io.github.johnnypixelz.utilizer.file;
+package io.github.johnnypixelz.utilizer.file.adapters;
 
 import com.google.gson.*;
 
@@ -10,9 +10,7 @@ public class InterfaceAdapter<T> implements JsonSerializer<T>, JsonDeserializer<
     public final JsonElement serialize(final T object, final Type interfaceType, final JsonSerializationContext context)
     {
         final JsonObject member = new JsonObject();
-
         member.addProperty("type", object.getClass().getName());
-
         member.add("data", context.serialize(object));
 
         return member;

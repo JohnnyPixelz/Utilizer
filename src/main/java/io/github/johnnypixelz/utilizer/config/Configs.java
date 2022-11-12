@@ -19,7 +19,7 @@ public class Configs {
     }
 
     @NotNull
-    public static FileConfiguration get(@NotNull String config) {
+    public static UtilConfiguration get(@NotNull String config) {
         return load(config).getConfig();
     }
 
