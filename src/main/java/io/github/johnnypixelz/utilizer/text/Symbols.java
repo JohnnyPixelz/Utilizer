@@ -5,12 +5,54 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
+import java.awt.*;
+
 public class Symbols {
     public static final char CHECK_MARK = '✔';
     public static final char CROSS = '✖';
     public static final char LEFT_DOUBLE_ARROW = '«';
     public static final char RIGHT_DOUBLE_ARROW = '»';
     public static final char SQUARE_ROOT = '√';
+    public static final char SQUARE = '▇';
+    public static final char DOT = '●';
+
+    /**
+     *
+     * @param beginColor starting stage of our shade
+     * @param endColor final stage of our shade
+     * @param currentShade current iteration of our shade [0, maxShades - 1]
+     * @param maxShades the total amount of shades
+     * @return the transition shade
+     */
+    public static ChatColor getColorTransition(ChatColor beginColor, ChatColor endColor, int currentShade, int maxShades) {
+        double percentage = currentShade / (double) (maxShades - 1);
+
+        final Color bColor = beginColor.getColor();
+        final Color eColor = endColor.getColor();
+
+        int r = (int) (bColor.getRed() * (1 - percentage) + eColor.getRed() * percentage);
+        int g = (int) (bColor.getGreen() * (1 - percentage) + eColor.getGreen() * percentage);
+        int b = (int) (bColor.getBlue() * (1 - percentage) + eColor.getBlue() * percentage);
+
+        return Colors.rgb(r, g, b);
+    }
+
+    public static String getBar(String tileSymbol, ChatColor beginFilledColor, ChatColor endFilledColor, ChatColor unfilledColor, int current, int max) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (int i = 0; i < current; i++) {
+            ChatColor color = getColorTransition(beginFilledColor, endFilledColor, i, max);
+            stringBuilder.append(color.toString());
+            stringBuilder.append(tileSymbol);
+        }
+
+        if (current < max) {
+            stringBuilder.append(unfilledColor.toString());
+            stringBuilder.append(tileSymbol.repeat(max - current));
+        }
+
+        return stringBuilder.toString();
+    }
 
     public static String getBar(String tileSymbol, ChatColor filledColor, ChatColor unfilledColor, int current, int max) {
         StringBuilder stringBuilder = new StringBuilder();
@@ -22,7 +64,7 @@ public class Symbols {
 
         if (current < max) {
             stringBuilder.append(unfilledColor.toString());
-            stringBuilder.append(max - current);
+            stringBuilder.append(tileSymbol.repeat(max - current));
         }
 
         return stringBuilder.toString();

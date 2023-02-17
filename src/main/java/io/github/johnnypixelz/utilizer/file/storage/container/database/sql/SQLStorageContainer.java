@@ -26,6 +26,13 @@ public class SQLStorageContainer<K, V> extends DatabaseStorageContainer<Map<K, V
 
     public void update(K key, V value) {
         storageHandler.insert(key, value);
+
+        if (value == null) {
+            get().remove(key);
+        } else {
+            get().put(key, value);
+        }
+
         if (sqlMessenger != null) {
             final SQLMessage<K, V> message = new SQLMessage<>(key, value);
             final String payload = gson.toJson(message);
@@ -37,10 +44,18 @@ public class SQLStorageContainer<K, V> extends DatabaseStorageContainer<Map<K, V
         return setupSync(null);
     }
 
+    public SQLStorageContainer<K, V> setupSync(long tickInterval) {
+        return setupSync(null, tickInterval);
+    }
+
     public SQLStorageContainer<K, V> setupSync(BiConsumer<K, V> callback) {
+        return setupSync(callback, 20);
+    }
+
+    public SQLStorageContainer<K, V> setupSync(BiConsumer<K, V> callback, long tickInterval) {
         if (sqlMessenger != null) return this;
 
-        sqlMessenger = SQLMessenger.setup(storageHandler.getCredentials(), storageHandler.getTable() + "_messages");
+        sqlMessenger = SQLMessenger.setup(storageHandler.getCredentials(), storageHandler.getTable() + "_messages", tickInterval);
         sqlMessenger.getEventEmitter().listen(payload -> {
             final ParameterizedType type = $Gson$Types.newParameterizedTypeWithOwner(null, SQLMessage.class, storageHandler.getKeyType(), storageHandler.getValueType());
             final SQLMessage<K, V> sqlMessage = gson.fromJson(payload, type);

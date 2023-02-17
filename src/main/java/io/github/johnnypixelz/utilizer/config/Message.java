@@ -1,8 +1,11 @@
 package io.github.johnnypixelz.utilizer.config;
 
 import com.cryptomorin.xseries.messages.ActionBar;
-import com.cryptomorin.xseries.messages.Titles;
+import io.github.johnnypixelz.utilizer.cache.Lazy;
+import io.github.johnnypixelz.utilizer.serialize.world.Point;
 import io.github.johnnypixelz.utilizer.text.Colors;
+import io.github.johnnypixelz.utilizer.text.Title;
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -11,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,19 +49,19 @@ public class Message {
 
         if (title != null) {
             if (titleSettings != null) {
-                Titles.sendTitle(
+                Title.title(
                         player,
+                        Colors.color(title),
+                        subtitle == null ? "" : Colors.color(subtitle),
                         titleSettings.getTitleFadeIn(),
                         titleSettings.getTitleStay(),
-                        titleSettings.getTitleFadeOut(),
-                        Colors.color(title),
-                        subtitle == null ? "" : Colors.color(subtitle)
+                        titleSettings.getTitleFadeOut()
                 );
             } else {
                 if (subtitle != null) {
-                    Titles.sendTitle(player, Colors.color(title), Colors.color(subtitle));
+                    Title.title(player, Colors.color(title), Colors.color(subtitle));
                 } else {
-                    Titles.sendTitle(player, Colors.color(title), "");
+                    Title.title(player, Colors.color(title), "");
                 }
             }
         }
@@ -73,6 +77,46 @@ public class Message {
     public Message send(@NotNull List<? extends CommandSender> commandSenders) {
         for (CommandSender commandSender : commandSenders) {
             send(commandSender);
+        }
+
+        return this;
+    }
+
+    @NotNull
+    public Message broadcast() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            send(player);
+        }
+
+        return this;
+    }
+
+    @NotNull
+    public Message broadcast(Point point, double radius) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            final Point playerPoint = Point.of(player.getLocation());
+            if (!playerPoint.getWorld().equals(point.getWorld())) continue;
+
+            final double playerDistanceSquared = point.distanceSquared(playerPoint);
+            if (playerDistanceSquared > Math.pow(radius, 2)) continue;
+
+            send(player);
+        }
+
+        return this;
+    }
+
+    @NotNull
+    public Message broadcast(Point point, double radius, Predicate<Player> predicate) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            final Point playerPoint = Point.of(player.getLocation());
+            if (!playerPoint.getWorld().equals(point.getWorld())) continue;
+
+            final double playerDistanceSquared = point.distanceSquared(playerPoint);
+            if (playerDistanceSquared > Math.pow(radius, 2)) continue;
+
+            if (!predicate.test(player)) continue;
+            send(player);
         }
 
         return this;

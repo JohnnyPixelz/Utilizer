@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
@@ -58,6 +59,28 @@ public class ItemEditor {
         return this;
     }
 
+    public ItemEditor setCustomModelData(int customModelData) {
+        return meta(itemMeta -> {
+            itemMeta.setCustomModelData(customModelData == 0 ? null : customModelData);
+        });
+    }
+
+    public ItemEditor removeCustomModelData() {
+        return meta(itemMeta -> {
+            itemMeta.setCustomModelData(null);
+        });
+    }
+
+    public ItemEditor setDurability(int durability) {
+        if (stack.getItemMeta() instanceof Damageable) {
+            return meta(Damageable.class, damageable -> {
+                damageable.setDamage(durability);
+            });
+        }
+
+        return this;
+    }
+
     public ItemEditor setLore(@NotNull List<String> lore) {
         return meta(itemMeta -> {
             final List<String> newLore = lore.stream()
@@ -73,12 +96,9 @@ public class ItemEditor {
     }
 
     public ItemEditor addLore(@NotNull List<String> lore) {
-        return meta(itemMeta -> {
-            if (!itemMeta.hasLore()) {
-                setLore(lore);
-                return;
-            }
+        if (!stack.getItemMeta().hasLore()) return setLore(lore);
 
+        return meta(itemMeta -> {
             final List<String> newLore = Objects.requireNonNull(itemMeta.getLore());
             newLore.addAll(lore.stream().map(Colors::color).collect(Collectors.toList()));
             itemMeta.setLore(newLore);

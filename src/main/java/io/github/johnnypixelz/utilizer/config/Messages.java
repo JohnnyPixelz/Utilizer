@@ -1,28 +1,89 @@
 package io.github.johnnypixelz.utilizer.config;
 
 import com.cryptomorin.xseries.XSound;
+import io.github.johnnypixelz.utilizer.serialize.world.Point;
 import io.github.johnnypixelz.utilizer.text.Colors;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class Messages {
+
+    public static void broadcast(String message) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            send(player, message);
+        }
+    }
+
+    public static void broadcast(List<String> message) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            send(player, message);
+        }
+    }
+
+    public static void broadcast(String message, Point point, double radius) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            final Point playerPoint = Point.of(player.getLocation());
+            if (!playerPoint.getWorld().equals(point.getWorld())) continue;
+
+            final double playerDistanceSquared = point.distanceSquared(playerPoint);
+            if (playerDistanceSquared > Math.pow(radius, 2)) continue;
+
+            send(player, message);
+        }
+    }
+
+    public static void broadcast(List<String> message, Point point, double radius) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            final Point playerPoint = Point.of(player.getLocation());
+            if (!playerPoint.getWorld().equals(point.getWorld())) continue;
+
+            final double playerDistanceSquared = point.distanceSquared(playerPoint);
+            if (playerDistanceSquared > Math.pow(radius, 2)) continue;
+
+            send(player, message);
+        }
+    }
+
+    public static void broadcast(String message, Point point, double radius, Predicate<Player> predicate) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            final Point playerPoint = Point.of(player.getLocation());
+            if (!playerPoint.getWorld().equals(point.getWorld())) continue;
+
+            final double playerDistanceSquared = point.distanceSquared(playerPoint);
+            if (playerDistanceSquared > Math.pow(radius, 2)) continue;
+
+            if (!predicate.test(player)) continue;
+            send(player, message);
+        }
+    }
+
+    public static void broadcast(List<String> message, Point point, double radius, Predicate<Player> predicate) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            final Point playerPoint = Point.of(player.getLocation());
+            if (!playerPoint.getWorld().equals(point.getWorld())) continue;
+
+            final double playerDistanceSquared = point.distanceSquared(playerPoint);
+            if (playerDistanceSquared > Math.pow(radius, 2)) continue;
+
+            if (!predicate.test(player)) continue;
+            send(player, message);
+        }
+    }
 
     public static void send(CommandSender commandSender, String message) {
         commandSender.sendMessage(Colors.color(message));
     }
 
     public static void send(CommandSender commandSender, List<String> message) {
-        for (String line : message) {
-            send(commandSender, line);
-        }
-    }
-
-    public static void send(CommandSender commandSender, String... message) {
         for (String line : message) {
             send(commandSender, line);
         }
@@ -35,12 +96,6 @@ public class Messages {
     }
 
     public static void send(List<? extends CommandSender> commandSenders, List<String> message) {
-        for (CommandSender commandSender : commandSenders) {
-            send(commandSender, message);
-        }
-    }
-
-    public static void send(List<? extends CommandSender> commandSenders, String... message) {
         for (CommandSender commandSender : commandSenders) {
             send(commandSender, message);
         }

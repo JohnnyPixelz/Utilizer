@@ -2,7 +2,6 @@ package io.github.johnnypixelz.utilizer.sql;
 
 import io.github.johnnypixelz.utilizer.Scheduler;
 import io.github.johnnypixelz.utilizer.event.StatefulEventEmitter;
-import io.github.johnnypixelz.utilizer.plugin.Logs;
 import org.bukkit.scheduler.BukkitTask;
 import org.jooq.*;
 import org.jooq.impl.SQLDataType;
@@ -20,6 +19,10 @@ public class SQLMessenger {
     private static final Field<String> MESSENGER_ID = field("messengerId", SQLDataType.VARCHAR.notNull());
 
     public static SQLMessenger setup(DatabaseCredentials credentials, String table) {
+        return setup(credentials, table, 20);
+    }
+
+    public static SQLMessenger setup(DatabaseCredentials credentials, String table, long tickInterval) {
         final String dataSource = credentials.getDataSource();
 
         SQLDialect dialect;
@@ -30,10 +33,14 @@ public class SQLMessenger {
             dialect = SQLDialect.MARIADB;
         }
 
-        return setup(credentials, table, dialect);
+        return setup(credentials, table, dialect, tickInterval);
     }
 
     public static SQLMessenger setup(DatabaseCredentials credentials, String table, SQLDialect dialect) {
+        return setup(credentials, table, dialect, 20);
+    }
+
+    public static SQLMessenger setup(DatabaseCredentials credentials, String table, SQLDialect dialect, long tickInterval) {
         SQLMessenger messenger = new SQLMessenger(credentials, table, dialect);
 
         messenger.sql.execute(dslContext -> {
@@ -57,7 +64,7 @@ public class SQLMessenger {
 
         latestId.ifPresent(id -> messenger.lastId = id);
 
-        messenger.pollTask = Scheduler.asyncTimer(messenger::poll, 20);
+        messenger.pollTask = Scheduler.asyncTimer(messenger::poll, tickInterval);
         messenger.cleanOldMessagesTask = Scheduler.asyncTimer(messenger::cleanOldMessages, 20 * 30);
 
         return messenger;

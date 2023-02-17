@@ -60,6 +60,16 @@ public class StringSQLStorageHandler<V> extends SQLStorageHandler<String, V> {
     public void insert(String key, V value) {
         checkTableInitialization();
 
+        if (value == null) {
+            sql.execute(dslContext -> {
+                dslContext.deleteFrom(table(table))
+                        .where(ID.eq(key))
+                        .executeAsync();
+            });
+
+            return;
+        }
+
         final String jsonString = gson.toJson(value, valueType);
         final JSON jooqJson = JSON.json(jsonString);
 

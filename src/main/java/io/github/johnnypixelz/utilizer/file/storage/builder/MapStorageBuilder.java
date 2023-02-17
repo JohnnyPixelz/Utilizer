@@ -24,6 +24,12 @@ public class MapStorageBuilder<K, V> implements StorageBuilder<Map<K, V>> {
         this.valueType = valueType;
     }
 
+    @Override
+    public FileStorageHandler<Map<K, V>> json(String fileName) {
+        return json(fileName, GsonProvider.standard());
+    }
+
+    @Override
     public FileStorageHandler<Map<K, V>> json(String fileName, Gson gson) {
         final ParameterizedType type = $Gson$Types.newParameterizedTypeWithOwner(null, HashMap.class, keyType, valueType);
         return new GsonStorageHandler<>(fileName, type, gson);
@@ -35,7 +41,7 @@ public class MapStorageBuilder<K, V> implements StorageBuilder<Map<K, V>> {
 
     public SQLStorageHandler<K, V> sql(DatabaseCredentials credentials, String table, Gson gson) {
         if (keyType == String.class) {
-            return (SQLStorageHandler<K, V>) new StringSQLStorageHandler<>(credentials, table, gson, valueType);
+            return (SQLStorageHandler<K, V>) new StringSQLStorageHandler<V>(credentials, table, gson, valueType);
         } else if (keyType == UUID.class) {
             return (SQLStorageHandler<K, V>) new UUIDSQLStorageHandler<>(credentials, table, gson, valueType);
         } else {

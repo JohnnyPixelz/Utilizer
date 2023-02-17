@@ -76,10 +76,10 @@ public class UtilConfiguration extends YamlConfiguration {
         }
 
 //        TODO implement 1.9+ features when I update the lib
-//        if (section.isSet("custom-model-data")) {
-//            final int data = section.getInt("custom-model-data");
-//            Items.meta(stack, itemMeta -> itemMeta.)
-//        }
+        if (section.isSet("custom-model-data")) {
+            final int data = section.getInt("custom-model-data");
+            Items.meta(stack, itemMeta -> itemMeta.setCustomModelData(data));
+        }
 
         return stack;
     }

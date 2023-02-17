@@ -6,9 +6,8 @@ import com.google.gson.JsonObject;
 import io.github.johnnypixelz.utilizer.cache.Lazy;
 import io.github.johnnypixelz.utilizer.gson.GsonSerializable;
 import io.github.johnnypixelz.utilizer.gson.JsonBuilder;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.World;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.jetbrains.annotations.NotNull;
 
@@ -106,6 +105,21 @@ public class ChunkPosition implements GsonSerializable {
 
     public BlockPosition getBlock(int x, int y, int z) {
         return BlockPosition.of((this.x << 4) | (x & 0xF), y, (this.z << 4) | (z & 0xF), this.world);
+    }
+
+    public BlockPosition getHighestBlockAt(int x, int z) {
+        final World world = Bukkit.getWorld(getWorld());
+        final int maxHeight = world.getMaxHeight();
+        final int minHeight = world.getMinHeight();
+
+        for (int y = maxHeight; y >= minHeight; y--) {
+            final Block block = world.getBlockAt(x, y, z);
+            if (block.getType().isAir()) continue;
+
+            return BlockPosition.of(block);
+        }
+
+        return BlockPosition.of(x, minHeight, z, getWorld());
     }
 
     public Collection<BlockPosition> blocks() {

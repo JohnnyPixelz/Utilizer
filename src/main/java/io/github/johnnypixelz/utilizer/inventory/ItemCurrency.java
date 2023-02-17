@@ -18,10 +18,13 @@ public class ItemCurrency {
     }
 
     public static boolean has(Player player, Predicate<ItemStack> predicate, int amount) {
+        if (amount <= 0) return true;
+
         return amount(player, predicate) >= amount;
     }
 
     public static boolean withdraw(Player player, Predicate<ItemStack> predicate, int amount) {
+        if (amount <= 0) return true;
         if (!has(player, predicate, amount)) return false;
 
         Inventory inv = player.getInventory();
