@@ -44,6 +44,8 @@ public class TaskBuilder {
             return scheduler.run(task);
         } else if (timer <= 0 && iterations <= 0) {
             return scheduler.delayed(task, delay);
+        } else if (delay <= 0 && timer <= 0) {
+            return scheduler.timed(task, 1L, iterations);
         } else if (delay <= 0 && iterations <= 0) {
             return scheduler.timer(task, timer);
         } else if (delay <= 0) {
