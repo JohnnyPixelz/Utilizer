@@ -4,10 +4,11 @@ import com.google.common.base.Strings;
 import io.github.johnnypixelz.utilizer.text.Colors;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
+import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
+import java.util.*;
 
 public class Parse {
 
@@ -68,6 +69,12 @@ public class Parse {
         } catch (NumberFormatException exception) {
             return defaultValue;
         }
+    }
+
+    public static List<String> stringOrList(ConfigurationSection section, String path) {
+        return section.isString(path)
+                ? new ArrayList<>(Collections.singletonList(section.getString(path)))
+                : section.getStringList(path);
     }
 
 }
