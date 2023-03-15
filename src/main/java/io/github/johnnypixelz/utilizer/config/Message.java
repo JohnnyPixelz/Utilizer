@@ -1,7 +1,6 @@
 package io.github.johnnypixelz.utilizer.config;
 
 import com.cryptomorin.xseries.messages.ActionBar;
-import io.github.johnnypixelz.utilizer.cache.Lazy;
 import io.github.johnnypixelz.utilizer.serialize.world.Point;
 import io.github.johnnypixelz.utilizer.text.Colors;
 import io.github.johnnypixelz.utilizer.text.Title;

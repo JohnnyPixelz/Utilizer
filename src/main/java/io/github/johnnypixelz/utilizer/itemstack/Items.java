@@ -1,13 +1,10 @@
 package io.github.johnnypixelz.utilizer.itemstack;
 
-import com.cryptomorin.xseries.XItemStack;
 import com.cryptomorin.xseries.XPotion;
 import com.google.common.base.Enums;
 import com.google.common.base.Strings;
 import io.github.johnnypixelz.utilizer.config.Parse;
-import io.github.johnnypixelz.utilizer.file.adapters.GraphAdapterBuilder;
 import io.github.johnnypixelz.utilizer.text.Colors;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
 import org.bukkit.block.Banner;
 import org.bukkit.block.BlockState;
@@ -523,7 +520,7 @@ public class Items {
         if (itemMeta == null) return stack;
 
         if (!itemMeta.getClass().isAssignableFrom(metaClass)) {
-            throw new IllegalArgumentException("Meta class type different than actual type");
+            throw new IllegalArgumentException("Meta class type different than actual type. Expected " + itemMeta.getClass().getSimpleName() + " but got " + metaClass.getSimpleName() + ".");
         }
 
         T meta = metaClass.cast(itemMeta);

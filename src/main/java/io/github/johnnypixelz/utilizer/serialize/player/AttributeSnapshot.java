@@ -2,7 +2,6 @@ package io.github.johnnypixelz.utilizer.serialize.player;
 
 import org.bukkit.GameMode;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 

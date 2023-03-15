@@ -4,7 +4,6 @@ import com.cryptomorin.xseries.XSound;
 import io.github.johnnypixelz.utilizer.serialize.world.Point;
 import io.github.johnnypixelz.utilizer.text.Colors;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;

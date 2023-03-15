@@ -7,6 +7,7 @@ import org.bukkit.Color;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 public class Parse {
 
@@ -50,6 +51,15 @@ public class Parse {
                 integer(splitColor[1], 0),
                 integer(splitColor[2], 0)
         );
+    }
+
+    public static Optional<Integer> integer(@NotNull String string) {
+        try {
+            final int number = Integer.parseInt(string);
+            return Optional.of(number);
+        } catch (NumberFormatException exception) {
+            return Optional.empty();
+        }
     }
 
     public static int integer(@NotNull String string, int defaultValue) {

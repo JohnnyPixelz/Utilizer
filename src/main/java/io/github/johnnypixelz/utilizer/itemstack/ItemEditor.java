@@ -292,7 +292,7 @@ public class ItemEditor {
     public <T extends ItemMeta> ItemEditor meta(@NotNull Class<T> metaClass, @NotNull Consumer<T> metaConsumer) {
         ItemMeta itemMeta = stack.getItemMeta();
         if (!itemMeta.getClass().isAssignableFrom(metaClass)) {
-            throw new IllegalArgumentException("Meta class type different than actual type");
+            throw new IllegalArgumentException("Meta class type different than actual type. Expected " + itemMeta.getClass().getSimpleName() + " but got " + metaClass.getSimpleName() + ".");
         }
 
         T meta = metaClass.cast(itemMeta);
