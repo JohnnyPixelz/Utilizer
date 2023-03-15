@@ -36,6 +36,8 @@ import static com.cryptomorin.xseries.XMaterial.supports;
 
 public class Items {
 
+    public static final ItemStack AIR = new ItemStack(Material.AIR);
+
     public static boolean isNull(ItemStack item) {
         return item == null || item.getType().equals(Material.AIR);
     }
