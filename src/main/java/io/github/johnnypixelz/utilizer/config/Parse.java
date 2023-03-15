@@ -8,7 +8,10 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 public class Parse {
 
@@ -16,7 +19,6 @@ public class Parse {
      * Parses RGB color codes from a string.
      *
      * @param color the RGB string, format: "int, int, int"
-     *
      * @return a color based on the RGB.
      */
     @NotNull
@@ -37,7 +39,6 @@ public class Parse {
      * Parses RGB chat color codes from a string.
      *
      * @param color the RGB string, format: "int, int, int"
-     *
      * @return a chat color based on the RGB.
      */
     @NotNull
@@ -75,6 +76,23 @@ public class Parse {
         return section.isString(path)
                 ? new ArrayList<>(Collections.singletonList(section.getString(path)))
                 : section.getStringList(path);
+    }
+
+    /**
+     * Restricts a number to a given range
+     *
+     * @param min   minimum range value
+     * @param max   maximum range value
+     * @param value value to constrain
+     * @return the existing value if it was
+     * included in the range or new if it was altered
+     */
+    public static int constrain(int min, int max, int value) {
+        if (min > max) {
+            throw new IllegalArgumentException("min cannot be bigger than max");
+        }
+
+        return Math.max(min, Math.min(max, value));
     }
 
 }
