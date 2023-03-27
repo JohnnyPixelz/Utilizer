@@ -1,10 +1,10 @@
 package io.github.johnnypixelz.utilizer.itemstack.firework;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.lang.Validate;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class FireworkBuilder {
@@ -28,7 +28,7 @@ public class FireworkBuilder {
      * @throws IllegalArgumentException If type is null
      */
     public FireworkBuilder withType(FireworkEffect.Type type) throws IllegalArgumentException {
-        Validate.notNull(type, "Cannot have null type");
+        Objects.requireNonNull(type, "Cannot have null type");
         this.type = type;
         return this;
     }
@@ -83,7 +83,7 @@ public class FireworkBuilder {
      * @throws IllegalArgumentException If color is null
      */
     public FireworkBuilder withColor(Color color) throws IllegalArgumentException {
-        Validate.notNull(color, "Cannot have null color");
+        Objects.requireNonNull(color, "Cannot have null color");
 
         colors.add(color);
 
@@ -100,14 +100,14 @@ public class FireworkBuilder {
      *                                  thrown after changes have occurred)
      */
     public FireworkBuilder withColor(Color... colors) throws IllegalArgumentException {
-        Validate.notNull(colors, "Cannot have null colors");
+        Objects.requireNonNull(colors, "Cannot have null colors");
         if (colors.length == 0) {
             return this;
         }
 
         ImmutableList.Builder<Color> list = this.colors;
         for (Color color : colors) {
-            Validate.notNull(color, "Color cannot be null");
+            Objects.requireNonNull(color, "Color cannot be null");
             list.add(color);
         }
 
@@ -125,7 +125,7 @@ public class FireworkBuilder {
      *                                  thrown after changes have occurred)
      */
     public FireworkBuilder withColor(Iterable<?> colors) throws IllegalArgumentException {
-        Validate.notNull(colors, "Cannot have null colors");
+        Objects.requireNonNull(colors, "Cannot have null colors");
 
         ImmutableList.Builder<Color> list = this.colors;
         for (Object color : colors) {
@@ -210,7 +210,7 @@ public class FireworkBuilder {
      *                                  thrown after changes have occurred)
      */
     public FireworkBuilder withFade(Color color) throws IllegalArgumentException {
-        Validate.notNull(color, "Cannot have null color");
+        Objects.requireNonNull(color, "Cannot have null color");
 
         if (fadeColors == null) {
             fadeColors = ImmutableList.builder();
@@ -231,7 +231,7 @@ public class FireworkBuilder {
      *                                  thrown after changes have occurred)
      */
     public FireworkBuilder withFade(Color... colors) throws IllegalArgumentException {
-        Validate.notNull(colors, "Cannot have null colors");
+        Objects.requireNonNull(colors, "Cannot have null colors");
         if (colors.length == 0) {
             return this;
         }
@@ -242,7 +242,7 @@ public class FireworkBuilder {
         }
 
         for (Color color : colors) {
-            Validate.notNull(color, "Color cannot be null");
+            Objects.requireNonNull(color, "Color cannot be null");
             list.add(color);
         }
 
@@ -260,7 +260,7 @@ public class FireworkBuilder {
      *                                  thrown after changes have occurred)
      */
     public FireworkBuilder withFade(Iterable<?> colors) throws IllegalArgumentException {
-        Validate.notNull(colors, "Cannot have null colors");
+        Objects.requireNonNull(colors, "Cannot have null colors");
 
         ImmutableList.Builder<Color> list = this.fadeColors;
         if (list == null) {

@@ -1,8 +1,8 @@
 package io.github.johnnypixelz.utilizer.enchantments;
 
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.enchantments.Enchantment;
 
+@Deprecated
 public class Enchantments {
 
     public static String getName(Enchantment ench) {
@@ -58,7 +58,8 @@ public class Enchantments {
             case "DEPTH_STRIDER":
                 return "Depth Strider";
             default:
-                return StringUtils.capitalize(ench.getName().replace("_", " ").toLowerCase());
+                return "";
+//                return StringUtils.capitalize(ench.getName().replace("_", " ").toLowerCase());
         }
     }
 }

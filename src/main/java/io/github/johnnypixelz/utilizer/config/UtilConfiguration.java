@@ -2,7 +2,6 @@ package io.github.johnnypixelz.utilizer.config;
 
 import com.cryptomorin.xseries.XMaterial;
 import io.github.johnnypixelz.utilizer.itemstack.Items;
-import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -19,7 +18,7 @@ import java.util.logging.Level;
 public class UtilConfiguration extends YamlConfiguration {
 
     public static UtilConfiguration loadConfiguration(File file) {
-        Validate.notNull(file, "File cannot be null");
+        Objects.requireNonNull(file, "File cannot be null");
 
         UtilConfiguration config = new UtilConfiguration();
 
@@ -29,7 +28,7 @@ public class UtilConfiguration extends YamlConfiguration {
         } catch (IOException ex) {
             Bukkit.getLogger().log(Level.SEVERE, "Cannot load " + file, ex);
         } catch (InvalidConfigurationException ex) {
-            Bukkit.getLogger().log(Level.SEVERE, "Cannot load " + file , ex);
+            Bukkit.getLogger().log(Level.SEVERE, "Cannot load " + file, ex);
         }
 
         return config;

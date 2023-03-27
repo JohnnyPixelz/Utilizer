@@ -1,7 +1,6 @@
 package io.github.johnnypixelz.utilizer.itemstack;
 
 import com.google.gson.Gson;
-import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -14,10 +13,7 @@ import org.bukkit.material.MaterialData;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * ItemBuilder - API Class to create a {@link org.bukkit.inventory.ItemStack} with just one line of Code
@@ -72,7 +68,7 @@ public class ItemBuilder {
      */
     public ItemBuilder(Material material, int amount, String displayname) {
         if (material == null) material = Material.AIR;
-        Validate.notNull(displayname, "The Displayname is null.");
+        Objects.requireNonNull(displayname, "The Displayname is null.");
         this.item = new ItemStack(material, amount);
         this.meta = item.getItemMeta();
         this.material = material;
@@ -86,7 +82,7 @@ public class ItemBuilder {
      */
     public ItemBuilder(Material material, String displayname) {
         if (material == null) material = Material.AIR;
-        Validate.notNull(displayname, "The Displayname is null.");
+        Objects.requireNonNull(displayname, "The Displayname is null.");
         this.item = new ItemStack(material);
         this.meta = item.getItemMeta();
         this.material = material;
@@ -97,7 +93,7 @@ public class ItemBuilder {
      * Initalizes the ItemBuilder with a {@link org.bukkit.inventory.ItemStack}
      */
     public ItemBuilder(ItemStack item) {
-        Validate.notNull(item, "The Item is null.");
+        Objects.requireNonNull(item, "The Item is null.");
         this.item = item;
         this.meta = item.getItemMeta();
         this.material = item.getType();
@@ -129,7 +125,7 @@ public class ItemBuilder {
      */
     @Deprecated
     public ItemBuilder(ItemBuilder builder) {
-        Validate.notNull(builder, "The ItemBuilder is null.");
+        Objects.requireNonNull(builder, "The ItemBuilder is null.");
         this.item = builder.item;
         this.meta = builder.meta;
         this.material = builder.material;
@@ -161,7 +157,7 @@ public class ItemBuilder {
      * @param data MaterialData for the ItemStack
      */
     public ItemBuilder data(MaterialData data) {
-        Validate.notNull(data, "The Data is null.");
+        Objects.requireNonNull(data, "The Data is null.");
         this.data = data;
         return this;
     }
@@ -194,7 +190,7 @@ public class ItemBuilder {
      * @param material Material for the ItemStack
      */
     public ItemBuilder material(Material material) {
-        Validate.notNull(material, "The Material is null.");
+        Objects.requireNonNull(material, "The Material is null.");
         this.material = material;
         return this;
     }
@@ -205,7 +201,7 @@ public class ItemBuilder {
      * @param meta Meta for the ItemStack
      */
     public ItemBuilder meta(ItemMeta meta) {
-        Validate.notNull(meta, "The Meta is null.");
+        Objects.requireNonNull(meta, "The Meta is null.");
         this.meta = meta;
         return this;
     }
@@ -217,7 +213,7 @@ public class ItemBuilder {
      * @param level   Level of the Enchantment
      */
     public ItemBuilder enchant(Enchantment enchant, int level) {
-        Validate.notNull(enchant, "The Enchantment is null.");
+        Objects.requireNonNull(enchant, "The Enchantment is null.");
         enchantments.put(enchant, level);
         return this;
     }
@@ -228,7 +224,7 @@ public class ItemBuilder {
      * @param enchantments Arena containing Enchantment and Level for the ItemStack
      */
     public ItemBuilder enchant(Map<Enchantment, Integer> enchantments) {
-        Validate.notNull(enchantments, "The Enchantments are null.");
+        Objects.requireNonNull(enchantments, "The Enchantments are null.");
         this.enchantments = enchantments;
         return this;
     }
@@ -239,7 +235,7 @@ public class ItemBuilder {
      * @param displayname Displayname for the ItemStack
      */
     public ItemBuilder displayname(String displayname) {
-        Validate.notNull(displayname, "The Displayname is null.");
+        Objects.requireNonNull(displayname, "The Displayname is null.");
         this.displayname = andSymbol ? ChatColor.translateAlternateColorCodes('&', displayname) : displayname;
         return this;
     }
@@ -250,7 +246,7 @@ public class ItemBuilder {
      * @param line Line of the Lore for the ItemStack
      */
     public ItemBuilder lore(String line) {
-        Validate.notNull(line, "The Line is null.");
+        Objects.requireNonNull(line, "The Line is null.");
         lore.add(andSymbol ? ChatColor.translateAlternateColorCodes('&', line) : line);
         return this;
     }
@@ -261,7 +257,7 @@ public class ItemBuilder {
      * @param lore List containing String as Lines for the ItemStack Lore
      */
     public ItemBuilder lore(List<String> lore) {
-        Validate.notNull(lore, "The Lores are null.");
+        Objects.requireNonNull(lore, "The Lores are null.");
         for (String line : lore) {
             lore(line);
         }
@@ -274,7 +270,7 @@ public class ItemBuilder {
      * @param lines One or more Strings for the ItemStack Lore
      */
     public ItemBuilder lore(String... lines) {
-        Validate.notNull(lines, "The Lines are null.");
+        Objects.requireNonNull(lines, "The Lines are null.");
         for (String line : lines) {
             lore(andSymbol ? ChatColor.translateAlternateColorCodes('&', line) : line);
         }
@@ -288,7 +284,7 @@ public class ItemBuilder {
      * @param index Point in the Lore for the ItemStack
      */
     public ItemBuilder lore(String line, int index) {
-        Validate.notNull(line, "The Line is null.");
+        Objects.requireNonNull(line, "The Line is null.");
         lore.set(index, andSymbol ? ChatColor.translateAlternateColorCodes('&', line) : line);
         return this;
     }
@@ -299,7 +295,7 @@ public class ItemBuilder {
      * @param flag ItemFlag for the ItemStack
      */
     public ItemBuilder flag(ItemFlag flag) {
-        Validate.notNull(flag, "The Flag is null.");
+        Objects.requireNonNull(flag, "The Flag is null.");
         flags.add(flag);
         return this;
     }
@@ -310,7 +306,7 @@ public class ItemBuilder {
      * @param flags List containing all ItemFlags
      */
     public ItemBuilder flag(List<ItemFlag> flags) {
-        Validate.notNull(flags, "The Flags are null.");
+        Objects.requireNonNull(flags, "The Flags are null.");
         this.flags = flags;
         return this;
     }
