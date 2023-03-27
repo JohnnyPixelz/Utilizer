@@ -3,21 +3,23 @@ package io.github.johnnypixelz.utilizer.minigame.module.teleport;
 import io.github.johnnypixelz.utilizer.minigame.MinigameModule;
 import io.github.johnnypixelz.utilizer.minigame.arena.Arena;
 import io.github.johnnypixelz.utilizer.minigame.arena.FFAArena;
-import io.github.johnnypixelz.utilizer.minigame.arena.Position;
 import io.github.johnnypixelz.utilizer.minigame.arena.TeamedArena;
 import io.github.johnnypixelz.utilizer.minigame.module.teams.Team;
 import io.github.johnnypixelz.utilizer.minigame.module.teams.TeamsModule;
 import io.github.johnnypixelz.utilizer.random.ProbabilityList;
+import io.github.johnnypixelz.utilizer.serialize.world.Position;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventPriority;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class TeleportModule extends MinigameModule {
     private final List<ArenaTeleportHandler> arenaHandlers = new ArrayList<>();
+    private final Map<UUID, Position> positions = new HashMap<>();
     private boolean teleportToLobby = true;
     private boolean teleportToGame = true;
+    private boolean restorePosition = true;
 
     public TeleportModule() {
         registerArenaHandlers();
@@ -32,12 +34,26 @@ public class TeleportModule extends MinigameModule {
         });
 
         getEventManager().getOnPlayerJoin().listen(player -> {
+            if (!restorePosition) return;
+
+            positions.put(player.getUniqueId(), Position.of(player));
+        }, EventPriority.LOWEST);
+
+        getEventManager().getOnPlayerJoin().listen(player -> {
             if (!teleportToLobby) return;
 
             Arena arena = getMinigame().getArena();
             if (!arena.hasLobbyPosition()) return;
             player.teleport(arena.getLobbyPosition().toLocation());
         });
+
+        getEventManager().getOnPlayerRemove().listen(player -> {
+            if (!restorePosition) return;
+            positions.computeIfPresent(player.getUniqueId(), (uuid, position) -> {
+                player.teleport(position.toLocation());
+                return null;
+            });
+        }, EventPriority.HIGHEST);
     }
 
     private void registerArenaHandlers() {
@@ -98,4 +114,10 @@ public class TeleportModule extends MinigameModule {
         teleportToGame = false;
         return this;
     }
+
+    public TeleportModule disablePositionRestore() {
+        restorePosition = false;
+        return this;
+    }
+
 }

@@ -1,5 +1,7 @@
 package io.github.johnnypixelz.utilizer.minigame.arena;
 
+import io.github.johnnypixelz.utilizer.serialize.world.Position;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;

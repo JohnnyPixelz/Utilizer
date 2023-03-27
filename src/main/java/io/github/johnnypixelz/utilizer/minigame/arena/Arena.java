@@ -1,6 +1,7 @@
 package io.github.johnnypixelz.utilizer.minigame.arena;
 
 import io.github.johnnypixelz.utilizer.minigame.MinigameModule;
+import io.github.johnnypixelz.utilizer.serialize.world.Position;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,10 @@ public abstract class Arena {
     }
 
     public boolean areRequiredModulesPresent(List<? extends MinigameModule> modules) {
-        return modules.stream().map(MinigameModule::getClass).collect(Collectors.toList()).containsAll(requiredModules);
+        return modules.stream()
+                .map(MinigameModule::getClass)
+                .collect(Collectors.toSet())
+                .containsAll(requiredModules);
     }
 
     public boolean hasLobbyPosition() {

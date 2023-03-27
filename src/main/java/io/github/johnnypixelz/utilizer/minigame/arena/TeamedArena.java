@@ -1,6 +1,7 @@
 package io.github.johnnypixelz.utilizer.minigame.arena;
 
 import io.github.johnnypixelz.utilizer.minigame.module.teams.TeamsModule;
+import io.github.johnnypixelz.utilizer.serialize.world.Position;
 
 import java.util.*;
 
