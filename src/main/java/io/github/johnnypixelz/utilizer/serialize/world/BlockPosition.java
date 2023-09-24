@@ -10,9 +10,9 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 /**
@@ -138,7 +138,7 @@ public class BlockPosition implements GsonSerializable {
         return BlockRegion.of(this, other);
     }
 
-    @NotNull
+    @Nonnull
     @Override
     public JsonObject serialize() {
         return JsonBuilder.object()

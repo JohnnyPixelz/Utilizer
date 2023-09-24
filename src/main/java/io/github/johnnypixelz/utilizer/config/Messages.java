@@ -8,8 +8,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -120,13 +120,13 @@ public class Messages {
         }
     }
 
-    @NotNull
-    public static Message cfg(@NotNull String configPath) {
+    @Nonnull
+    public static Message cfg(@Nonnull String configPath) {
         return cfg("config", configPath);
     }
 
-    @NotNull
-    public static Message cfg(@NotNull String config, @NotNull String configPath) {
+    @Nonnull
+    public static Message cfg(@Nonnull String config, @Nonnull String configPath) {
         FileConfiguration fileConfiguration = Configs.get(config);
 
         Message message = new Message();

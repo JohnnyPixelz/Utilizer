@@ -1,18 +1,17 @@
 package io.github.johnnypixelz.utilizer.maven;
 
-import org.jetbrains.annotations.NotNull;
-
+import javax.annotation.Nonnull;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
 
 public class Dependency {
 
-    public static Dependency of(@NotNull String groupId, @NotNull String artifactId, @NotNull String version, @NotNull String repoUrl) {
+    public static Dependency of(@Nonnull String groupId, @Nonnull String artifactId, @Nonnull String version, @Nonnull String repoUrl) {
         return new Dependency(groupId, artifactId, version, repoUrl);
     }
 
-    public static Dependency of(@NotNull String groupId, @NotNull String artifactId, @NotNull String version) {
+    public static Dependency of(@Nonnull String groupId, @Nonnull String artifactId, @Nonnull String version) {
         return new Dependency(groupId, artifactId, version);
     }
 
@@ -21,11 +20,11 @@ public class Dependency {
     private final String version;
     private final String repoUrl;
 
-    public Dependency(@NotNull String groupId, @NotNull String artifactId, @NotNull String version) {
+    public Dependency(@Nonnull String groupId, @Nonnull String artifactId, @Nonnull String version) {
         this(groupId, artifactId, version, "https://repo1.maven.org/maven2");
     }
 
-    public Dependency(@NotNull String groupId, @NotNull String artifactId, @NotNull String version, @NotNull String repoUrl) {
+    public Dependency(@Nonnull String groupId, @Nonnull String artifactId, @Nonnull String version, @Nonnull String repoUrl) {
         this.groupId = Objects.requireNonNull(groupId, "groupId");
         this.artifactId = Objects.requireNonNull(artifactId, "artifactId");
         this.version = Objects.requireNonNull(version, "version");

@@ -14,9 +14,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -30,7 +30,7 @@ public class OnlinePlayerPickerProvider implements InventoryProvider {
     private String title;
     private int timer;
 
-    public OnlinePlayerPickerProvider setCallback(@NotNull Consumer<Player> callback) {
+    public OnlinePlayerPickerProvider setCallback(@Nonnull Consumer<Player> callback) {
         this.callback = callback;
         return this;
     }

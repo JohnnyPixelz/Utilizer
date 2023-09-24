@@ -5,9 +5,9 @@ import io.github.johnnypixelz.utilizer.plugin.Provider;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.clip.placeholderapi.expansion.Relational;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,17 +49,17 @@ public class Expansion extends PlaceholderExpansion implements Relational {
     }
 
     @Override
-    public @NotNull List<String> getPlaceholders() {
+    public @Nonnull List<String> getPlaceholders() {
         return Collections.unmodifiableList(new ArrayList<>(placeholders.keySet()));
     }
 
     @Override
-    public @NotNull String getIdentifier() {
+    public @Nonnull String getIdentifier() {
         return Provider.getPlugin().getName().toLowerCase();
     }
 
     @Override
-    public @NotNull String getAuthor() {
+    public @Nonnull String getAuthor() {
         List<String> authors = Provider.getPlugin().getDescription().getAuthors();
         if (authors.isEmpty()) {
             return "N/A";
@@ -69,7 +69,7 @@ public class Expansion extends PlaceholderExpansion implements Relational {
     }
 
     @Override
-    public @NotNull String getVersion() {
+    public @Nonnull String getVersion() {
         return Provider.getPlugin().getDescription().getVersion();
     }
 
@@ -79,7 +79,7 @@ public class Expansion extends PlaceholderExpansion implements Relational {
     }
 
     @Override
-    public String onPlaceholderRequest(@Nullable Player player, @NotNull String params) {
+    public String onPlaceholderRequest(@Nullable Player player, @Nonnull String params) {
         SystemPlaceholderCallback systemPlaceholderCallback = systemPlaceholders.get(params);
         if (systemPlaceholderCallback != null) return systemPlaceholderCallback.run();
 
@@ -101,7 +101,7 @@ public class Expansion extends PlaceholderExpansion implements Relational {
     }
 
     @Override
-    public String onPlaceholderRequest(@Nullable Player player, @Nullable Player otherPlayer, @NotNull String params) {
+    public String onPlaceholderRequest(@Nullable Player player, @Nullable Player otherPlayer, @Nonnull String params) {
         if (player == null || otherPlayer == null) return "";
 
         RelationalPlaceholderCallback relationalPlaceholderCallback = relationalPlaceholders.get(params);

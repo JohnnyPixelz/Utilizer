@@ -3,20 +3,20 @@ package io.github.johnnypixelz.utilizer.file;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.github.johnnypixelz.utilizer.plugin.Provider;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
 import java.io.*;
 import java.lang.reflect.Type;
 
 public class Persistence {
     private static Gson gson = new Gson();
 
-    public static <T> T loadFile(@NotNull File file) {
+    public static <T> T loadFile(@Nonnull File file) {
         return loadFile(file, null);
     }
 
-    public static <T> T loadFile(@NotNull File file, @Nullable TypeToken<T> token) {
+    public static <T> T loadFile(@Nonnull File file, @Nullable TypeToken<T> token) {
         try {
             Type type = token != null
                     ? token.getType()
@@ -27,27 +27,27 @@ public class Persistence {
         }
     }
 
-    public static <T> T loadFile(@NotNull String fileName) {
+    public static <T> T loadFile(@Nonnull String fileName) {
         File file = new File(Provider.getPlugin().getDataFolder().getPath() + File.separator + fileName + ".json");
         return loadFile(file);
     }
 
-    public static <T> T loadFile(@NotNull String fileName, @Nullable TypeToken<T> token) {
+    public static <T> T loadFile(@Nonnull String fileName, @Nullable TypeToken<T> token) {
         File file = new File(Provider.getPlugin().getDataFolder().getPath() + File.separator + fileName + ".json");
         return loadFile(file, token);
     }
 
-    public static boolean saveFile(@NotNull File file, @NotNull Object object) {
+    public static boolean saveFile(@Nonnull File file, @Nonnull Object object) {
         return saveFile(file, object, null);
     }
 
-    public static boolean saveFile(@NotNull String fileName, @NotNull Object object) {
+    public static boolean saveFile(@Nonnull String fileName, @Nonnull Object object) {
         Provider.getPlugin().getDataFolder().mkdirs();
         File file = new File(Provider.getPlugin().getDataFolder().getPath() + File.separator + fileName + ".json");
         return saveFile(file, object);
     }
 
-    public static <T> boolean saveFile(@NotNull File file, @NotNull Object object, @Nullable TypeToken<T> token) {
+    public static <T> boolean saveFile(@Nonnull File file, @Nonnull Object object, @Nullable TypeToken<T> token) {
         try {
             FileWriter writer = new FileWriter(file);
             Type type = token != null
@@ -63,7 +63,7 @@ public class Persistence {
         return true;
     }
 
-    public static <T> boolean saveFile(@NotNull String fileName, @NotNull Object object, @Nullable TypeToken<T> token) {
+    public static <T> boolean saveFile(@Nonnull String fileName, @Nonnull Object object, @Nullable TypeToken<T> token) {
         Provider.getPlugin().getDataFolder().mkdirs();
         File file = new File(Provider.getPlugin().getDataFolder().getPath() + File.separator + fileName + ".json");
         return saveFile(file, object, token);
@@ -73,7 +73,7 @@ public class Persistence {
         Persistence.gson = gson;
     }
 
-    @NotNull
+    @Nonnull
     public static Gson getGson() {
         return gson;
     }

@@ -1,8 +1,8 @@
 package io.github.johnnypixelz.utilizer.sql;
 
 import org.bukkit.configuration.ConfigurationSection;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -10,23 +10,23 @@ import java.util.stream.Collectors;
 
 public class DatabaseCredentials {
 
-    @NotNull
-    public static DatabaseCredentials of(@NotNull String address, int port, @NotNull String database, @NotNull String username, @NotNull String password) {
+    @Nonnull
+    public static DatabaseCredentials of(@Nonnull String address, int port, @Nonnull String database, @Nonnull String username, @Nonnull String password) {
         return of(address, port, database, username, password, "mariadb", new HashMap<>());
     }
 
-    @NotNull
-    public static DatabaseCredentials of(@NotNull String address, int port, @NotNull String database, @NotNull String username, @NotNull String password, @NotNull String dataSource) {
+    @Nonnull
+    public static DatabaseCredentials of(@Nonnull String address, int port, @Nonnull String database, @Nonnull String username, @Nonnull String password, @Nonnull String dataSource) {
         return of(address, port, database, username, password, dataSource, new HashMap<>());
     }
 
-    @NotNull
-    public static DatabaseCredentials of(@NotNull String address, int port, @NotNull String database, @NotNull String username, @NotNull String password, @NotNull String dataSource, @NotNull Map<String, String> options) {
+    @Nonnull
+    public static DatabaseCredentials of(@Nonnull String address, int port, @Nonnull String database, @Nonnull String username, @Nonnull String password, @Nonnull String dataSource, @Nonnull Map<String, String> options) {
         return new DatabaseCredentials(address, port, database, username, password, dataSource, options);
     }
 
-    @NotNull
-    public static DatabaseCredentials fromConfig(@NotNull ConfigurationSection config) {
+    @Nonnull
+    public static DatabaseCredentials fromConfig(@Nonnull ConfigurationSection config) {
         Map<String, String> options = new HashMap<>();
 
         if (config.isConfigurationSection("properties")) {
@@ -57,7 +57,7 @@ public class DatabaseCredentials {
     private final String dataSource;
     private final Map<String, String> options;
 
-    private DatabaseCredentials(@NotNull String address, int port, @NotNull String database, @NotNull String username, @NotNull String password, @NotNull String dataSource, @NotNull Map<String, String> options) {
+    private DatabaseCredentials(@Nonnull String address, int port, @Nonnull String database, @Nonnull String username, @Nonnull String password, @Nonnull String dataSource, @Nonnull Map<String, String> options) {
         this.address = Objects.requireNonNull(address);
         this.port = port;
         this.database = Objects.requireNonNull(database);
@@ -67,7 +67,7 @@ public class DatabaseCredentials {
         this.options = Objects.requireNonNull(options);
     }
 
-    @NotNull
+    @Nonnull
     public String getAddress() {
         return this.address;
     }
@@ -76,32 +76,32 @@ public class DatabaseCredentials {
         return this.port;
     }
 
-    @NotNull
+    @Nonnull
     public String getDatabase() {
         return this.database;
     }
 
-    @NotNull
+    @Nonnull
     public String getUsername() {
         return this.username;
     }
 
-    @NotNull
+    @Nonnull
     public String getPassword() {
         return this.password;
     }
 
-    @NotNull
+    @Nonnull
     public String getDataSource() {
         return dataSource;
     }
 
-    @NotNull
+    @Nonnull
     public Map<String, String> getOptions() {
         return options;
     }
 
-    @NotNull
+    @Nonnull
     public String getJdbcURL() {
         String format = "jdbc:{source}://{address}:{port}/{database}?{options}";
 

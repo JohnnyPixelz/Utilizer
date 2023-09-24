@@ -7,9 +7,9 @@ import io.github.johnnypixelz.utilizer.gson.JsonBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 /**
@@ -74,7 +74,7 @@ public class Position implements GsonSerializable {
         return this.point.subtract(x, y, z).withDirection(this.direction);
     }
 
-    @NotNull
+    @Nonnull
     @Override
     public JsonObject serialize() {
         return JsonBuilder.object()

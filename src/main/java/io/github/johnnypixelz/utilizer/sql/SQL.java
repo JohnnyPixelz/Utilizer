@@ -5,12 +5,12 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.github.johnnypixelz.utilizer.maven.Dependency;
 import io.github.johnnypixelz.utilizer.maven.DependencyLoader;
 import io.github.johnnypixelz.utilizer.plugin.Provider;
-import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.mariadb.jdbc.Driver;
 
+import javax.annotation.Nonnull;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Objects;
@@ -34,7 +34,7 @@ public class SQL {
     private static final long CONNECTION_TIMEOUT = TimeUnit.SECONDS.toMillis(10);
     private static final long LEAK_DETECTION_THRESHOLD = TimeUnit.SECONDS.toMillis(10);
 
-    public static SQL connect(@NotNull DatabaseCredentials credentials) {
+    public static SQL connect(@Nonnull DatabaseCredentials credentials) {
         final String dataSource = credentials.getDataSource();
 
         SQLDialect dialect;
@@ -48,7 +48,7 @@ public class SQL {
         return new SQL(credentials, dialect);
     }
 
-    public static SQL connect(@NotNull DatabaseCredentials credentials, @NotNull SQLDialect dialect) {
+    public static SQL connect(@Nonnull DatabaseCredentials credentials, @Nonnull SQLDialect dialect) {
         return new SQL(credentials, dialect);
     }
 
@@ -56,7 +56,7 @@ public class SQL {
     private final DatabaseCredentials credentials;
     private final DSLContext dsl;
 
-    private SQL(@NotNull DatabaseCredentials credentials, @NotNull SQLDialect dialect) {
+    private SQL(@Nonnull DatabaseCredentials credentials, @Nonnull SQLDialect dialect) {
         this.credentials = credentials;
         final HikariConfig hikari = new HikariConfig();
 
@@ -97,27 +97,27 @@ public class SQL {
         this.dsl = DSL.using(source, dialect);
     }
 
-    @NotNull
+    @Nonnull
     public HikariDataSource getHikari() {
         return this.source;
     }
 
-    @NotNull
+    @Nonnull
     public DatabaseCredentials getCredentials() {
         return credentials;
     }
 
-    @NotNull
+    @Nonnull
     public Connection getConnection() throws SQLException {
         return Objects.requireNonNull(dsl.parsingConnection(), "connection is null");
     }
 
-    public <R> Optional<R> query(@NotNull Function<DSLContext, R> query) {
+    public <R> Optional<R> query(@Nonnull Function<DSLContext, R> query) {
         final R result = query.apply(dsl);
         return Optional.ofNullable(result);
     }
 
-    public void execute(@NotNull Consumer<DSLContext> execute) {
+    public void execute(@Nonnull Consumer<DSLContext> execute) {
         execute.accept(dsl);
     }
 

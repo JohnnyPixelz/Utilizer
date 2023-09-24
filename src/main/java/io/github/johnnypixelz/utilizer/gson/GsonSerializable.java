@@ -1,9 +1,9 @@
 package io.github.johnnypixelz.utilizer.gson;
 
 import com.google.gson.JsonElement;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -25,8 +25,8 @@ public interface GsonSerializable {
      * @return the deserialized object
      * @throws IllegalStateException if the clazz does not have a deserialization method
      */
-    @NotNull
-    static <T extends GsonSerializable> T deserialize(@NotNull Class<T> clazz, @NotNull JsonElement element) {
+    @Nonnull
+    static <T extends GsonSerializable> T deserialize(@Nonnull Class<T> clazz, @Nonnull JsonElement element) {
         Method deserializeMethod = getDeserializeMethod(clazz);
         if (deserializeMethod == null) {
             throw new IllegalStateException("Class does not have a deserialize method accessible.");
@@ -48,8 +48,8 @@ public interface GsonSerializable {
      * @return the deserialized object
      * @throws IllegalStateException if the clazz does not have a deserialization method
      */
-    @NotNull
-    static GsonSerializable deserializeRaw(@NotNull Class<?> clazz, @NotNull JsonElement element) {
+    @Nonnull
+    static GsonSerializable deserializeRaw(@Nonnull Class<?> clazz, @Nonnull JsonElement element) {
         Class<? extends GsonSerializable> typeCastedClass = clazz.asSubclass(GsonSerializable.class);
         return deserialize(typeCastedClass, element);
     }
@@ -61,7 +61,7 @@ public interface GsonSerializable {
      * @return the deserialization method, if the class has one
      */
     @Nullable
-    static Method getDeserializeMethod(@NotNull Class<?> clazz) {
+    static Method getDeserializeMethod(@Nonnull Class<?> clazz) {
         if (!GsonSerializable.class.isAssignableFrom(clazz)) {
             return null;
         }
@@ -86,7 +86,7 @@ public interface GsonSerializable {
      *
      * @return a json form of this object
      */
-    @NotNull
+    @Nonnull
     JsonElement serialize();
 
 }

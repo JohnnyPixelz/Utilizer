@@ -17,9 +17,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -42,12 +42,12 @@ public class PanelProvider<T> implements InventoryProvider {
         this.stackGenerator = stackGenerator;
     }
 
-    @NotNull
-    public static <T> PanelProvider<T> of(@NotNull List<T> elements, @NotNull Function<T, ItemStack> stackGenerator) {
+    @Nonnull
+    public static <T> PanelProvider<T> of(@Nonnull List<T> elements, @Nonnull Function<T, ItemStack> stackGenerator) {
         return new PanelProvider<>(elements, stackGenerator);
     }
 
-    @NotNull
+    @Nonnull
     public PanelProvider<T> setSize(int size) {
         if (size >= 3 && size <= 6) {
             this.size = size;
@@ -56,49 +56,49 @@ public class PanelProvider<T> implements InventoryProvider {
     }
 
     // Placeholders: %navigation% (Previous/Next) %page% %maxpage%
-    @NotNull
+    @Nonnull
     public PanelProvider<T> setArrow(@Nullable ItemStack stack) {
         this.arrow = stack;
         return this;
     }
 
-    @NotNull
+    @Nonnull
     public PanelProvider<T> setCallback(@Nullable BiConsumer<InventoryClickEvent, T> callback) {
         this.callback = callback;
         return this;
     }
 
-    @NotNull
+    @Nonnull
     public PanelProvider<T> onLeftClick(@Nullable Consumer<T> leftClick) {
         this.leftClick = leftClick;
         return this;
     }
 
-    @NotNull
+    @Nonnull
     public PanelProvider<T> onRightClick(@Nullable Consumer<T> rightClick) {
         this.rightClick = rightClick;
         return this;
     }
 
-    @NotNull
+    @Nonnull
     public PanelProvider<T> onMiddleClick(@Nullable Consumer<T> middleClick) {
         this.middleClick = middleClick;
         return this;
     }
 
-    @NotNull
+    @Nonnull
     public PanelProvider<T> setOnClose(@Nullable Consumer<Player> onClose) {
         this.onClose = onClose;
         return this;
     }
 
-    @NotNull
+    @Nonnull
     public PanelProvider<T> setTitle(@Nullable String title) {
         this.title = title;
         return this;
     }
 
-    @NotNull
+    @Nonnull
     public SmartInventory build() {
         SmartInventory.Builder builder = SmartInventory.builder()
                 .provider(this)

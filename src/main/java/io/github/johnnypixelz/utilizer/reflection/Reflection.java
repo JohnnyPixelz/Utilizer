@@ -2,8 +2,8 @@ package io.github.johnnypixelz.utilizer.reflection;
 
 import io.github.johnnypixelz.utilizer.plugin.Provider;
 import org.bukkit.Bukkit;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -53,7 +53,7 @@ public class Reflection {
      * @param <T>   The type of the class
      * @return The new instance of the class, or null if error
      */
-    public static <T> T getInstanceFromClass(@NotNull Class<T> clazz) {
+    public static <T> T getInstanceFromClass(@Nonnull Class<T> clazz) {
         try {
             Constructor<T> constructor = clazz.getConstructor();
             return constructor.newInstance();
@@ -69,7 +69,7 @@ public class Reflection {
      * @param <T>   The type of the class
      * @return The list of matching classes
      */
-    public static <T> List<Class<T>> getExtendingClasses(@NotNull Class<T> clazz) {
+    public static <T> List<Class<T>> getExtendingClasses(@Nonnull Class<T> clazz) {
         List<Class<T>> list = new ArrayList<>();
         try {
             ClassLoader loader = Provider.getPlugin().getClass().getClassLoader();
@@ -102,7 +102,7 @@ public class Reflection {
         return list;
     }
 
-    public static <T> List<T> getInstantiatedExtendingClasses(@NotNull Class<T> clazz) {
+    public static <T> List<T> getInstantiatedExtendingClasses(@Nonnull Class<T> clazz) {
         List<T> list = new ArrayList<>();
 
         for (Class<T> extendingClass : getExtendingClasses(clazz)) {

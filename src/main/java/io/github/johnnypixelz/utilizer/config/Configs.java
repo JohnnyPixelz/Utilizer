@@ -2,8 +2,8 @@ package io.github.johnnypixelz.utilizer.config;
 
 import io.github.johnnypixelz.utilizer.plugin.Provider;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -13,23 +13,23 @@ import java.util.HashMap;
 public class Configs {
     private static final HashMap<String, Config> configMap = new HashMap<>();
 
-    @NotNull
+    @Nonnull
     public static FileConfiguration getDefault() {
         return load("config").getConfig();
     }
 
-    @NotNull
-    public static UtilConfiguration get(@NotNull String config) {
+    @Nonnull
+    public static UtilConfiguration get(@Nonnull String config) {
         return load(config).getConfig();
     }
 
-    @NotNull
+    @Nonnull
     public static Collection<Config> getConfigs() {
         return Collections.unmodifiableCollection(configMap.values());
     }
 
-    @NotNull
-    public static Config load(@NotNull String config) {
+    @Nonnull
+    public static Config load(@Nonnull String config) {
         if (!config.endsWith(".yml")) {
             config = config + ".yml";
         }

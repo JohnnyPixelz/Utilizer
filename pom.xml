@@ -6,7 +6,7 @@
 
     <groupId>io.github.johnnypixelz</groupId>
     <artifactId>Utilizer</artifactId>
-    <version>0.15.2</version>
+    <version>0.16.0</version>
     <packaging>jar</packaging>
     <description>Powerful but easy to use library for Bukkit Plugin Development</description>
     <url>https://github.com/JohnnyPixelz/Utilizer</url>
@@ -198,6 +198,10 @@
                                 <relocation>
                                     <pattern>be.bendem.sqlstreams</pattern>
                                     <shadedPattern>io.github.johnnypixelz.utilizer.shade.sqlstreams</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.google.gson</pattern>
+                                    <shadedPattern>io.github.johnnypixelz.utilizer.shade.gson</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>

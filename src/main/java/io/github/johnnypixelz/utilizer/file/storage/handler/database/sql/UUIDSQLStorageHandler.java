@@ -2,13 +2,13 @@ package io.github.johnnypixelz.utilizer.file.storage.handler.database.sql;
 
 import com.google.gson.Gson;
 import io.github.johnnypixelz.utilizer.sql.DatabaseCredentials;
-import org.jetbrains.annotations.NotNull;
 import org.jooq.Field;
 import org.jooq.JSON;
 import org.jooq.Record2;
 import org.jooq.Result;
 import org.jooq.impl.SQLDataType;
 
+import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,7 +45,7 @@ public class UUIDSQLStorageHandler<V> extends SQLStorageHandler<UUID, V> {
 
         return sql.query(
                 dslContext -> {
-                    final @NotNull Result<Record2<UUID, JSON>> fetch = dslContext.select(ID, DATA).from(table).fetch();
+                    final @Nonnull Result<Record2<UUID, JSON>> fetch = dslContext.select(ID, DATA).from(table).fetch();
                     return fetch.stream()
                             .map(record -> {
                                 final UUID idString = record.value1();

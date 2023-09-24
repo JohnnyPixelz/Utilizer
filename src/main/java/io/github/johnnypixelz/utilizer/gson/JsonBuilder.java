@@ -1,9 +1,9 @@
 package io.github.johnnypixelz.utilizer.gson;
 
 import com.google.gson.*;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 /**
  * Builder utilities for creating GSON Objects/Arrays.
  */
-@NotNull
+@Nonnull
 public final class JsonBuilder {
 
     /**

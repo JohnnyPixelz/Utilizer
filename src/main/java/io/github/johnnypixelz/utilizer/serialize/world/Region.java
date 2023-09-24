@@ -6,8 +6,8 @@ import com.google.gson.JsonObject;
 import io.github.johnnypixelz.utilizer.gson.GsonSerializable;
 import io.github.johnnypixelz.utilizer.gson.JsonBuilder;
 import org.bukkit.Location;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.Objects;
 
 /**
@@ -90,7 +90,7 @@ public class Region implements GsonSerializable {
         return this.depth;
     }
 
-    @NotNull
+    @Nonnull
     @Override
     public JsonObject serialize() {
         return JsonBuilder.object()

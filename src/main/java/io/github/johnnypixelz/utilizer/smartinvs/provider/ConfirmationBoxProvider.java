@@ -11,8 +11,8 @@ import io.github.johnnypixelz.utilizer.smartinvs.listener.InventoryCloseListener
 import io.github.johnnypixelz.utilizer.text.Colors;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 
 public class ConfirmationBoxProvider implements InventoryProvider {
@@ -96,7 +96,7 @@ public class ConfirmationBoxProvider implements InventoryProvider {
             return this;
         }
 
-        @NotNull
+        @Nonnull
         public SmartInventory build() {
             SmartInventory.Builder builder = SmartInventory.builder()
                     .provider(provider)

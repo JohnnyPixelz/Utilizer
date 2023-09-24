@@ -21,14 +21,17 @@ public class Task extends BukkitRunnable {
         this.consumer = consumer;
 
         try {
-            taskField = super.getClass().getDeclaredField("task");
+            taskField = getClass().getSuperclass().getDeclaredField("task");
         } catch (NoSuchFieldException e) {
             throw new RuntimeException(e);
         }
 
         this.taskCache = Cache.suppliedBy(() -> {
             try {
+                taskField.setAccessible(true);
                 final Object o = taskField.get(this);
+                taskField.setAccessible(false);
+
                 return (BukkitTask) o;
             } catch (IllegalAccessException | ClassCastException e) {
                 return null;
