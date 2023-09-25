@@ -72,6 +72,23 @@ public class Parse {
         }
     }
 
+    public static Optional<Double> decimal(@Nonnull String string) {
+        try {
+            final double number = Double.parseDouble(string);
+            return Optional.of(number);
+        } catch (NumberFormatException exception) {
+            return Optional.empty();
+        }
+    }
+
+    public static double decimal(@Nonnull String string, double defaultValue) {
+        try {
+            return Double.parseDouble(string);
+        } catch (NumberFormatException exception) {
+            return defaultValue;
+        }
+    }
+
     public static List<String> stringOrList(ConfigurationSection section, String path) {
         return section.isString(path)
                 ? new ArrayList<>(Collections.singletonList(section.getString(path)))
