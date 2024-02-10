@@ -18,7 +18,7 @@
 
     <distributionManagement>
         <repository>
-            <id>tzoni-repo</id>
+            <id>tzoni-repo-releases</id>
             <url>https://repo.tzoni.me/releases</url>
         </repository>
     </distributionManagement>
@@ -48,7 +48,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.19.3-R0.1-SNAPSHOT</version>
+            <version>1.20-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -89,7 +89,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.10</version>
+            <version>42.5.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
