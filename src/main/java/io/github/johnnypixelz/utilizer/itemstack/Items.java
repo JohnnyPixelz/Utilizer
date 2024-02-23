@@ -3,6 +3,7 @@ package io.github.johnnypixelz.utilizer.itemstack;
 import com.cryptomorin.xseries.XPotion;
 import com.google.common.base.Enums;
 import com.google.common.base.Strings;
+import io.github.johnnypixelz.utilizer.amount.Amount;
 import io.github.johnnypixelz.utilizer.config.Parse;
 import io.github.johnnypixelz.utilizer.text.Colors;
 import org.bukkit.*;
@@ -88,9 +89,11 @@ public class Items {
         }
 
         if (section.isSet("amount")) {
-            final int amount = section.getInt("amount", 1);
-            if (amount >= 1 && amount <= 64) {
-                itemEditor.setAmount(amount);
+            final String configAmount = section.getString("amount", "1");
+            final Amount amount = Amount.parse(configAmount);
+            final int finalAmount = amount.getAmount();
+            if (finalAmount >= 1 && finalAmount <= 64) {
+                itemEditor.setAmount(finalAmount);
             }
         }
 
