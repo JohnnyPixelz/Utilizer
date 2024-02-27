@@ -1,42 +1,73 @@
 package io.github.johnnypixelz.utilizer.command;
 
+import io.github.johnnypixelz.utilizer.command.annotations.Default;
+import io.github.johnnypixelz.utilizer.command.annotations.Label;
+import io.github.johnnypixelz.utilizer.command.annotations.Subcommand;
+import io.github.johnnypixelz.utilizer.command.exceptions.CommandAnnotationParseException;
+
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class Command {
-    private final String root;
-    private String description;
-    private final List<Class<?>> arguments;
-    private final List<Command> subcommands;
+    private List<String> rootLabels;
+    private List<String> subcommandLabels;
+    private Method defaultMethod;
+    private List<Command> subcommands;
 
-    public Command(String root) {
-        this.root = root;
-        this.description = null;
-        this.arguments = new ArrayList<>();
+    private Command() {
+        this.rootLabels = new ArrayList<>();
+        this.subcommandLabels = new ArrayList<>();
+        this.defaultMethod = null;
         this.subcommands = new ArrayList<>();
     }
 
-    public String getRoot() {
-        return root;
+    public List<String> getRootLabels() {
+        return rootLabels;
     }
 
-    public String getDescription() {
-        return description;
+    public List<String> getSubcommandLabels() {
+        return subcommandLabels;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public Method getDefaultMethod() {
+        return defaultMethod;
     }
 
     public List<Command> getSubcommands() {
         return subcommands;
     }
 
-    public void addSubcommand(Command command) {
-        subcommands.add(command);
-    }
+    public void parseAnnotations() throws CommandAnnotationParseException {
+        final Label labelAnnotation = getClass().getAnnotation(Label.class);
+        if (labelAnnotation == null) {
+            throw new CommandAnnotationParseException("Missing label annotation.");
+        }
 
-    public <T> void setArguments(Class<T> argumentClass, CommandArguments1<T> argument1) {
+        this.rootLabels = CommandUtil.parseLabel(labelAnnotation.value());
+
+        this.subcommands = new ArrayList<>();
+
+        for (Method declaredMethod : getClass().getDeclaredMethods()) {
+//            Processing Default annotations
+            if (declaredMethod.isAnnotationPresent(Default.class)) {
+                defaultMethod = declaredMethod;
+            }
+
+//            Processing Subcommand annotations
+            if (declaredMethod.isAnnotationPresent(Subcommand.class)) {
+                final Subcommand subcommandAnnotation = declaredMethod.getAnnotation(Subcommand.class);
+                final String subcommandLabel = subcommandAnnotation.value();
+                final List<String> subcommandLabels = CommandUtil.parseLabel(subcommandLabel);
+                final Command command = new Command();
+                command.subcommandLabels = subcommandLabels;
+                command.defaultMethod = declaredMethod;
+                subcommands.add(command);
+            }
+        }
+
 
     }
 
