@@ -6,7 +6,7 @@ import java.util.*;
 import java.util.function.Function;
 
 public class CommandArgumentResolverManager {
-    private static Map<Class<?>, CommandArgumentResolver<String, ?>> resolvers = new HashMap<>();
+    private static final Map<Class<?>, CommandArgumentResolver<String, ?>> resolvers = new HashMap<>();
 
     static {
         registerResolver(Short.class, argument -> {
