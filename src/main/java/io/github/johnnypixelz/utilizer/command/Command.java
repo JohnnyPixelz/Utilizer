@@ -14,7 +14,7 @@ public class Command {
     private CommandMethod defaultMethod;
     private List<Command> subcommands;
 
-    private Command() {
+    public Command() {
         this.labels = new ArrayList<>();
         this.defaultMethod = null;
         this.subcommands = new ArrayList<>();

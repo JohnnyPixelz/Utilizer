@@ -1,6 +1,7 @@
 package io.github.johnnypixelz.utilizer.command;
 
 import io.github.johnnypixelz.utilizer.command.exceptions.UnsupportedCommandArgumentException;
+import io.github.johnnypixelz.utilizer.plugin.Logs;
 import org.bukkit.command.CommandSender;
 
 import java.lang.reflect.InvocationTargetException;
@@ -67,7 +68,14 @@ public class CommandMethod {
             }
         } else {
             try {
-                method.invoke(command, sender, resolvedArgumentsArray);
+                List<Object> objectList = new ArrayList<>();
+                objectList.add(sender);
+                objectList.addAll(List.of(resolvedArgumentsArray));
+                method.invoke(command, objectList.toArray(Object[]::new));
+            } catch (IllegalArgumentException e) {
+                Logs.severe("Attempted to invoke command method for command " + command.getLabels().get(0));
+                Logs.severe("Method required " + method.getParameterCount() + " arguments and provided " + (resolvedArgumentsArray.length + 1));
+                throw new RuntimeException(e);
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             } catch (InvocationTargetException e) {

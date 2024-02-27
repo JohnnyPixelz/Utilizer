@@ -1,6 +1,9 @@
 package io.github.johnnypixelz.utilizer.command;
 
 import io.github.johnnypixelz.utilizer.command.exceptions.UnsupportedCommandArgumentException;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 import java.util.*;
 import java.util.function.Function;
@@ -98,6 +101,13 @@ public class CommandArgumentResolverManager {
         });
         registerResolver(String[].class, argument -> argument.split(" "));
 //        registerResolver(Enum.class, argument -> ); TODO implement enums
+        registerResolver(Player.class, Bukkit::getPlayer);
+        registerResolver(OfflinePlayer.class, argument -> {
+            final OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(argument);
+
+            if (offlinePlayer.isOnline()) return null;
+            return offlinePlayer;
+        });
     }
 
     public static <T> void registerResolver(Class<T> type, CommandArgumentResolver<String, T> resolver) {
