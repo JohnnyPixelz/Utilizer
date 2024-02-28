@@ -2,6 +2,8 @@ package io.github.johnnypixelz.utilizer.command;
 
 import io.github.johnnypixelz.utilizer.command.exceptions.CommandAnnotationParseException;
 import io.github.johnnypixelz.utilizer.command.exceptions.UnsupportedCommandArgumentException;
+import io.github.johnnypixelz.utilizer.command.permissions.CommandPermission;
+import io.github.johnnypixelz.utilizer.command.permissions.CommandPermissionMessage;
 import io.github.johnnypixelz.utilizer.plugin.Logs;
 import io.github.johnnypixelz.utilizer.plugin.Provider;
 import org.bukkit.Bukkit;
@@ -17,8 +19,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public class CommandManager {
     private static final List<Command> registeredCommands = new ArrayList<>();
@@ -57,7 +59,8 @@ public class CommandManager {
 
                 registeredCommands.add(newCommand);
                 commandMap.register(newCommand.getLabels().get(0), Provider.getPlugin().getName(), new BukkitCommand(newCommand));
-            } catch (InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException e) {
+            } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
+                     IllegalAccessException e) {
                 e.printStackTrace();
             } catch (CommandAnnotationParseException e) {
                 e.printStackTrace();
@@ -65,50 +68,87 @@ public class CommandManager {
         }
     }
 
-    public static void executeCommand(Command command, CommandSender sender, List<String> args) {
-        deepSearchForSubcommand(command, args, (subcommand, remainingArgs) -> {
-            final CommandMethod defaultMethod = subcommand.getDefaultMethod();
-            try {
-//                Passing command since that is the class which contains the declared method
-                defaultMethod.execute(sender, remainingArgs);
-            } catch (UnsupportedCommandArgumentException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-//        final String label = args.get(0).toLowerCase();
-//        for (Command registeredCommand : registeredCommands) {
-//            if (!registeredCommand.getLabels().contains(label)) continue;
-//
-//            deepSearchForSubcommand(registeredCommand, args.subList(1, args.size()), (command, remainingArgs) -> {
-//                final CommandMethod defaultMethod = command.getDefaultMethod();
-//                try {
-//                    defaultMethod.execute(command, sender, remainingArgs);
-//                } catch (UnsupportedCommandArgumentException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            });
-//
-//        }
+    static void registerCommand(Command command) {
+        registeredCommands.add(command);
+        commandMap.register(command.getLabels().get(0), Provider.getPlugin().getName(), new BukkitCommand(command));
     }
 
-    private static void deepSearchForSubcommand(Command command, List<String> args, BiConsumer<Command, List<String>> foundCommand) {
-        if (args.isEmpty()) {
-            Logs.info("[1] Found subcommand " + command.getLabels().get(0));
-            foundCommand.accept(command, args);
-            return;
-        }
+    static void executeCommand(Command command, CommandSender sender, List<String> args) {
+        Command currentCommand = command;
+        List<String> currentArgs = args;
 
-        String label = args.get(0).toLowerCase();
-        for (Command subcommand : command.getSubcommands()) {
-            if (subcommand.getLabels().contains(label)) {
-                deepSearchForSubcommand(subcommand, args.subList(1, args.size()), foundCommand);
+        for (CommandPermission requiredPermission : command.getRequiredPermissions()) {
+            if (!sender.hasPermission(requiredPermission.getPermission())) {
+                requiredPermission.getPermissionMessage()
+                        .or(() -> Optional.ofNullable(command.getPermissionMessage()))
+                        .map(CommandPermissionMessage::getMessage)
+                        .orElse(CommandMessageManager.getMessage(CommandMessage.NO_PERMISSION))
+                        .send(sender);
                 return;
             }
         }
 
-        Logs.info("[2] Found subcommand " + command.getLabels().get(0));
-        foundCommand.accept(command, args);
+        while (!currentArgs.isEmpty()) {
+            String label = currentArgs.get(0).toLowerCase();
+            boolean found = false;
+
+            for (Command subcommand : currentCommand.getSubcommands()) {
+                if (subcommand.getLabels().contains(label)) {
+
+                    for (CommandPermission requiredPermission : subcommand.getRequiredPermissions()) {
+                        if (!sender.hasPermission(requiredPermission.getPermission())) {
+                            requiredPermission.getPermissionMessage()
+                                    .or(() -> Optional.ofNullable(subcommand.getPermissionMessage()))
+                                    .map(CommandPermissionMessage::getMessage)
+                                    .orElse(CommandMessageManager.getMessage(CommandMessage.NO_PERMISSION))
+                                    .send(sender);
+                            return;
+                        }
+                    }
+
+                    currentCommand = subcommand;
+                    currentArgs = currentArgs.subList(1, currentArgs.size());
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                break;
+            }
+        }
+
+        try {
+            final CommandMethod defaultMethod = currentCommand.getDefaultMethod();
+            defaultMethod.execute(sender, currentArgs);
+        } catch (UnsupportedCommandArgumentException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void deepSearchForSubcommand(Command command, List<String> args, BiConsumer<Command, List<String>> foundCommand) {
+        Command currentCommand = command;
+        List<String> currentArgs = args;
+
+        while (!currentArgs.isEmpty()) {
+            String label = currentArgs.get(0).toLowerCase();
+            boolean found = false;
+
+            for (Command subcommand : currentCommand.getSubcommands()) {
+                if (subcommand.getLabels().contains(label)) {
+                    currentCommand = subcommand;
+                    currentArgs = currentArgs.subList(1, currentArgs.size());
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                break;
+            }
+        }
+
+        foundCommand.accept(currentCommand, currentArgs);
     }
 
 }
