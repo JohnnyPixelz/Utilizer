@@ -23,7 +23,13 @@ public class BukkitCommand extends org.bukkit.command.Command implements PluginI
     @NotNull
     @Override
     public String getDescription() {
-        return "No description available";
+        return command.getDescription() != null ? command.getDescription() : "No description available";
+    }
+
+    @NotNull
+    @Override
+    public List<String> getAliases() {
+        return command.getLabels().subList(1, command.getLabels().size());
     }
 
     @Override

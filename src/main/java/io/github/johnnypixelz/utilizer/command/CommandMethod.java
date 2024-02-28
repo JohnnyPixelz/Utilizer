@@ -13,10 +13,12 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class CommandMethod {
+    private final Command methodParent;
     private final Method method;
     private Class<? extends CommandSender> senderType;
 
-    public CommandMethod(Method method) {
+    public CommandMethod(Command methodParent, Method method) {
+        this.methodParent = methodParent;
         this.method = method;
 
         final Parameter[] parameters = method.getParameters();
@@ -34,7 +36,7 @@ public class CommandMethod {
         }
     }
 
-    public void execute(Command command, CommandSender sender, List<String> arguments) throws UnsupportedCommandArgumentException {
+    public void execute(CommandSender sender, List<String> arguments) throws UnsupportedCommandArgumentException {
         Stream<Parameter> parameterStream = Arrays.stream(method.getParameters());
         if (senderType != null) {
             parameterStream = parameterStream.skip(1);
@@ -60,7 +62,7 @@ public class CommandMethod {
 
         if (senderType == null) {
             try {
-                method.invoke(command, resolvedArgumentsArray);
+                method.invoke(methodParent, resolvedArgumentsArray);
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             } catch (InvocationTargetException e) {
@@ -71,9 +73,9 @@ public class CommandMethod {
                 List<Object> objectList = new ArrayList<>();
                 objectList.add(sender);
                 objectList.addAll(List.of(resolvedArgumentsArray));
-                method.invoke(command, objectList.toArray(Object[]::new));
+                method.invoke(methodParent, objectList.toArray(Object[]::new));
             } catch (IllegalArgumentException e) {
-                Logs.severe("Attempted to invoke command method for command " + command.getLabels().get(0));
+                Logs.severe("Attempted to invoke command method for command " + methodParent.getLabels().get(0));
                 Logs.severe("Method required " + method.getParameterCount() + " arguments and provided " + (resolvedArgumentsArray.length + 1));
                 throw new RuntimeException(e);
             } catch (IllegalAccessException e) {

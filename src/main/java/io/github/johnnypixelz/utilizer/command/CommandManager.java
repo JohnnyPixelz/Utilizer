@@ -70,7 +70,7 @@ public class CommandManager {
             final CommandMethod defaultMethod = subcommand.getDefaultMethod();
             try {
 //                Passing command since that is the class which contains the declared method
-                defaultMethod.execute(command, sender, remainingArgs);
+                defaultMethod.execute(sender, remainingArgs);
             } catch (UnsupportedCommandArgumentException e) {
                 throw new RuntimeException(e);
             }

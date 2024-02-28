@@ -99,6 +99,7 @@ public class CommandArgumentResolverManager {
 
             return argument.charAt(0);
         });
+        registerResolver(String.class, argument -> argument);
         registerResolver(String[].class, argument -> argument.split(" "));
 //        registerResolver(Enum.class, argument -> ); TODO implement enums
         registerResolver(Player.class, Bukkit::getPlayer);
