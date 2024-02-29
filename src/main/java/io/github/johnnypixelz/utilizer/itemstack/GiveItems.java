@@ -1,4 +1,4 @@
-package io.github.johnnypixelz.utilizer.inventory;
+package io.github.johnnypixelz.utilizer.itemstack;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
