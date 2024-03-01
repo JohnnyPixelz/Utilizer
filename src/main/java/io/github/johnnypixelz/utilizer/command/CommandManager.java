@@ -1,9 +1,8 @@
 package io.github.johnnypixelz.utilizer.command;
 
 import io.github.johnnypixelz.utilizer.command.exceptions.CommandAnnotationParseException;
+import io.github.johnnypixelz.utilizer.command.exceptions.NotEnoughArgumentsException;
 import io.github.johnnypixelz.utilizer.command.exceptions.UnsupportedCommandArgumentException;
-import io.github.johnnypixelz.utilizer.command.permissions.CommandPermission;
-import io.github.johnnypixelz.utilizer.command.permissions.CommandPermissionMessage;
 import io.github.johnnypixelz.utilizer.plugin.Logs;
 import io.github.johnnypixelz.utilizer.plugin.Provider;
 import org.bukkit.Bukkit;
@@ -19,8 +18,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiConsumer;
 
 public class CommandManager {
     private static final List<Command> registeredCommands = new ArrayList<>();
@@ -46,6 +43,7 @@ public class CommandManager {
         }
     }
 
+    @SafeVarargs
     public static void registerCommands(Class<? extends Command>... commands) {
         for (Class<? extends Command> command : commands) {
             try {
@@ -77,34 +75,20 @@ public class CommandManager {
         Command currentCommand = command;
         List<String> currentArgs = args;
 
-        for (CommandPermission requiredPermission : command.getRequiredPermissions()) {
-            if (!sender.hasPermission(requiredPermission.getPermission())) {
-                requiredPermission.getPermissionMessage()
-                        .or(() -> Optional.ofNullable(command.getPermissionMessage()))
-                        .map(CommandPermissionMessage::getMessage)
-                        .orElse(CommandMessageManager.getMessage(CommandMessage.NO_PERMISSION))
-                        .send(sender);
-                return;
-            }
-        }
+        if (!command.checkIfPermittedAndInform(sender)) return;
 
+        Logs.info("Executing command " + command.getLabels().get(0));
         while (!currentArgs.isEmpty()) {
             String label = currentArgs.get(0).toLowerCase();
             boolean found = false;
 
+            Logs.info("Searching for subcommands named " + label);
             for (Command subcommand : currentCommand.getSubcommands()) {
+                Logs.info("Checking for subcommand " + subcommand.getLabels().get(0));
                 if (subcommand.getLabels().contains(label)) {
+                    Logs.info("Found subcommand " + label);
 
-                    for (CommandPermission requiredPermission : subcommand.getRequiredPermissions()) {
-                        if (!sender.hasPermission(requiredPermission.getPermission())) {
-                            requiredPermission.getPermissionMessage()
-                                    .or(() -> Optional.ofNullable(subcommand.getPermissionMessage()))
-                                    .map(CommandPermissionMessage::getMessage)
-                                    .orElse(CommandMessageManager.getMessage(CommandMessage.NO_PERMISSION))
-                                    .send(sender);
-                            return;
-                        }
-                    }
+                    if (!subcommand.checkIfPermittedAndInform(sender)) return;
 
                     currentCommand = subcommand;
                     currentArgs = currentArgs.subList(1, currentArgs.size());
@@ -114,41 +98,50 @@ public class CommandManager {
             }
 
             if (!found) {
+                Logs.info("Didn't find subcommand with name " + label + ", current command is " + currentCommand.getLabels().get(0));
                 break;
             }
         }
 
         try {
             final CommandMethod defaultMethod = currentCommand.getDefaultMethod();
+            if (defaultMethod == null) {
+                Logs.severe("Attempted to execute a null default method on class " + currentCommand.getClass().getCanonicalName() + ", command " + currentCommand.getLabels().get(0));
+                return;
+            }
+
             defaultMethod.execute(sender, currentArgs);
-        } catch (UnsupportedCommandArgumentException e) {
-            throw new RuntimeException(e);
+        } catch (UnsupportedCommandArgumentException exception) {
+            CommandMessageManager.getMessage(CommandMessage.INTERNAL_ERROR).send(sender);
+            exception.printStackTrace();
+        } catch (NotEnoughArgumentsException exception) {
+            CommandMessageManager.getMessage(CommandMessage.NOT_ENOUGH_ARGUMENTS).send(sender);
         }
     }
 
-    private static void deepSearchForSubcommand(Command command, List<String> args, BiConsumer<Command, List<String>> foundCommand) {
-        Command currentCommand = command;
-        List<String> currentArgs = args;
-
-        while (!currentArgs.isEmpty()) {
-            String label = currentArgs.get(0).toLowerCase();
-            boolean found = false;
-
-            for (Command subcommand : currentCommand.getSubcommands()) {
-                if (subcommand.getLabels().contains(label)) {
-                    currentCommand = subcommand;
-                    currentArgs = currentArgs.subList(1, currentArgs.size());
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found) {
-                break;
-            }
-        }
-
-        foundCommand.accept(currentCommand, currentArgs);
-    }
+//    private static void deepSearchForSubcommand(Command command, List<String> args, BiConsumer<Command, List<String>> foundCommand) {
+//        Command currentCommand = command;
+//        List<String> currentArgs = args;
+//
+//        while (!currentArgs.isEmpty()) {
+//            String label = currentArgs.get(0).toLowerCase();
+//            boolean found = false;
+//
+//            for (Command subcommand : currentCommand.getSubcommands()) {
+//                if (subcommand.getLabels().contains(label)) {
+//                    currentCommand = subcommand;
+//                    currentArgs = currentArgs.subList(1, currentArgs.size());
+//                    found = true;
+//                    break;
+//                }
+//            }
+//
+//            if (!found) {
+//                break;
+//            }
+//        }
+//
+//        foundCommand.accept(currentCommand, currentArgs);
+//    }
 
 }

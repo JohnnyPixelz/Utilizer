@@ -1,5 +1,6 @@
 package io.github.johnnypixelz.utilizer.command;
 
+import io.github.johnnypixelz.utilizer.command.exceptions.NotEnoughArgumentsException;
 import io.github.johnnypixelz.utilizer.command.exceptions.UnsupportedCommandArgumentException;
 import io.github.johnnypixelz.utilizer.plugin.Logs;
 import org.bukkit.command.CommandSender;
@@ -36,7 +37,15 @@ public class CommandMethod {
         }
     }
 
-    public void execute(CommandSender sender, List<String> arguments) throws UnsupportedCommandArgumentException {
+    public Command getMethodParent() {
+        return methodParent;
+    }
+
+    public Method getMethod() {
+        return method;
+    }
+
+    public void execute(CommandSender sender, List<String> arguments) throws UnsupportedCommandArgumentException, NotEnoughArgumentsException {
         Stream<Parameter> parameterStream = Arrays.stream(method.getParameters());
         if (senderType != null) {
             parameterStream = parameterStream.skip(1);
@@ -45,7 +54,7 @@ public class CommandMethod {
         final Parameter[] parameters = parameterStream.toArray(Parameter[]::new);
 
         if (arguments.size() < parameters.length) {
-            throw new IllegalArgumentException("Not enough arguments");
+            throw new NotEnoughArgumentsException("Not enough arguments");
         }
 
         List<Object> resolvedArguments = new ArrayList<>();

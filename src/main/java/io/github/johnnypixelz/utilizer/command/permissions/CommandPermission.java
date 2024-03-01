@@ -34,9 +34,9 @@ public interface CommandPermission {
     static CommandPermission processPermissionAnnotation(Permission permissionAnnotation) {
         final String permission = permissionAnnotation.value();
 
-        if (permissionAnnotation.message() != null) {
+        if (!permissionAnnotation.message().isEmpty()) {
             return literal(permission, permissionAnnotation.message());
-        } else if (permissionAnnotation.messageConfig() != null && permissionAnnotation.messagePath() != null) {
+        } else if (!permissionAnnotation.messageConfig().isEmpty() && !permissionAnnotation.messagePath().isEmpty()) {
             return literal(permission, permissionAnnotation.messageConfig(), permissionAnnotation.messagePath());
         } else {
             return literal(permission);
@@ -47,9 +47,9 @@ public interface CommandPermission {
         final String config = permissionAnnotation.config();
         final String path = permissionAnnotation.path();
 
-        if (permissionAnnotation.message() != null) {
+        if (!permissionAnnotation.message().isEmpty()) {
             return config(config, path, permissionAnnotation.message());
-        } else if (permissionAnnotation.messageConfig() != null && permissionAnnotation.messagePath() != null) {
+        } else if (!permissionAnnotation.messageConfig().isEmpty() && !permissionAnnotation.messagePath().isEmpty()) {
             return config(config, path, permissionAnnotation.messageConfig(), permissionAnnotation.messagePath());
         } else {
             return config(config, path);
