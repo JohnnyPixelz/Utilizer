@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 public class Command {
     private List<String> labels;
     private CommandMethod defaultMethod;
-    private List<Command> subcommands;
+    private final List<Command> subcommands;
     private String description;
     private final List<CommandPermission> requiredPermissions;
     private CommandPermissionMessage permissionMessage;
@@ -53,6 +53,14 @@ public class Command {
 
     public Command getParent() {
         return parent;
+    }
+
+    public CommandSyntax getSyntax() {
+        return syntax;
+    }
+
+    private void generateSyntax() {
+        this.syntax = new CommandSyntax(this);
     }
 
     public List<CommandPermission> getRequiredPermissions() {
@@ -116,6 +124,8 @@ public class Command {
 
                 parsePermissionAnnotations(subcommand, declaredMethod);
 
+                subcommand.generateSyntax();
+
                 command.subcommands.add(subcommand);
             }
 
@@ -132,6 +142,8 @@ public class Command {
                 labelCommand.description = description;
 
                 parsePermissionAnnotations(labelCommand, declaredMethod);
+
+                labelCommand.generateSyntax();
 
                 CommandManager.registerCommand(labelCommand);
             }
@@ -198,6 +210,8 @@ public class Command {
                                 parsePermissionAnnotations(newCommand, declaredCommandClass);
                                 parseMethodAnnotations(newCommand, declaredCommandClass);
                                 parseClassAnnotations(newCommand, declaredCommandClass);
+
+                                newCommand.generateSyntax();
                             });
 
                     Optional.ofNullable(declaredCommandClass.getAnnotation(Subcommand.class))
@@ -215,6 +229,8 @@ public class Command {
                                 parsePermissionAnnotations(newCommand, declaredCommandClass);
                                 parseMethodAnnotations(newCommand, declaredCommandClass);
                                 parseClassAnnotations(newCommand, declaredCommandClass);
+
+                                newCommand.generateSyntax();
                             });
 
                 });
