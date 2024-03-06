@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender;
 
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,10 +30,10 @@ public class CommandSyntax {
                 commandTree.add(firstCommand);
             }
 
-            final List<Command> reversedCommandTree = commandTree.reversed();
+            Collections.reverse(commandTree);
 
-            for (int i = 0; i < reversedCommandTree.size(); i++) {
-                final Command reversedCommandTreeCommand = reversedCommandTree.get(i);
+            for (int i = 0; i < commandTree.size(); i++) {
+                final Command reversedCommandTreeCommand = commandTree.get(i);
                 if (i == 0) {
                     this.label = reversedCommandTreeCommand.getLabels().get(0);
                     continue;
