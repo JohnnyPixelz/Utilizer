@@ -47,7 +47,7 @@ public class CustomInventory {
             InventoryManager.setInventory(player, null);
         });
 
-        InventoryContents contents = new InventoryContents.Impl(this, player.getUniqueId());
+        InventoryContents contents = new InventoryContents(this, player.getUniqueId());
         contents.pagination().page(page);
 
         InventoryManager.setContents(player, contents);

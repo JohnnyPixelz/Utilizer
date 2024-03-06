@@ -1,218 +1,165 @@
 package io.github.johnnypixelz.utilizer.inventory.content;
 
-import io.github.johnnypixelz.utilizer.inventory.InventoryItem;
 import io.github.johnnypixelz.utilizer.inventory.CustomInventory;
+import io.github.johnnypixelz.utilizer.inventory.InventoryItem;
 
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-public interface SlotIterator {
+public class SlotIterator {
 
-    enum Type {
+    public enum Type {
         HORIZONTAL,
         VERTICAL
     }
 
-    Optional<InventoryItem> get();
+    private final InventoryContents contents;
+    private final CustomInventory inventory;
 
-    SlotIterator set(InventoryItem item);
+    private final Type type;
+    private boolean started = false;
+    private boolean allowOverride = true;
+    private int row, column;
 
-    SlotIterator previous();
+    private final Set<Slot> blacklisted = new HashSet<>();
 
-    SlotIterator next();
+    public SlotIterator(InventoryContents contents, CustomInventory inventory, Type type, int startRow, int startColumn) {
+        this.contents = contents;
+        this.inventory = inventory;
+        this.type = type;
+        this.row = startRow;
+        this.column = startColumn;
+    }
 
-    SlotIterator blacklist(int row, int column);
+    public SlotIterator(InventoryContents contents, CustomInventory inventory, Type type) {
+        this(contents, inventory, type, 0, 0);
+    }
 
-    SlotIterator blacklist(SlotPos slotPos);
+    public Optional<InventoryItem> get() {
+        return contents.get(row, column);
+    }
 
-    int row();
+    public SlotIterator set(InventoryItem item) {
+        if (canPlace())
+            contents.set(row, column, item);
 
-    SlotIterator row(int row);
+        return this;
+    }
 
-    int column();
-
-    SlotIterator column(int column);
-
-    boolean started();
-
-    boolean ended();
-
-    boolean doesAllowOverride();
-
-    SlotIterator allowOverride(boolean override);
-
-
-    class Impl implements SlotIterator {
-
-        private InventoryContents contents;
-        private CustomInventory inv;
-
-        private Type type;
-        private boolean started = false;
-        private boolean allowOverride = true;
-        private int row, column;
-
-        private Set<SlotPos> blacklisted = new HashSet<>();
-
-        public Impl(InventoryContents contents, CustomInventory inv,
-                    Type type, int startRow, int startColumn) {
-
-            this.contents = contents;
-            this.inv = inv;
-
-            this.type = type;
-
-            this.row = startRow;
-            this.column = startColumn;
-        }
-
-        public Impl(InventoryContents contents, CustomInventory inv,
-                    Type type) {
-
-            this(contents, inv, type, 0, 0);
-        }
-
-        @Override
-        public Optional<InventoryItem> get() {
-            return contents.get(row, column);
-        }
-
-        @Override
-        public SlotIterator set(InventoryItem item) {
-            if (canPlace())
-                contents.set(row, column, item);
-
+    public SlotIterator previous() {
+        if (row == 0 && column == 0) {
+            this.started = true;
             return this;
         }
 
-        @Override
-        public SlotIterator previous() {
-            if (row == 0 && column == 0) {
+        do {
+            if (!this.started) {
                 this.started = true;
-                return this;
-            }
+            } else {
+                switch (type) {
+                    case HORIZONTAL:
+                        column--;
 
-            do {
-                if (!this.started) {
-                    this.started = true;
-                } else {
-                    switch (type) {
-                        case HORIZONTAL:
-                            column--;
-
-                            if (column == 0) {
-                                column = inv.getColumns() - 1;
-                                row--;
-                            }
-                            break;
-                        case VERTICAL:
+                        if (column == 0) {
+                            column = inventory.getColumns() - 1;
                             row--;
+                        }
+                        break;
+                    case VERTICAL:
+                        row--;
 
-                            if (row == 0) {
-                                row = inv.getRows() - 1;
-                                column--;
-                            }
-                            break;
-                    }
+                        if (row == 0) {
+                            row = inventory.getRows() - 1;
+                            column--;
+                        }
+                        break;
                 }
             }
-            while (!canPlace() && (row != 0 || column != 0));
+        }
+        while (!canPlace() && (row != 0 || column != 0));
 
+        return this;
+    }
+
+    public SlotIterator next() {
+        if (ended()) {
+            this.started = true;
             return this;
         }
 
-        @Override
-        public SlotIterator next() {
-            if (ended()) {
+        do {
+            if (!this.started) {
                 this.started = true;
-                return this;
-            }
+            } else {
+                switch (type) {
+                    case HORIZONTAL:
+                        column = ++column % inventory.getColumns();
 
-            do {
-                if (!this.started) {
-                    this.started = true;
-                } else {
-                    switch (type) {
-                        case HORIZONTAL:
-                            column = ++column % inv.getColumns();
+                        if (column == 0)
+                            row++;
+                        break;
+                    case VERTICAL:
+                        row = ++row % inventory.getRows();
 
-                            if (column == 0)
-                                row++;
-                            break;
-                        case VERTICAL:
-                            row = ++row % inv.getRows();
-
-                            if (row == 0)
-                                column++;
-                            break;
-                    }
+                        if (row == 0)
+                            column++;
+                        break;
                 }
             }
-            while (!canPlace() && !ended());
-
-            return this;
         }
+        while (!canPlace() && !ended());
 
-        @Override
-        public SlotIterator blacklist(int row, int column) {
-            this.blacklisted.add(SlotPos.of(row, column));
-            return this;
-        }
+        return this;
+    }
 
-        @Override
-        public SlotIterator blacklist(SlotPos slotPos) {
-            return blacklist(slotPos.getRow(), slotPos.getColumn());
-        }
+    public SlotIterator blacklist(int row, int column) {
+        this.blacklisted.add(Slot.of(row, column));
+        return this;
+    }
 
-        @Override
-        public int row() {
-            return row;
-        }
+    public SlotIterator blacklist(Slot slotPos) {
+        return blacklist(slotPos.getRow(), slotPos.getColumn());
+    }
 
-        @Override
-        public SlotIterator row(int row) {
-            this.row = row;
-            return this;
-        }
+    public int row() {
+        return row;
+    }
 
-        @Override
-        public int column() {
-            return column;
-        }
+    public SlotIterator row(int row) {
+        this.row = row;
+        return this;
+    }
 
-        @Override
-        public SlotIterator column(int column) {
-            this.column = column;
-            return this;
-        }
+    public int column() {
+        return column;
+    }
 
-        @Override
-        public boolean started() {
-            return this.started;
-        }
+    public SlotIterator column(int column) {
+        this.column = column;
+        return this;
+    }
 
-        @Override
-        public boolean ended() {
-            return row == inv.getRows() - 1
-                    && column == inv.getColumns() - 1;
-        }
+    public boolean started() {
+        return this.started;
+    }
 
-        @Override
-        public boolean doesAllowOverride() {
-            return allowOverride;
-        }
+    public boolean ended() {
+        return row == inventory.getRows() - 1
+                && column == inventory.getColumns() - 1;
+    }
 
-        @Override
-        public SlotIterator allowOverride(boolean override) {
-            this.allowOverride = override;
-            return this;
-        }
+    public boolean doesAllowOverride() {
+        return allowOverride;
+    }
 
-        private boolean canPlace() {
-            return !blacklisted.contains(SlotPos.of(row, column)) && (allowOverride || !this.get().isPresent());
-        }
+    public SlotIterator allowOverride(boolean override) {
+        this.allowOverride = override;
+        return this;
+    }
 
+    private boolean canPlace() {
+        return !blacklisted.contains(Slot.of(row, column)) && (allowOverride || this.get().isEmpty());
     }
 
 }

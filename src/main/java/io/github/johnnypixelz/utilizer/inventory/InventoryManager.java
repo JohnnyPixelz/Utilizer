@@ -14,7 +14,6 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
@@ -40,7 +39,7 @@ public class InventoryManager {
                 .filter(opener -> opener.supports(type))
                 .findAny();
 
-        if (!opInv.isPresent()) {
+        if (opInv.isEmpty()) {
             opInv = defaultOpeners.stream()
                     .filter(opener -> opener.supports(type))
                     .findAny();

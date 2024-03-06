@@ -1,11 +1,10 @@
 package io.github.johnnypixelz.utilizer.inventory.content;
 
-public class SlotPos {
-
+public class Slot {
     private final int row;
     private final int column;
 
-    public SlotPos(int row, int column) {
+    public Slot(int row, int column) {
         this.row = row;
         this.column = column;
     }
@@ -17,7 +16,7 @@ public class SlotPos {
         if (obj == null || getClass() != obj.getClass())
             return false;
 
-        SlotPos slotPos = (SlotPos) obj;
+        Slot slotPos = (Slot) obj;
 
         return row == slotPos.row && column == slotPos.column;
     }
@@ -38,8 +37,8 @@ public class SlotPos {
         return column;
     }
 
-    public static SlotPos of(int row, int column) {
-        return new SlotPos(row, column);
+    public static Slot of(int row, int column) {
+        return new Slot(row, column);
     }
 
 }

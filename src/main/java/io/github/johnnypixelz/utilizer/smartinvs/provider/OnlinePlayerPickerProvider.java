@@ -1,12 +1,7 @@
 package io.github.johnnypixelz.utilizer.smartinvs.provider;
 
 import com.cryptomorin.xseries.XMaterial;
-import fr.minuskube.inv.ClickableItem;
-import fr.minuskube.inv.SmartInventory;
-import fr.minuskube.inv.content.InventoryContents;
-import fr.minuskube.inv.content.InventoryProvider;
-import fr.minuskube.inv.content.Pagination;
-import fr.minuskube.inv.content.SlotIterator;
+import io.github.johnnypixelz.utilizer.inventory.content.InventoryProvider;
 import io.github.johnnypixelz.utilizer.itemstack.Items;
 import io.github.johnnypixelz.utilizer.smartinvs.listener.InventoryCloseListener;
 import io.github.johnnypixelz.utilizer.text.Colors;
