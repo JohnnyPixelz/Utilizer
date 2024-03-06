@@ -22,6 +22,7 @@ public class Command {
     private final List<CommandPermission> requiredPermissions;
     private CommandPermissionMessage permissionMessage;
     private Command parent;
+    private CommandSyntax syntax;
 
     public Command() {
         this.labels = new ArrayList<>();
@@ -31,6 +32,7 @@ public class Command {
         this.requiredPermissions = new ArrayList<>();
         this.permissionMessage = null;
         this.parent = null;
+        this.syntax = null;
     }
 
     public List<String> getLabels() {
@@ -49,33 +51,16 @@ public class Command {
         return description;
     }
 
+    public Command getParent() {
+        return parent;
+    }
+
     public List<CommandPermission> getRequiredPermissions() {
         return requiredPermissions;
     }
 
     public CommandPermissionMessage getPermissionMessage() {
         return permissionMessage;
-    }
-
-    public String getSyntax() {
-        String rootLabel;
-        List<String> subLabelList = new ArrayList<>();
-        List<String> parameterList = new ArrayList<>();
-
-        final Parameter[] methodParameters = defaultMethod.getMethod().getParameters();
-
-        if (methodParameters.length > 0) {
-            final Class<?> firstParameterType = methodParameters[0].getType();
-            boolean skipFirstParameter = false;
-
-            //            Checking if the parameter is a command sender
-            if (CommandSender.class.isAssignableFrom(firstParameterType) || CommandSender.class.isAssignableFrom(firstParameterType.getSuperclass())) {
-                skipFirstParameter = true;
-            }
-
-
-        }
-
     }
 
     public boolean isPermitted(CommandSender sender) {
