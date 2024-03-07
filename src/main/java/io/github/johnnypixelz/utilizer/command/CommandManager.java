@@ -5,6 +5,7 @@ import io.github.johnnypixelz.utilizer.command.exceptions.NotEnoughArgumentsExce
 import io.github.johnnypixelz.utilizer.command.exceptions.UnsupportedCommandArgumentException;
 import io.github.johnnypixelz.utilizer.plugin.Logs;
 import io.github.johnnypixelz.utilizer.plugin.Provider;
+import io.github.johnnypixelz.utilizer.text.Colors;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandMap;
@@ -18,6 +19,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.MatchResult;
+import java.util.regex.Pattern;
 
 public class CommandManager {
     private static final List<Command> registeredCommands = new ArrayList<>();
@@ -73,7 +76,14 @@ public class CommandManager {
 
     static void executeCommand(Command command, CommandSender sender, List<String> args) {
         Command currentCommand = command;
-        List<String> currentArgs = args;
+
+        final String parameterSentence = String.join(" ", args);
+        Pattern argsPattern = Pattern.compile("\".+?\"|[^ ]+");
+        List<String> currentArgs = argsPattern.matcher(parameterSentence)
+                .results()
+                .map(MatchResult::group)
+                .map(String::trim)
+                .toList();
 
         if (!command.checkIfPermittedAndInform(sender)) return;
 
@@ -106,7 +116,8 @@ public class CommandManager {
         try {
             final CommandMethod defaultMethod = currentCommand.getDefaultMethod();
             if (defaultMethod == null) {
-                Logs.severe("Attempted to execute a null default method on class " + currentCommand.getClass().getCanonicalName() + ", command " + currentCommand.getLabels().get(0));
+                final String unknownCommand = Bukkit.spigot().getConfig().getString("messages.unknown-command", "Unknown command. Type \"/help\" for help.");
+                sender.sendMessage(Colors.color(unknownCommand));
                 return;
             }
 
@@ -116,6 +127,7 @@ public class CommandManager {
             exception.printStackTrace();
         } catch (NotEnoughArgumentsException exception) {
             CommandMessageManager.getMessage(CommandMessage.NOT_ENOUGH_ARGUMENTS).send(sender);
+            sender.sendMessage(currentCommand.getSyntax().generateSyntax());
         }
     }
 

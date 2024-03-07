@@ -9,9 +9,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.Queue;
 
 public class CommandMethod {
     private final Command methodParent;
@@ -46,22 +46,29 @@ public class CommandMethod {
     }
 
     public void execute(CommandSender sender, List<String> arguments) throws UnsupportedCommandArgumentException, NotEnoughArgumentsException {
-        Stream<Parameter> parameterStream = Arrays.stream(method.getParameters());
+        final Queue<String> args = new LinkedList<>(arguments);
+        final Queue<Parameter> parameters = new LinkedList<>(List.of(method.getParameters()));
+
         if (senderType != null) {
-            parameterStream = parameterStream.skip(1);
-        }
-
-        final Parameter[] parameters = parameterStream.toArray(Parameter[]::new);
-
-        if (arguments.size() < parameters.length) {
-            throw new NotEnoughArgumentsException("Not enough arguments");
+            parameters.poll();
         }
 
         List<Object> resolvedArguments = new ArrayList<>();
 
-        for (int index = 0; index < parameters.length; index++) {
-            final Parameter parameter = parameters[index];
-            final String argument = arguments.get(index);
+        while (!parameters.isEmpty()) {
+            final Parameter parameter = parameters.poll();
+            String argument = args.poll();
+
+            if (argument == null) {
+                throw new NotEnoughArgumentsException("Not enough arguments");
+            }
+
+//            If last parameter, and parameter is of type String, join all rest of arguments.
+            if (parameters.isEmpty() && parameter.getType() == String.class) {
+                while (!args.isEmpty()) {
+                    argument += " " + args.poll();
+                }
+            }
 
             final Object resolvedArgument = CommandArgumentResolverManager.resolve(parameter.getType(), argument);
             resolvedArguments.add(resolvedArgument);

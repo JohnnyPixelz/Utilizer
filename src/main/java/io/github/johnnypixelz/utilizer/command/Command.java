@@ -56,10 +56,18 @@ public class Command {
     }
 
     public CommandSyntax getSyntax() {
+        if (syntax == null) {
+            Logs.severe("Attempted to get syntax for command " + labels.get(0) + " but syntax is null.");
+        }
+
         return syntax;
     }
 
     private void generateSyntax() {
+        if (defaultMethod == null) {
+            Logs.severe("Attempted to generate syntax for command " + labels.get(0) + " with default method null.");
+            return;
+        }
         this.syntax = new CommandSyntax(this);
     }
 
@@ -252,6 +260,8 @@ public class Command {
         parsePermissionAnnotations(this, this.getClass());
         parseMethodAnnotations(this, this.getClass());
         parseClassAnnotations(this, this.getClass());
+
+        this.generateSyntax();
     }
 
     private void parsePermissionAnnotations(Command command, AnnotatedElement annotatedElement) {
