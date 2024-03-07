@@ -3,125 +3,138 @@ package io.github.johnnypixelz.utilizer.command;
 import io.github.johnnypixelz.utilizer.command.exceptions.UnsupportedCommandArgumentException;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.lang.reflect.Parameter;
 import java.util.*;
-import java.util.function.Function;
 
 public class CommandArgumentResolverManager {
-    private static final Map<Class<?>, CommandArgumentResolver<String, ?>> resolvers = new HashMap<>();
+    private static final Map<Class<?>, CommandArgumentResolver<CommandArgumentResolverContext, ?>> resolvers = new HashMap<>();
 
     static {
-        registerResolver(Short.class, argument -> {
+        registerResolver(Short.class, context -> {
             try {
-                return Short.parseShort(argument);
+                return Short.parseShort(context.getArgument());
             } catch (NumberFormatException exception) {
                 throw new IllegalArgumentException("");
             }
         });
-        registerResolver(short.class, argument -> {
+        registerResolver(short.class, context -> {
             try {
-                return Short.parseShort(argument);
+                return Short.parseShort(context.getArgument());
             } catch (NumberFormatException exception) {
                 throw new IllegalArgumentException("");
             }
         });
-        registerResolver(Integer.class, argument -> {
+        registerResolver(Integer.class, context -> {
             try {
-                return Integer.parseInt(argument);
+                return Integer.parseInt(context.getArgument());
             } catch (NumberFormatException exception) {
                 throw new IllegalArgumentException("");
             }
         });
-        registerResolver(int.class, argument -> {
+        registerResolver(int.class, context -> {
             try {
-                return Integer.parseInt(argument);
+                return Integer.parseInt(context.getArgument());
             } catch (NumberFormatException exception) {
                 throw new IllegalArgumentException("");
             }
         });
-        registerResolver(Long.class, argument -> {
+        registerResolver(Long.class, context -> {
             try {
-                return Long.parseLong(argument);
+                return Long.parseLong(context.getArgument());
             } catch (NumberFormatException exception) {
                 throw new IllegalArgumentException("");
             }
         });
-        registerResolver(long.class, argument -> {
+        registerResolver(long.class, context -> {
             try {
-                return Long.parseLong(argument);
+                return Long.parseLong(context.getArgument());
             } catch (NumberFormatException exception) {
                 throw new IllegalArgumentException("");
             }
         });
-        registerResolver(Float.class, argument -> {
+        registerResolver(Float.class, context -> {
             try {
-                return Float.parseFloat(argument);
+                return Float.parseFloat(context.getArgument());
             } catch (NumberFormatException exception) {
                 throw new IllegalArgumentException("");
             }
         });
-        registerResolver(float.class, argument -> {
+        registerResolver(float.class, context -> {
             try {
-                return Float.parseFloat(argument);
+                return Float.parseFloat(context.getArgument());
             } catch (NumberFormatException exception) {
                 throw new IllegalArgumentException("");
             }
         });
-        registerResolver(Double.class, argument -> {
+        registerResolver(Double.class, context -> {
             try {
-                return Double.parseDouble(argument);
+                return Double.parseDouble(context.getArgument());
             } catch (NumberFormatException exception) {
                 throw new IllegalArgumentException("");
             }
         });
-        registerResolver(double.class, argument -> {
+        registerResolver(double.class, context -> {
             try {
-                return Double.parseDouble(argument);
+                return Double.parseDouble(context.getArgument());
             } catch (NumberFormatException exception) {
                 throw new IllegalArgumentException("");
             }
         });
         final List<String> truthValues = Arrays.asList("t", "tr", "tru", "true", "on", "y", "ye", "yes", "1");
-        registerResolver(Boolean.class, truthValues::contains);
-        registerResolver(boolean.class, truthValues::contains);
-        registerResolver(Character.class, argument -> {
-            if (argument.length() > 1) {
+        registerResolver(Boolean.class, context -> truthValues.contains(context.getArgument()));
+        registerResolver(boolean.class, context -> truthValues.contains(context.getArgument()));
+        registerResolver(Character.class, context -> {
+            if (context.getArgument().length() > 1) {
                 throw new IllegalArgumentException("Argument must be one character");
             }
 
-            return argument.charAt(0);
+            return context.getArgument().charAt(0);
         });
-        registerResolver(char.class, argument -> {
-            if (argument.length() > 1) {
+        registerResolver(char.class, context -> {
+            if (context.getArgument().length() > 1) {
                 throw new IllegalArgumentException("Argument must be one character");
             }
 
-            return argument.charAt(0);
+            return context.getArgument().charAt(0);
         });
-        registerResolver(String.class, argument -> argument);
-        registerResolver(String[].class, argument -> argument.split(" "));
-//        registerResolver(Enum.class, argument -> ); TODO implement enums
-        registerResolver(Player.class, Bukkit::getPlayer);
-        registerResolver(OfflinePlayer.class, argument -> {
-            final OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(argument);
+        registerResolver(String.class, CommandArgumentResolverContext::getArgument);
+        registerResolver(String[].class, context -> context.getArgument().split(" "));
+        registerResolver(Enum.class, context -> {
+            final String argument = context.getArgument();
+            //noinspection unchecked
+            Class<? extends Enum<?>> enumCls = (Class<? extends Enum<?>>) context.getParameter().getType();
+
+            for (Enum<?> enumConstant : enumCls.getEnumConstants()) {
+                if (enumConstant.name().equalsIgnoreCase(argument)) {
+                    return enumConstant;
+                }
+            }
+
+            return null;
+        });
+        registerResolver(Player.class, context -> Bukkit.getPlayer(context.getArgument()));
+        registerResolver(OfflinePlayer.class, context -> {
+            final OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(context.getArgument());
 
             if (offlinePlayer.isOnline()) return null;
             return offlinePlayer;
         });
     }
 
-    public static <T> void registerResolver(Class<T> type, CommandArgumentResolver<String, T> resolver) {
+    public static <T> void registerResolver(Class<T> type, CommandArgumentResolver<CommandArgumentResolverContext, T> resolver) {
         resolvers.put(type, resolver);
     }
 
-    public static CommandArgumentResolver<String, ?> getResolver(Class<?> type) {
+    public static CommandArgumentResolver<CommandArgumentResolverContext, ?> getResolver(Class<?> type) {
         do {
             if (type == Object.class) {
                 break;
             }
 
-            final CommandArgumentResolver<String, ?> resolver = resolvers.get(type);
+            final CommandArgumentResolver<CommandArgumentResolverContext, ?> resolver = resolvers.get(type);
             if (resolver != null) {
                 return resolver;
             }
@@ -130,14 +143,15 @@ public class CommandArgumentResolverManager {
         return null;
     }
 
-    public static Object resolve(Class<?> type, String argument) throws UnsupportedCommandArgumentException {
-        final CommandArgumentResolver<String, ?> resolver = getResolver(type);
+    public static Object resolve(CommandSender sender, String argument, Parameter parameter) throws UnsupportedCommandArgumentException {
+        final CommandArgumentResolver<CommandArgumentResolverContext, ?> resolver = getResolver(parameter.getType());
 
         if (resolver == null) {
-            throw new UnsupportedCommandArgumentException("No resolver exists for type " + type.getCanonicalName());
+            throw new UnsupportedCommandArgumentException("No resolver exists for type " + parameter.getType().getCanonicalName());
         }
 
-        return resolver.resolve(argument);
+        final CommandArgumentResolverContext commandArgumentResolverContext = new CommandArgumentResolverContext(sender, parameter, argument);
+        return resolver.resolve(commandArgumentResolverContext);
     }
 
 }

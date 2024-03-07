@@ -70,7 +70,7 @@ public class CommandMethod {
                 }
             }
 
-            final Object resolvedArgument = CommandArgumentResolverManager.resolve(parameter.getType(), argument);
+            final Object resolvedArgument = CommandArgumentResolverManager.resolve(sender, argument, parameter);
             resolvedArguments.add(resolvedArgument);
         }
 
