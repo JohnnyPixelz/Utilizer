@@ -58,4 +58,26 @@ public class Configs {
         configMap.put(config, configObj);
         return configObj;
     }
+
+    public static boolean isLoaded(String configPath) {
+        if (!configPath.endsWith(".yml")) {
+            configPath += "yml";
+        }
+
+        return configMap.containsKey(configPath);
+    }
+
+    public static boolean isConfig(String configPath) {
+        if (!configPath.endsWith(".yml")) {
+            configPath += "yml";
+        }
+
+        if (configMap.containsKey(configPath)) return true;
+
+        final File dataFolder = Provider.getPlugin().getDataFolder();
+        final File file = new File(dataFolder, configPath);
+
+        return file.exists();
+    }
+
 }
