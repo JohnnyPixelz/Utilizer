@@ -1,11 +1,10 @@
 package io.github.johnnypixelz.utilizer.file.storage.container.file;
 
-import io.github.johnnypixelz.utilizer.Scheduler;
 import io.github.johnnypixelz.utilizer.file.storage.container.StorageContainer;
 import io.github.johnnypixelz.utilizer.file.storage.handler.file.FileStorageHandler;
+import io.github.johnnypixelz.utilizer.tasks.Tasks;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 public class FileStorageContainer<T> extends StorageContainer<T> {
@@ -36,8 +35,8 @@ public class FileStorageContainer<T> extends StorageContainer<T> {
         return this;
     }
 
-    public BukkitTask autoSave(long duration, TimeUnit timeUnit) {
-        return Scheduler.syncTimer(this::save, timeUnit.toSeconds(duration) * 20);
+    public BukkitTask autoSave(long ticks) {
+        return Tasks.sync().timer(this::save, ticks);
     }
 
 }
