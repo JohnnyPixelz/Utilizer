@@ -15,6 +15,10 @@ public class Task extends BukkitRunnable {
         return new Task(consumer);
     }
 
+    public static Task of(Runnable runnable) {
+        return new Task(bukkitTask -> runnable.run());
+    }
+
     private final Consumer<BukkitTask> consumer;
 
     private Task(Consumer<BukkitTask> consumer) {
