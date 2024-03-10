@@ -10,16 +10,18 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 public class ItemSupplier {
-    private final String itemId;
     private final boolean stackable;
     private final Supplier<ItemStack> supplier;
     private final NamespacedKey namespacedKey;
 
     public ItemSupplier(String itemId, boolean stackable, Supplier<ItemStack> supplier) {
-        this.itemId = itemId;
+        this(new NamespacedKey(Provider.getPlugin(), itemId + "_supplier"), stackable, supplier);
+    }
+
+    public ItemSupplier(NamespacedKey namespacedKey, boolean stackable, Supplier<ItemStack> supplier) {
         this.stackable = stackable;
         this.supplier = supplier;
-        this.namespacedKey = new NamespacedKey(Provider.getPlugin(), itemId);
+        this.namespacedKey = namespacedKey;
     }
 
     public ItemStack getItemStack() {
@@ -31,7 +33,7 @@ public class ItemSupplier {
                 .getItem();
     }
 
-    public boolean isSimilar(ItemStack stack) {
+    public boolean isSameType(ItemStack stack) {
         if (Items.isNull(stack)) return false;
         if (!stack.hasItemMeta()) return false;
 
@@ -39,6 +41,10 @@ public class ItemSupplier {
         if (itemMeta == null) return false;
 
         return itemMeta.getPersistentDataContainer().has(namespacedKey, PersistentDataType.STRING);
+    }
+
+    public NamespacedKey getNamespacedKey() {
+        return namespacedKey;
     }
 
 }
