@@ -1,5 +1,6 @@
 package io.github.johnnypixelz.utilizer.plugin;
 
+import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Provider {
@@ -11,6 +12,10 @@ public class Provider {
         }
 
         return plugin;
+    }
+
+    public static NamespacedKey getNamespacedKey(String key) {
+        return new NamespacedKey(getPlugin(), key);
     }
 
 }
