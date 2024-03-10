@@ -1,5 +1,6 @@
-package io.github.johnnypixelz.utilizer.features.customblocks;
+package io.github.johnnypixelz.utilizer.features.customblocks.customblockcustomitem;
 
+import io.github.johnnypixelz.utilizer.features.customblocks.CustomBlock;
 import io.github.johnnypixelz.utilizer.file.storage.Storage;
 import io.github.johnnypixelz.utilizer.file.storage.container.file.FileStorageContainer;
 import io.github.johnnypixelz.utilizer.gson.GsonProvider;
@@ -7,6 +8,7 @@ import io.github.johnnypixelz.utilizer.plugin.Provider;
 import io.github.johnnypixelz.utilizer.serialize.world.BlockPosition;
 import io.github.johnnypixelz.utilizer.tasks.Tasks;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -17,32 +19,26 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class CustomBlockManager<T extends CustomBlock> {
-    private final FileStorageContainer<Map<BlockPosition, T>> storage;
+public class CustomBlockCustomItemManager<CB extends StatefulCustomBlock<CBD>, CBD extends CustomBlockData> {
+    private final FileStorageContainer<Map<BlockPosition, CB>> storage;
+    private final CustomBlockCustomItemListener<CB, CBD> listener;
+    private final CustomBlockCustomItemSupplier<CB, CBD> itemSupplier;
+    private final Class<CBD> customBlockDataType;
+
     private BukkitTask tickTask;
     private BukkitTask autoSaveTask;
-    private final CustomBlockItemSupplier<T> itemSupplier;
-    private final CustomBlockListener<T> listener;
 
-    public CustomBlockManager(Class<T> customBlockClass, String fileName) {
-        this.storage = Storage.map(BlockPosition.class, customBlockClass)
+    public CustomBlockCustomItemManager(Class<CB> customBlockType, Class<CBD> customBlockDataType, String fileName, NamespacedKey itemKey, boolean stackable, Function<CBD, ItemStack> supplier) {
+        this.storage = Storage.map(BlockPosition.class, customBlockType)
                 .json(fileName, GsonProvider.builder().enableComplexMapKeySerialization().create())
                 .container(HashMap::new);
 
-        this.itemSupplier = null;
-        this.listener = new CustomBlockListener<>(this);
+        this.customBlockDataType = customBlockDataType;
+        this.itemSupplier = new CustomBlockCustomItemSupplier<CB, CBD>(itemKey, stackable, supplier, customBlockDataType);
+        this.listener = new CustomBlockCustomItemListener<>(this);
     }
 
-    public CustomBlockManager(Class<T> customBlockClass, String fileName, String itemId, boolean stackable, Function<T, ItemStack> supplier) {
-        this.storage = Storage.map(BlockPosition.class, customBlockClass)
-                .json(fileName, GsonProvider.builder().enableComplexMapKeySerialization().create())
-                .container(HashMap::new);
-
-        this.itemSupplier = new CustomBlockItemSupplier<>(itemId, stackable, supplier);
-        this.listener = new CustomBlockListener<>(this);
-    }
-
-    public CustomBlockManager<T> init() {
+    public CustomBlockCustomItemManager<CB, CBD> init() {
         storage.get().forEach((blockPosition, customBlock) -> {
             customBlock.onLoad();
         });
@@ -61,17 +57,8 @@ public class CustomBlockManager<T extends CustomBlock> {
         return this;
     }
 
-    public CustomBlockManager<T> setAutoSave(long ticks) {
-        if (autoSaveTask != null && !autoSaveTask.isCancelled()) {
-            autoSaveTask.cancel();
-        }
-
-        if (ticks <= 0) return this;
-
-        autoSaveTask = Tasks.sync().delayedTimer(bukkitTask -> {
-            save();
-        }, ticks, ticks);
-
+    public CustomBlockCustomItemManager<CB, CBD> setAutoSave(long ticks) {
+        storage.autoSave(ticks);
         return this;
     }
 
@@ -97,35 +84,37 @@ public class CustomBlockManager<T extends CustomBlock> {
         storage.save();
     }
 
-    public Collection<T> getCustomBlocks() {
+    public Collection<CB> getCustomBlocks() {
         return storage.get().values();
     }
 
-    public Optional<T> getCustomBlock(@Nonnull BlockPosition blockPosition) {
+    public Optional<CB> getCustomBlock(@Nonnull BlockPosition blockPosition) {
         return Optional.ofNullable(storage.get().get(blockPosition));
     }
 
-    public T registerCustomBlock(T customBlock) {
+    public CB registerCustomBlock(CB customBlock) {
         final BlockPosition blockPosition = customBlock.getBlockPosition();
-        if (storage.get().containsKey(blockPosition)) throw new IllegalStateException("There is already a block at this location.");
+        if (storage.get().containsKey(blockPosition))
+            throw new IllegalStateException("There is already a block at this location.");
 
         storage.get().put(blockPosition, customBlock);
         customBlock.onRegister();
         return customBlock;
     }
 
-    public void unregisterCustomBlock(T customBlock) {
-        if (!storage.get().containsValue(customBlock)) throw new IllegalStateException("Attempted to unregister an unregistered block.");
+    public void unregisterCustomBlock(CB customBlock) {
+        if (!storage.get().containsValue(customBlock))
+            throw new IllegalStateException("Attempted to unregister an unregistered block.");
 
         customBlock.onUnregister();
         storage.get().remove(customBlock.getBlockPosition());
     }
 
-    public CustomBlockItemSupplier<T> getItemSupplier() {
+    public CustomBlockCustomItemSupplier<CB, CBD> getItemSupplier() {
         return itemSupplier;
     }
 
-    public CustomBlockListener<T> getListener() {
+    public CustomBlockCustomItemListener<CB, CBD> getListener() {
         return listener;
     }
 

@@ -1,7 +1,9 @@
-package io.github.johnnypixelz.utilizer.features.customblocks;
+package io.github.johnnypixelz.utilizer.features.customblocks.customblockitem;
 
 import io.github.johnnypixelz.utilizer.event.BiStatefulEventEmitter;
 import io.github.johnnypixelz.utilizer.event.StatefulEventEmitter;
+import io.github.johnnypixelz.utilizer.features.customblocks.CustomBlock;
+import io.github.johnnypixelz.utilizer.features.customblocks.CustomBlockGenerator;
 import io.github.johnnypixelz.utilizer.serialize.world.BlockPosition;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
@@ -13,10 +15,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Optional;
-import java.util.function.Function;
 
-public class CustomBlockListener<T extends CustomBlock> implements Listener {
-    private final CustomBlockManager<T> manager;
+public class CustomBlockItemListener<T extends CustomBlock> implements Listener {
+    private final CustomBlockItemManager<T> manager;
     private boolean allowBreak; // Default: true
     private boolean dropWhenBroken; // Default: true
     private boolean placeable; // Default: true
@@ -28,9 +29,9 @@ public class CustomBlockListener<T extends CustomBlock> implements Listener {
     private final BiStatefulEventEmitter<BlockPlaceEvent, T> postPlaceEventEmitter;
     private final BiStatefulEventEmitter<PlayerInteractEvent, T> leftClickInteractEventEmitter;
     private final BiStatefulEventEmitter<PlayerInteractEvent, T> rightClickInteractEventEmitter;
-    private Function<BlockPlaceEvent, T> placeCustomBlockGenerator;
+    private CustomBlockGenerator<T> customBlockGenerator;
 
-    public CustomBlockListener(CustomBlockManager<T> manager) {
+    public CustomBlockItemListener(CustomBlockItemManager<T> manager) {
         this.manager = manager;
 
         this.allowBreak = true;
@@ -47,7 +48,7 @@ public class CustomBlockListener<T extends CustomBlock> implements Listener {
         this.rightClickInteractEventEmitter = new BiStatefulEventEmitter<>();
     }
 
-    public CustomBlockManager<T> getManager() {
+    public CustomBlockItemManager<T> getManager() {
         return manager;
     }
 
@@ -55,7 +56,7 @@ public class CustomBlockListener<T extends CustomBlock> implements Listener {
         return allowBreak;
     }
 
-    public CustomBlockListener<T> setAllowBreak(boolean allowBreak) {
+    public CustomBlockItemListener<T> setAllowBreak(boolean allowBreak) {
         this.allowBreak = allowBreak;
         return this;
     }
@@ -64,7 +65,7 @@ public class CustomBlockListener<T extends CustomBlock> implements Listener {
         return dropWhenBroken;
     }
 
-    public CustomBlockListener<T> setDropWhenBroken(boolean dropWhenBroken) {
+    public CustomBlockItemListener<T> setDropWhenBroken(boolean dropWhenBroken) {
         this.dropWhenBroken = dropWhenBroken;
         return this;
     }
@@ -73,7 +74,7 @@ public class CustomBlockListener<T extends CustomBlock> implements Listener {
         return placeable;
     }
 
-    public CustomBlockListener<T> setPlaceable(boolean placeable) {
+    public CustomBlockItemListener<T> setPlaceable(boolean placeable) {
         this.placeable = placeable;
         return this;
     }
@@ -82,7 +83,7 @@ public class CustomBlockListener<T extends CustomBlock> implements Listener {
         return interactable;
     }
 
-    public CustomBlockListener<T> setInteractable(boolean interactable) {
+    public CustomBlockItemListener<T> setInteractable(boolean interactable) {
         this.interactable = interactable;
         return this;
     }
@@ -91,7 +92,7 @@ public class CustomBlockListener<T extends CustomBlock> implements Listener {
         return movable;
     }
 
-    public CustomBlockListener<T> setMovable(boolean movable) {
+    public CustomBlockItemListener<T> setMovable(boolean movable) {
         this.movable = movable;
         return this;
     }
@@ -100,17 +101,17 @@ public class CustomBlockListener<T extends CustomBlock> implements Listener {
         return explodable;
     }
 
-    public CustomBlockListener<T> setExplodable(boolean explodable) {
+    public CustomBlockItemListener<T> setExplodable(boolean explodable) {
         this.explodable = explodable;
         return this;
     }
 
-    public Function<BlockPlaceEvent, T> getPlaceCustomBlockGenerator() {
-        return placeCustomBlockGenerator;
+    public CustomBlockGenerator<T> getPlaceCustomBlockGenerator() {
+        return customBlockGenerator;
     }
 
-    public void setPlaceCustomBlockGenerator(Function<BlockPlaceEvent, T> placeCustomBlockGenerator) {
-        this.placeCustomBlockGenerator = placeCustomBlockGenerator;
+    public void setPlaceCustomBlockGenerator(CustomBlockGenerator<T> placeCustomBlockGenerator) {
+        this.customBlockGenerator = placeCustomBlockGenerator;
     }
 
     public BiStatefulEventEmitter<BlockBreakEvent, T> getBreakEventEmitter() {
@@ -162,7 +163,7 @@ public class CustomBlockListener<T extends CustomBlock> implements Listener {
         if (itemSupplier == null) return;
 
         final ItemStack itemInHand = event.getItemInHand();
-        final boolean similar = itemSupplier.isSimilar(itemInHand);
+        final boolean similar = itemSupplier.isSameType(itemInHand);
         if (!similar) return;
 
         if (!placeable) {
@@ -172,8 +173,8 @@ public class CustomBlockListener<T extends CustomBlock> implements Listener {
 
         this.placeEventEmitter.emit(event);
 
-        if (!event.isCancelled() && placeCustomBlockGenerator != null) {
-            final T createdCustomBlock = placeCustomBlockGenerator.apply(event);
+        if (!event.isCancelled() && customBlockGenerator != null) {
+            final T createdCustomBlock = customBlockGenerator.apply(event, BlockPosition.of(event.getBlockPlaced()), itemInHand);
             if (createdCustomBlock != null) {
                 this.manager.registerCustomBlock(createdCustomBlock);
                 this.postPlaceEventEmitter.emit(event, createdCustomBlock);

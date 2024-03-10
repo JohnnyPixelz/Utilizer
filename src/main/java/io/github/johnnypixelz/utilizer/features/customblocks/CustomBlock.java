@@ -13,19 +13,19 @@ public abstract class CustomBlock {
         return blockPosition;
     }
 
-    protected void onTick() {
+    public void onTick() {
     }
 
-    protected void onRegister() {
+    public void onRegister() {
     }
 
-    protected void onUnregister() {
+    public void onUnregister() {
     }
 
-    protected void onLoad() {
+    public void onLoad() {
     }
 
-    protected void onUnload() {
+    public void onUnload() {
     }
 
 }
