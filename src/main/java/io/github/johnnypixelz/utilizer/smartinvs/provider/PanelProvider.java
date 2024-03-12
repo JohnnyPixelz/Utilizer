@@ -135,13 +135,11 @@ public class PanelProvider<T> implements InventoryProvider {
                     callback.accept(click, element);
                 }
 
-                if (click.getClick() == ClickType.DOUBLE_CLICK) return;
-
-                if (click.isLeftClick() && leftClick != null) {
+                if (click.getClick() == ClickType.LEFT && leftClick != null) {
                     leftClick.accept(element);
                 }
 
-                if (click.isRightClick() && rightClick != null) {
+                if (click.getClick() == ClickType.RIGHT && rightClick != null) {
                     rightClick.accept(element);
                 }
 
