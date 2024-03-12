@@ -1,7 +1,7 @@
 package io.github.johnnypixelz.utilizer.features.customblocks.customblockitem;
 
 import io.github.johnnypixelz.utilizer.features.customblocks.CustomBlock;
-import io.github.johnnypixelz.utilizer.itemstack.ItemSupplier;
+import io.github.johnnypixelz.utilizer.itemstack.supplier.ItemSupplier;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 

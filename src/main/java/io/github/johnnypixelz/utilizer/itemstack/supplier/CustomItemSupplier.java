@@ -1,6 +1,7 @@
-package io.github.johnnypixelz.utilizer.itemstack;
+package io.github.johnnypixelz.utilizer.itemstack.supplier;
 
 import io.github.johnnypixelz.utilizer.gson.GsonProvider;
+import io.github.johnnypixelz.utilizer.itemstack.Items;
 import io.github.johnnypixelz.utilizer.plugin.Provider;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
