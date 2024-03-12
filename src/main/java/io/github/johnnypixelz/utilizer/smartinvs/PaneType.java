@@ -1,4 +1,4 @@
-package io.github.johnnypixelz.utilizer.itemstack;
+package io.github.johnnypixelz.utilizer.smartinvs;
 
 import com.cryptomorin.xseries.XMaterial;
 

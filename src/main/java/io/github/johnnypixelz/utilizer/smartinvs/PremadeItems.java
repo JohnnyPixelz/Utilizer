@@ -1,5 +1,6 @@
-package io.github.johnnypixelz.utilizer.itemstack;
+package io.github.johnnypixelz.utilizer.smartinvs;
 
+import io.github.johnnypixelz.utilizer.itemstack.Items;
 import org.bukkit.inventory.ItemStack;
 
 public class PremadeItems {
