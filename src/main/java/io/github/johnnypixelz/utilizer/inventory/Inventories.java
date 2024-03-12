@@ -1,4 +1,4 @@
-package io.github.johnnypixelz.utilizer.itemstack;
+package io.github.johnnypixelz.utilizer.inventory;
 
 import org.bukkit.Location;
 import org.bukkit.World;
