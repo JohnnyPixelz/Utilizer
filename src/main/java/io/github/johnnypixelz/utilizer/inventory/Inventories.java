@@ -41,7 +41,7 @@ public class Inventories {
      */
     @Nonnull
     public static List<ItemStack> give(@Nonnull Player player, @Nullable ItemStack... items) {
-        return give(player, false, items);
+        return give(player, true, items);
     }
 
     /**
@@ -67,11 +67,10 @@ public class Inventories {
      * @param items  the items to give.
      *
      * @return the items that did not fit and were dropped.
-     * @since 2.0.1
      */
     @Nonnull
     public static List<ItemStack> giveOrDrop(@Nonnull Player player, @Nullable ItemStack... items) {
-        return giveOrDrop(player, false, items);
+        return giveOrDrop(player, true, items);
     }
 
     /**
@@ -82,7 +81,6 @@ public class Inventories {
      * @param split  same as {@link #addItems(Inventory, boolean, ItemStack...)}
      *
      * @return the items that did not fit and were dropped.
-     * @since 2.0.1
      */
     @Nonnull
     public static List<ItemStack> giveOrDrop(@Nonnull Player player, boolean split, @Nullable ItemStack... items) {
@@ -111,11 +109,9 @@ public class Inventories {
      * @param items           the items to add.
      *
      * @return items that didn't fit in the inventory.
-     * @since 4.0.0
      */
     @Nonnull
-    public static List<ItemStack> addItems(@Nonnull Inventory inventory, boolean split,
-                                           @Nullable Predicate<Integer> modifiableSlots, @Nonnull ItemStack... items) {
+    public static List<ItemStack> addItems(@Nonnull Inventory inventory, boolean split, @Nullable Predicate<Integer> modifiableSlots, @Nonnull ItemStack... items) {
         Objects.requireNonNull(inventory, "Cannot add items to null inventory");
         Objects.requireNonNull(items, "Cannot add null items to inventory");
 
@@ -135,7 +131,7 @@ public class Inventories {
                 // Check if there is a similar item that can be stacked before using free slots.
                 int firstPartial = lastPartial >= invSize ? -1 : firstPartial(inventory, item, lastPartial, modifiableSlots);
                 if (firstPartial == -1) {
-                    // Start adding items to left overs if there are no partial and empty slots
+                    // Start adding items to leftovers if there are no partial and empty slots
                     // -1 means that there are no empty slots left.
                     if (lastEmpty != -1) lastEmpty = firstEmpty(inventory, lastEmpty, modifiableSlots);
                     if (lastEmpty == -1) {
@@ -199,7 +195,6 @@ public class Inventories {
      *
      * @return the first matched item slot, otherwise -1
      * @throws IndexOutOfBoundsException if the beginning index is less than 0 or greater than the inventory storage size.
-     * @since 4.0.0
      */
     public static int firstPartial(@Nonnull Inventory inventory, @Nullable ItemStack item, int beginIndex, @Nullable Predicate<Integer> modifiableSlots) {
         if (item != null) {
@@ -233,7 +228,6 @@ public class Inventories {
      * @param items the items to stack.
      *
      * @return stacked up items.
-     * @since 4.0.0
      */
     @Nonnull
     public static List<ItemStack> stack(@Nonnull Collection<ItemStack> items, @Nonnull BiPredicate<ItemStack, ItemStack> similarity) {
@@ -258,6 +252,10 @@ public class Inventories {
         return stacked;
     }
 
+    public static int firstEmpty(@Nonnull Inventory inventory) {
+        return firstEmpty(inventory, 0, null);
+    }
+
     public static int firstEmpty(@Nonnull Inventory inventory, int beginIndex) {
         return firstEmpty(inventory, beginIndex, null);
     }
@@ -273,7 +271,6 @@ public class Inventories {
      *
      * @return first empty item slot, otherwise -1
      * @throws IndexOutOfBoundsException if the beginning index is less than 0 or greater than the inventory storage size.
-     * @since 4.0.0
      */
     public static int firstEmpty(@Nonnull Inventory inventory, int beginIndex, @Nullable Predicate<Integer> modifiableSlots) {
         ItemStack[] items = inventory.getStorageContents();
@@ -298,7 +295,6 @@ public class Inventories {
      * @throws IndexOutOfBoundsException if the beginning index is less than 0 or greater than the inventory storage size.
      * @see #firstEmpty(Inventory, int)
      * @see #firstPartial(Inventory, ItemStack, int)
-     * @since 4.2.0
      */
     public static int firstPartialOrEmpty(@Nonnull Inventory inventory, @Nullable ItemStack item, int beginIndex) {
         if (item != null) {
