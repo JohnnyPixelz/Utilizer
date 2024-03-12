@@ -4,6 +4,7 @@ import com.cryptomorin.xseries.XPotion;
 import com.google.common.base.Enums;
 import com.google.common.base.Strings;
 import io.github.johnnypixelz.utilizer.amount.Amount;
+import io.github.johnnypixelz.utilizer.cache.Cache;
 import io.github.johnnypixelz.utilizer.config.Parse;
 import io.github.johnnypixelz.utilizer.text.Colors;
 import org.bukkit.*;
@@ -22,19 +23,23 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.*;
 import org.bukkit.map.MapView;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
-import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.cryptomorin.xseries.XMaterial.supports;
 
+
+@SuppressWarnings("unused UnusedReturnValue")
 public class Items {
 
     public static final ItemStack AIR = new ItemStack(Material.AIR);
@@ -58,10 +63,14 @@ public class Items {
     }
 
     public static ItemStack create(@Nonnull Material material, @Nullable String displayName, @Nullable String... lore) {
-        return create(material, displayName, Arrays.asList(lore));
+        return create(material, displayName, lore == null ? null : Arrays.asList(lore));
     }
 
-    public static ItemStack parse(@Nonnull ConfigurationSection section) {
+    public static ItemStack parse(@Nullable ConfigurationSection section) {
+        if (section == null) {
+            return new ItemStack(Material.STONE);
+        }
+
         final String materialString;
         if (section.isString("type")) {
             materialString = section.getString("type", "STONE");
@@ -363,12 +372,20 @@ public class Items {
     }
 
     public static ItemStack addLore(@Nonnull ItemStack stack, @Nonnull List<String> lore) {
-        if (!stack.getItemMeta().hasLore()) return setLore(stack, lore);
-
         return meta(stack, itemMeta -> {
-            final List<String> newLore = Objects.requireNonNull(itemMeta.getLore());
-            newLore.addAll(lore.stream().map(Colors::color).toList());
-            itemMeta.setLore(newLore);
+            if (!itemMeta.hasLore()) {
+                setLore(stack, lore);
+                return;
+            }
+
+            final List<String> oldLore = itemMeta.getLore();
+            if (oldLore == null) {
+                setLore(stack, lore);
+                return;
+            }
+
+            oldLore.addAll(lore.stream().map(Colors::color).toList());
+            itemMeta.setLore(oldLore);
         });
     }
 
@@ -419,7 +436,9 @@ public class Items {
     }
 
     public static ItemStack removeFlags(@Nonnull ItemStack stack, @Nonnull ItemFlag... flags) {
-        return removeFlags(stack, Arrays.asList(flags));
+        return meta(stack, itemMeta -> {
+            itemMeta.removeItemFlags(flags);
+        });
     }
 
     public static ItemStack clearFlags(@Nonnull ItemStack stack) {
@@ -457,6 +476,13 @@ public class Items {
         return stack;
     }
 
+    public static ItemStack map(@Nonnull ItemStack stack, @Nonnull String target, @Nonnull Supplier<String> replacement) {
+        mapName(stack, target, replacement);
+        mapLore(stack, target, replacement);
+
+        return stack;
+    }
+
     public static ItemStack map(@Nonnull ItemStack stack, @Nonnull Function<String, String> mapper) {
         mapName(stack, mapper);
         mapLore(stack, mapper);
@@ -472,6 +498,16 @@ public class Items {
         });
     }
 
+    public static ItemStack mapName(@Nonnull ItemStack stack, @Nonnull String target, @Nonnull Supplier<String> replacement) {
+        return meta(stack, itemMeta -> {
+            if (!itemMeta.hasDisplayName()) return;
+
+            if (!itemMeta.getDisplayName().contains(target)) return;
+
+            itemMeta.setDisplayName(itemMeta.getDisplayName().replace(target, replacement.get()));
+        });
+    }
+
     public static ItemStack mapName(@Nonnull ItemStack stack, @Nonnull Function<String, String> mapper) {
         return meta(stack, itemMeta -> {
             if (!itemMeta.hasDisplayName()) return;
@@ -481,48 +517,84 @@ public class Items {
     }
 
     public static ItemStack mapLore(@Nonnull ItemStack stack, @Nonnull String target, @Nonnull String replacement) {
-        if (!stack.getItemMeta().hasLore()) return stack;
-
         return meta(stack, itemMeta -> {
-            List<String> lore = itemMeta.getLore();
-            Objects.requireNonNull(lore);
+            if (!itemMeta.hasLore()) return;
 
-            for (int index = 0; index < lore.size(); index++) {
-                lore.set(index, lore.get(index).replace(target, replacement));
-            }
+            List<String> lore = itemMeta.getLore();
+            if (lore == null) return;
+
+            lore.replaceAll(line -> line.replace(target, replacement));
 
             itemMeta.setLore(lore);
+        });
+    }
+
+    public static ItemStack mapLore(@Nonnull ItemStack stack, @Nonnull String target, @Nonnull Supplier<String> replacement) {
+        return meta(stack, itemMeta -> {
+            if (!itemMeta.hasLore()) return;
+
+            List<String> lore = itemMeta.getLore();
+            if (lore == null) return;
+
+            final Cache<String> replacementCache = Cache.suppliedBy(replacement);
+
+            final List<String> list = lore.stream()
+                    .map(line -> {
+                        if (!line.contains(target)) return line;
+                        return line.replace(target, replacementCache.get());
+                    })
+                    .toList();
+
+            itemMeta.setLore(list);
         });
     }
 
     public static ItemStack mapLore(@Nonnull ItemStack stack, @Nonnull Function<String, String> mapper) {
-        if (!stack.getItemMeta().hasLore()) return stack;
-
         return meta(stack, itemMeta -> {
-            List<String> lore = itemMeta.getLore();
-            Objects.requireNonNull(lore);
+            if (!itemMeta.hasLore()) return;
 
-            for (int index = 0; index < lore.size(); index++) {
-                lore.set(index, mapper.apply(lore.get(index)));
-            }
+            final List<String> lore = itemMeta.getLore();
+            if (lore == null) return;
+
+            lore.replaceAll(mapper::apply);
 
             itemMeta.setLore(lore);
         });
     }
 
-    public static ItemStack mapLore(@Nonnull ItemStack stack, @Nonnull String target, @Nonnull List<String> replacement) {
-        if (!stack.getItemMeta().hasLore()) return stack;
-
+    public static ItemStack mapLoreMulti(@Nonnull ItemStack stack, @Nonnull String target, @Nonnull List<String> replacement) {
         return meta(stack, itemMeta -> {
-            List<String> lore = itemMeta.getLore();
-            Objects.requireNonNull(lore);
+            if (!itemMeta.hasLore()) return;
+
+            final List<String> lore = itemMeta.getLore();
+            if (lore == null) return;
 
             final List<String> newLore = lore.stream()
                     .flatMap(loreLine -> {
                         if (!loreLine.contains(target)) return Stream.of(loreLine);
                         return replacement.stream().map(line -> loreLine.replace(target, line));
                     })
-                    .collect(Collectors.toList());
+                    .toList();
+
+            itemMeta.setLore(newLore);
+        });
+    }
+
+    public static ItemStack mapLoreMulti(@Nonnull ItemStack stack, @Nonnull String target, @Nonnull Supplier<List<String>> replacement) {
+        return meta(stack, itemMeta -> {
+            if (!itemMeta.hasLore()) return;
+
+            final List<String> lore = itemMeta.getLore();
+            if (lore == null) return;
+
+            final Cache<List<String>> replacementCache = Cache.suppliedBy(replacement);
+
+            final List<String> newLore = lore.stream()
+                    .flatMap(loreLine -> {
+                        if (!loreLine.contains(target)) return Stream.of(loreLine);
+                        return replacementCache.get().stream().map(line -> loreLine.replace(target, line));
+                    })
+                    .toList();
 
             itemMeta.setLore(newLore);
         });
@@ -553,6 +625,12 @@ public class Items {
         return stack;
     }
 
+    public static ItemStack pdc(@Nonnull ItemStack stack, @Nonnull Consumer<PersistentDataContainer> container) {
+        return meta(stack, itemMeta -> {
+            container.accept(itemMeta.getPersistentDataContainer());
+        });
+    }
+
     public static ItemEditor edit(@Nonnull ItemStack stack) {
         return new ItemEditor(stack);
     }
@@ -560,4 +638,9 @@ public class Items {
     public static ItemEditor edit(@Nonnull Material material) {
         return new ItemEditor(material);
     }
+
+    public static ItemEditor edit(@Nonnull ConfigurationSection section) {
+        return new ItemEditor(parse(section));
+    }
+
 }

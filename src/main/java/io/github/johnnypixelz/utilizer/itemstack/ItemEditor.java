@@ -1,5 +1,6 @@
 package io.github.johnnypixelz.utilizer.itemstack;
 
+import io.github.johnnypixelz.utilizer.cache.Cache;
 import io.github.johnnypixelz.utilizer.text.Colors;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -7,6 +8,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
 
 import javax.annotation.Nonnull;
 import java.util.Arrays;
@@ -14,6 +16,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,10 +40,7 @@ public class ItemEditor {
 
             // Coloring item's lore
             if (itemMeta.hasLore()) {
-                final List<String> lore = Objects.requireNonNull(itemMeta.getLore())
-                        .stream()
-                        .map(Colors::color)
-                        .collect(Collectors.toList());
+                final List<String> lore = Objects.requireNonNull(itemMeta.getLore()).stream().map(Colors::color).collect(Collectors.toList());
 
                 itemMeta.setLore(lore);
             }
@@ -105,12 +105,20 @@ public class ItemEditor {
     }
 
     public ItemEditor addLore(@Nonnull List<String> lore) {
-        if (!stack.getItemMeta().hasLore()) return setLore(lore);
-
         return meta(itemMeta -> {
-            final List<String> newLore = Objects.requireNonNull(itemMeta.getLore());
-            newLore.addAll(lore.stream().map(Colors::color).toList());
-            itemMeta.setLore(newLore);
+            if (!itemMeta.hasLore()) {
+                setLore(lore);
+                return;
+            }
+
+            final List<String> oldLore = itemMeta.getLore();
+            if (oldLore == null) {
+                setLore(lore);
+                return;
+            }
+
+            oldLore.addAll(lore.stream().map(Colors::color).toList());
+            itemMeta.setLore(oldLore);
         });
     }
 
@@ -135,8 +143,8 @@ public class ItemEditor {
 
     public ItemEditor setFlags(@Nonnull List<ItemFlag> flags) {
         return meta(itemMeta -> {
-           itemMeta.getItemFlags().forEach(itemMeta::removeItemFlags);
-           flags.forEach(itemMeta::addItemFlags);
+            itemMeta.getItemFlags().forEach(itemMeta::removeItemFlags);
+            flags.forEach(itemMeta::addItemFlags);
         });
     }
 
@@ -155,30 +163,21 @@ public class ItemEditor {
     }
 
     public ItemEditor removeFlags(@Nonnull List<ItemFlag> flags) {
-        ItemMeta itemMeta = stack.getItemMeta();
-
-        flags.forEach(itemMeta::removeItemFlags);
-
-        stack.setItemMeta(itemMeta);
-        return this;
+        return meta(itemMeta -> {
+            flags.forEach(itemMeta::removeItemFlags);
+        });
     }
 
     public ItemEditor removeFlags(@Nonnull ItemFlag... flags) {
-        ItemMeta itemMeta = stack.getItemMeta();
-
-        itemMeta.removeItemFlags(flags);
-
-        stack.setItemMeta(itemMeta);
-        return this;
+        return meta(itemMeta -> {
+            itemMeta.removeItemFlags(flags);
+        });
     }
 
     public ItemEditor clearFlags() {
-        ItemMeta itemMeta = stack.getItemMeta();
-
-        itemMeta.removeItemFlags(itemMeta.getItemFlags().toArray(new ItemFlag[0]));
-
-        stack.setItemMeta(itemMeta);
-        return this;
+        return meta(itemMeta -> {
+            itemMeta.removeItemFlags(itemMeta.getItemFlags().toArray(new ItemFlag[0]));
+        });
     }
 
     public ItemEditor glow() {
@@ -217,89 +216,125 @@ public class ItemEditor {
         return this;
     }
 
-    public ItemEditor mapName(@Nonnull Function<String, String> mapper) {
-        if (!stack.hasItemMeta()) return this;
+    public ItemEditor map(@Nonnull String target, @Nonnull Supplier<String> replacement) {
+        mapName(target, replacement);
+        mapLore(target, replacement);
 
-        ItemMeta itemMeta = stack.getItemMeta();
-        if (!itemMeta.hasDisplayName()) return this;
-
-        itemMeta.setDisplayName(mapper.apply(itemMeta.getDisplayName()));
-
-        stack.setItemMeta(itemMeta);
         return this;
     }
 
     public ItemEditor mapName(@Nonnull String target, @Nonnull String replacement) {
-        if (!stack.hasItemMeta()) return this;
+        return meta(itemMeta -> {
+            if (!itemMeta.hasDisplayName()) return;
 
-        ItemMeta itemMeta = stack.getItemMeta();
-        if (!itemMeta.hasDisplayName()) return this;
+            itemMeta.setDisplayName(itemMeta.getDisplayName().replace(target, replacement));
+        });
+    }
 
-        itemMeta.setDisplayName(itemMeta.getDisplayName().replace(target, replacement));
+    public ItemEditor mapName(@Nonnull String target, @Nonnull Supplier<String> replacement) {
+        return meta(itemMeta -> {
+            if (!itemMeta.hasDisplayName()) return;
+            if (!itemMeta.getDisplayName().contains(target)) return;
 
-        stack.setItemMeta(itemMeta);
-        return this;
+            itemMeta.setDisplayName(itemMeta.getDisplayName().replace(target, replacement.get()));
+        });
+    }
+
+    public ItemEditor mapName(@Nonnull Function<String, String> mapper) {
+        return meta(itemMeta -> {
+            if (!itemMeta.hasDisplayName()) return;
+
+            itemMeta.setDisplayName(mapper.apply(itemMeta.getDisplayName()));
+        });
     }
 
     public ItemEditor mapLore(@Nonnull String target, @Nonnull String replacement) {
-        if (!stack.hasItemMeta()) return this;
+        return meta(itemMeta -> {
+            if (!itemMeta.hasLore()) return;
 
-        ItemMeta itemMeta = stack.getItemMeta();
-        if (!itemMeta.hasLore()) return this;
+            List<String> lore = itemMeta.getLore();
+            if (lore == null) return;
 
-        List<String> lore = itemMeta.getLore();
+            lore.replaceAll(line -> line.replace(target, replacement));
 
-        for (int index = 0; index < lore.size(); index++) {
-            lore.set(index, lore.get(index).replace(target, replacement));
-        }
+            itemMeta.setLore(lore);
+        });
+    }
 
-        itemMeta.setLore(lore);
+    public ItemEditor mapLore(@Nonnull String target, @Nonnull Supplier<String> replacement) {
+        return meta(itemMeta -> {
+            if (!itemMeta.hasLore()) return;
 
-        stack.setItemMeta(itemMeta);
-        return this;
+            List<String> lore = itemMeta.getLore();
+            if (lore == null) return;
+
+            final Cache<String> replacementCache = Cache.suppliedBy(replacement);
+
+            final List<String> list = lore.stream()
+                    .map(line -> {
+                        if (!line.contains(target)) return line;
+                        return line.replace(target, replacementCache.get());
+                    })
+                    .toList();
+
+            itemMeta.setLore(list);
+        });
     }
 
     public ItemEditor mapLore(@Nonnull Function<String, String> mapper) {
-        if (!stack.hasItemMeta()) return this;
+        return meta(itemMeta -> {
+            if (!itemMeta.hasLore()) return;
 
-        ItemMeta itemMeta = stack.getItemMeta();
-        if (!itemMeta.hasLore()) return this;
+            final List<String> lore = itemMeta.getLore();
+            if (lore == null) return;
 
-        List<String> lore = itemMeta.getLore();
+            lore.replaceAll(mapper::apply);
 
-        for (int index = 0; index < lore.size(); index++) {
-            lore.set(index, mapper.apply(lore.get(index)));
-        }
-
-        itemMeta.setLore(lore);
-
-        stack.setItemMeta(itemMeta);
-        return this;
+            itemMeta.setLore(lore);
+        });
     }
 
-    public ItemEditor mapLore(@Nonnull String target, @Nonnull List<String> replacement) {
-        if (!stack.hasItemMeta()) return this;
+    public ItemEditor mapLoreMulti(@Nonnull String target, @Nonnull List<String> replacement) {
+        return meta(itemMeta -> {
+            if (!itemMeta.hasLore()) return;
 
-        ItemMeta itemMeta = stack.getItemMeta();
-        if (!itemMeta.hasLore()) return this;
+            final List<String> lore = itemMeta.getLore();
+            if (lore == null) return;
 
-        List<String> lore = itemMeta.getLore();
+            final List<String> newLore = lore.stream()
+                    .flatMap(loreLine -> {
+                        if (!loreLine.contains(target)) return Stream.of(loreLine);
+                        return replacement.stream().map(line -> loreLine.replace(target, line));
+                    })
+                    .toList();
 
-        final List<String> newLore = lore.stream()
-                .flatMap(loreLine -> {
-                    if (!loreLine.contains(target)) return Stream.of(loreLine);
-                    return replacement.stream().map(line -> loreLine.replace(target, line));
-                })
-                .collect(Collectors.toList());
+            itemMeta.setLore(newLore);
+        });
+    }
 
-        itemMeta.setLore(newLore);
+    public ItemEditor mapLoreMulti(@Nonnull String target, @Nonnull Supplier<List<String>> replacement) {
+        return meta(itemMeta -> {
+            if (!itemMeta.hasLore()) return;
 
-        stack.setItemMeta(itemMeta);
-        return this;
+            final List<String> lore = itemMeta.getLore();
+            if (lore == null) return;
+
+            final Cache<List<String>> replacementCache = Cache.suppliedBy(replacement);
+
+            final List<String> newLore = lore.stream()
+                    .flatMap(loreLine -> {
+                        if (!loreLine.contains(target)) return Stream.of(loreLine);
+                        return replacementCache.get().stream().map(line -> loreLine.replace(target, line));
+                    })
+                    .toList();
+
+            itemMeta.setLore(newLore);
+        });
     }
 
     public ItemEditor meta(@Nonnull Consumer<ItemMeta> metaConsumer) {
         ItemMeta itemMeta = stack.getItemMeta();
+        if (itemMeta == null) return this;
 
         metaConsumer.accept(itemMeta);
 
@@ -309,6 +344,8 @@ public class ItemEditor {
 
     public <T extends ItemMeta> ItemEditor meta(@Nonnull Class<T> metaClass, @Nonnull Consumer<T> metaConsumer) {
         ItemMeta itemMeta = stack.getItemMeta();
+        if (itemMeta == null) return this;
+
         if (!metaClass.isAssignableFrom(itemMeta.getClass())) {
             throw new IllegalArgumentException("Meta class type different than actual type. Expected " + itemMeta.getClass().getSimpleName() + " but got " + metaClass.getSimpleName() + ".");
         }
@@ -320,7 +357,14 @@ public class ItemEditor {
         return this;
     }
 
+    public ItemEditor pdc(@Nonnull Consumer<PersistentDataContainer> container) {
+        return meta(itemMeta -> {
+            container.accept(itemMeta.getPersistentDataContainer());
+        });
+    }
+
     public ItemStack getItem() {
         return stack;
     }
+
 }
