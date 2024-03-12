@@ -2,31 +2,42 @@ package io.github.johnnypixelz.utilizer.event;
 
 import org.bukkit.event.EventPriority;
 
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 public class StatelessEventEmitter {
-    private final Map<Runnable, EventPriority> listeners;
+    private final List<StatelessEventListener> listeners;
 
     public StatelessEventEmitter() {
-        this.listeners = new HashMap<>();
+        this.listeners = new ArrayList<>();
     }
 
     public void emit() {
-        listeners.entrySet()
-                .stream()
-                .sorted(Comparator.comparingInt(o -> o.getValue().getSlot()))
-                .map(Map.Entry::getKey)
+        listeners.stream()
+                .sorted(Comparator.comparingInt(o -> o.getPriority().getSlot()))
+                .map(StatelessEventListener::getRunnable)
                 .forEachOrdered(Runnable::run);
     }
 
-    public void listen(Runnable listener) {
-        listen(listener, EventPriority.NORMAL);
+    public StatelessEventListener listen(Runnable listener) {
+        return listen(listener, EventPriority.NORMAL);
     }
 
-    public void listen(Runnable listener, EventPriority priority) {
-        listeners.put(listener, priority);
+    public StatelessEventListener listen(Runnable listener, EventPriority priority) {
+        final StatelessEventListener statelessEventListener = new StatelessEventListener(this, listener, priority);
+        listeners.add(statelessEventListener);
+
+        return statelessEventListener;
+    }
+
+    public StatelessEventEmitter unregister(StatelessEventListener listener) {
+        this.listeners.remove(listener);
+        return this;
+    }
+
+    public List<StatelessEventListener> getListeners() {
+        return listeners;
     }
 
 }
