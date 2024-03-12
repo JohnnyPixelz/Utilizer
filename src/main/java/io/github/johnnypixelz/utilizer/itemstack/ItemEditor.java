@@ -95,18 +95,36 @@ public class ItemEditor {
         return setLore(Arrays.asList(lore));
     }
 
+    public ItemEditor setLoreIf(boolean condition, @Nonnull List<String> lore) {
+        if (condition) return setLore(lore);
+        return this;
+    }
+
+    public ItemEditor setLoreIf(boolean condition, @Nonnull String... lore) {
+        return setLoreIf(condition, Arrays.asList(lore));
+    }
+
     public ItemEditor addLore(@Nonnull List<String> lore) {
         if (!stack.getItemMeta().hasLore()) return setLore(lore);
 
         return meta(itemMeta -> {
             final List<String> newLore = Objects.requireNonNull(itemMeta.getLore());
-            newLore.addAll(lore.stream().map(Colors::color).collect(Collectors.toList()));
+            newLore.addAll(lore.stream().map(Colors::color).toList());
             itemMeta.setLore(newLore);
         });
     }
 
     public ItemEditor addLore(@Nonnull String... lore) {
         return addLore(Arrays.asList(lore));
+    }
+
+    public ItemEditor addLoreIf(boolean condition, @Nonnull List<String> lore) {
+        if (condition) return addLore(lore);
+        return this;
+    }
+
+    public ItemEditor addLoreIf(boolean condition, @Nonnull String... lore) {
+        return addLoreIf(condition, Arrays.asList(lore));
     }
 
     public ItemEditor removeLore() {

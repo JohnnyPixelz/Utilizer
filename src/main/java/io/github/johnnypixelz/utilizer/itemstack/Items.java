@@ -353,18 +353,36 @@ public class Items {
         return setLore(stack, Arrays.asList(lore));
     }
 
+    public static ItemStack setLoreIf(boolean condition, @Nonnull ItemStack stack, @Nonnull List<String> lore) {
+        if (condition) return setLore(stack, lore);
+        return stack;
+    }
+
+    public static ItemStack setLoreIf(boolean condition, @Nonnull ItemStack stack, @Nonnull String... lore) {
+        return setLoreIf(condition, stack, Arrays.asList(lore));
+    }
+
     public static ItemStack addLore(@Nonnull ItemStack stack, @Nonnull List<String> lore) {
         if (!stack.getItemMeta().hasLore()) return setLore(stack, lore);
 
         return meta(stack, itemMeta -> {
             final List<String> newLore = Objects.requireNonNull(itemMeta.getLore());
-            newLore.addAll(lore.stream().map(Colors::color).collect(Collectors.toList()));
+            newLore.addAll(lore.stream().map(Colors::color).toList());
             itemMeta.setLore(newLore);
         });
     }
 
     public static ItemStack addLore(@Nonnull ItemStack stack, @Nonnull String... lore) {
         return addLore(stack, Arrays.asList(lore));
+    }
+
+    public static ItemStack addLoreIf(boolean condition, @Nonnull ItemStack stack, @Nonnull List<String> lore) {
+        if (condition) return addLore(stack, lore);
+        return stack;
+    }
+
+    public static ItemStack addLoreIf(boolean condition, @Nonnull ItemStack stack, @Nonnull String... lore) {
+        return addLoreIf(condition, stack, Arrays.asList(lore));
     }
 
     public static ItemStack removeLore(@Nonnull ItemStack stack) {
