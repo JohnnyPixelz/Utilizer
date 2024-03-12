@@ -9,8 +9,8 @@ public class CustomBlockBuilderFileStep<CB extends CustomBlock> {
         this.customBlockType = customBlockType;
     }
 
-    public void json(String fileName) {
-        return new
+    public CustomBlockBuilderDetailStep<CB> json(String fileName) {
+        return new CustomBlockBuilderDetailStep<>(customBlockType, fileName);
     }
 
 }

@@ -106,6 +106,7 @@ public class CustomBlockItemManager<CB extends CustomBlock> {
 
         storage.get().put(blockPosition, customBlock);
         customBlock.onRegister();
+        customBlock.onLoad();
         return customBlock;
     }
 
@@ -113,6 +114,7 @@ public class CustomBlockItemManager<CB extends CustomBlock> {
         if (!storage.get().containsValue(customBlock))
             throw new IllegalStateException("Attempted to unregister an unregistered block.");
 
+        customBlock.onUnload();
         customBlock.onUnregister();
         storage.get().remove(customBlock.getBlockPosition());
     }

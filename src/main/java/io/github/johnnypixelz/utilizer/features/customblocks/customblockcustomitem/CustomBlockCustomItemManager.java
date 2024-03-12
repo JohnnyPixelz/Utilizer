@@ -23,6 +23,7 @@ public class CustomBlockCustomItemManager<CB extends StatefulCustomBlock<CBD>, C
     private final FileStorageContainer<Map<BlockPosition, CB>> storage;
     private final CustomBlockCustomItemListener<CB, CBD> listener;
     private final CustomBlockCustomItemSupplier<CB, CBD> itemSupplier;
+    private final Class<CB> customBlockType;
     private final Class<CBD> customBlockDataType;
 
     private BukkitTask tickTask;
@@ -33,8 +34,10 @@ public class CustomBlockCustomItemManager<CB extends StatefulCustomBlock<CBD>, C
                 .json(fileName, GsonProvider.builder().enableComplexMapKeySerialization().create())
                 .container(HashMap::new);
 
+        this.customBlockType = customBlockType;
         this.customBlockDataType = customBlockDataType;
-        this.itemSupplier = new CustomBlockCustomItemSupplier<CB, CBD>(itemKey, stackable, supplier, customBlockDataType);
+
+        this.itemSupplier = new CustomBlockCustomItemSupplier<>(itemKey, stackable, supplier, customBlockDataType);
         this.listener = new CustomBlockCustomItemListener<>(this);
     }
 
@@ -99,6 +102,7 @@ public class CustomBlockCustomItemManager<CB extends StatefulCustomBlock<CBD>, C
 
         storage.get().put(blockPosition, customBlock);
         customBlock.onRegister();
+        customBlock.onLoad();
         return customBlock;
     }
 
@@ -106,6 +110,7 @@ public class CustomBlockCustomItemManager<CB extends StatefulCustomBlock<CBD>, C
         if (!storage.get().containsValue(customBlock))
             throw new IllegalStateException("Attempted to unregister an unregistered block.");
 
+        customBlock.onUnload();
         customBlock.onUnregister();
         storage.get().remove(customBlock.getBlockPosition());
     }
@@ -116,6 +121,14 @@ public class CustomBlockCustomItemManager<CB extends StatefulCustomBlock<CBD>, C
 
     public CustomBlockCustomItemListener<CB, CBD> getListener() {
         return listener;
+    }
+
+    public Class<CB> getCustomBlockType() {
+        return customBlockType;
+    }
+
+    public Class<CBD> getCustomBlockDataType() {
+        return customBlockDataType;
     }
 
 }

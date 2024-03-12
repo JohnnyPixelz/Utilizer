@@ -2,6 +2,7 @@ package io.github.johnnypixelz.utilizer.features.customblocks.customblockcustomi
 
 import io.github.johnnypixelz.utilizer.event.BiStatefulEventEmitter;
 import io.github.johnnypixelz.utilizer.event.StatefulEventEmitter;
+import io.github.johnnypixelz.utilizer.plugin.Logs;
 import io.github.johnnypixelz.utilizer.serialize.world.BlockPosition;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
@@ -12,6 +13,9 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Optional;
 
 public class CustomBlockCustomItemListener<CB extends StatefulCustomBlock<CBD>, CBD extends CustomBlockData> implements Listener {
@@ -44,6 +48,58 @@ public class CustomBlockCustomItemListener<CB extends StatefulCustomBlock<CBD>, 
         this.postPlaceEventEmitter = new BiStatefulEventEmitter<>();
         this.leftClickInteractEventEmitter = new BiStatefulEventEmitter<>();
         this.rightClickInteractEventEmitter = new BiStatefulEventEmitter<>();
+
+        this.customBlockGenerator = (event, blockPosition, customBlockData, itemStack) -> {
+            final Class<CB> customBlockType = manager.getCustomBlockType();
+            final Class<CBD> customBlockDataType = manager.getCustomBlockDataType();
+
+            final Optional<Constructor<CB>> optionalEligibleConstructor = Arrays.stream((Constructor<CB>[]) customBlockType.getConstructors())
+                    .filter(constructor -> {
+                        // Filtering out constructors that contain parameters other than BlockPosition and customBlockDataType
+                        return Arrays.stream(constructor.getParameterTypes())
+                                .noneMatch(parameterType -> parameterType != BlockPosition.class && parameterType != customBlockDataType);
+                    })
+                    .filter(constructor -> {
+                        // Filtering out constructors that contain more than one BlockPosition or customBlockDataType
+                        final long blockPositionCount = Arrays.stream(constructor.getParameterTypes())
+                                .filter(parameterClass -> parameterClass == BlockPosition.class)
+                                .count();
+
+                        final long customDataTypeCount = Arrays.stream(constructor.getParameterTypes())
+                                .filter(parameterClass -> parameterClass == customBlockDataType)
+                                .count();
+
+                        return blockPositionCount <= 1 && customDataTypeCount <= 1;
+                    })
+                    .findAny();
+
+            if (optionalEligibleConstructor.isEmpty()) {
+                throw new IllegalArgumentException("Cannot instantiate custom block with custom constructor while using the default generator. Use CustomBlockCustomItemListener#setCustomBlockGenerator");
+            }
+
+            final Constructor<CB> constructor = optionalEligibleConstructor.get();
+            final Object[] constructorArguments = Arrays.stream(constructor.getParameterTypes())
+                    .map(parameterClass -> {
+                        if (parameterClass.equals(BlockPosition.class)) {
+                            return blockPosition;
+                        } else if (parameterClass.equals(customBlockDataType)) {
+                            return customBlockData;
+                        }
+
+                        // Unreachable code
+                        throw new IllegalStateException("Unexpected value: " + parameterClass);
+                    })
+                    .toArray(Object[]::new);
+
+            try {
+                return constructor.newInstance(constructorArguments);
+            } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+                Logs.severe("Attempted to instantiate constructor but failed to do so.");
+                e.printStackTrace();
+            }
+
+            return null;
+        };
     }
 
     public CustomBlockCustomItemManager<CB, CBD> getManager() {
