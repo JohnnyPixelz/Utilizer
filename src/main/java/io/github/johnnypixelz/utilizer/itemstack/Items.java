@@ -372,18 +372,14 @@ public class Items {
     }
 
     public static ItemStack addLore(@Nonnull ItemStack stack, @Nonnull List<String> lore) {
+        final ItemMeta existingMeta = stack.getItemMeta();
+        if (existingMeta == null) return setLore(stack, lore);
+        if (!existingMeta.hasLore()) return setLore(stack, lore);
+
+        final List<String> oldLore = existingMeta.getLore();
+        if (oldLore == null) return setLore(stack, lore);
+
         return meta(stack, itemMeta -> {
-            if (!itemMeta.hasLore()) {
-                setLore(stack, lore);
-                return;
-            }
-
-            final List<String> oldLore = itemMeta.getLore();
-            if (oldLore == null) {
-                setLore(stack, lore);
-                return;
-            }
-
             oldLore.addAll(lore.stream().map(Colors::color).toList());
             itemMeta.setLore(oldLore);
         });

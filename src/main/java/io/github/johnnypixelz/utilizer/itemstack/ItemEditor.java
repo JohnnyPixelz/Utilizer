@@ -1,6 +1,7 @@
 package io.github.johnnypixelz.utilizer.itemstack;
 
 import io.github.johnnypixelz.utilizer.cache.Cache;
+import io.github.johnnypixelz.utilizer.plugin.Logs;
 import io.github.johnnypixelz.utilizer.text.Colors;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -105,18 +106,14 @@ public class ItemEditor {
     }
 
     public ItemEditor addLore(@Nonnull List<String> lore) {
+        final ItemMeta existingMeta = stack.getItemMeta();
+        if (existingMeta == null) return setLore(lore);
+        if (!existingMeta.hasLore()) return setLore(lore);
+
+        final List<String> oldLore = existingMeta.getLore();
+        if (oldLore == null) return setLore(lore);
+
         return meta(itemMeta -> {
-            if (!itemMeta.hasLore()) {
-                setLore(lore);
-                return;
-            }
-
-            final List<String> oldLore = itemMeta.getLore();
-            if (oldLore == null) {
-                setLore(lore);
-                return;
-            }
-
             oldLore.addAll(lore.stream().map(Colors::color).toList());
             itemMeta.setLore(oldLore);
         });
