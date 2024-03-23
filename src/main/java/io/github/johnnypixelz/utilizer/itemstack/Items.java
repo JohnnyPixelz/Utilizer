@@ -610,7 +610,22 @@ public class Items {
         ItemMeta itemMeta = stack.getItemMeta();
         if (itemMeta == null) return stack;
 
-        if (!itemMeta.getClass().isAssignableFrom(metaClass)) {
+        if (!metaClass.isAssignableFrom(itemMeta.getClass())) {
+            return stack;
+        }
+
+        T meta = metaClass.cast(itemMeta);
+        metaConsumer.accept(meta);
+
+        stack.setItemMeta(meta);
+        return stack;
+    }
+
+    public static <T extends ItemMeta> ItemStack metaOrThrow(@Nonnull ItemStack stack, @Nonnull Class<T> metaClass, @Nonnull Consumer<T> metaConsumer) {
+        ItemMeta itemMeta = stack.getItemMeta();
+        if (itemMeta == null) return stack;
+
+        if (!metaClass.isAssignableFrom(itemMeta.getClass())) {
             throw new IllegalArgumentException("Meta class type different than actual type. Expected " + itemMeta.getClass().getSimpleName() + " but got " + metaClass.getSimpleName() + ".");
         }
 

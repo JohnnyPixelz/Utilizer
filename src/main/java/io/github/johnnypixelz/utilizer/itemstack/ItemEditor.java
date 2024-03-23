@@ -344,6 +344,21 @@ public class ItemEditor {
         if (itemMeta == null) return this;
 
         if (!metaClass.isAssignableFrom(itemMeta.getClass())) {
+            return this;
+        }
+
+        T meta = metaClass.cast(itemMeta);
+        metaConsumer.accept(meta);
+
+        stack.setItemMeta(meta);
+        return this;
+    }
+
+    public <T extends ItemMeta> ItemEditor metaOrThrow(@Nonnull Class<T> metaClass, @Nonnull Consumer<T> metaConsumer) {
+        ItemMeta itemMeta = stack.getItemMeta();
+        if (itemMeta == null) return this;
+
+        if (!metaClass.isAssignableFrom(itemMeta.getClass())) {
             throw new IllegalArgumentException("Meta class type different than actual type. Expected " + itemMeta.getClass().getSimpleName() + " but got " + metaClass.getSimpleName() + ".");
         }
 
