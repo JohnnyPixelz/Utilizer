@@ -47,8 +47,8 @@ public class ChunkRegion implements GsonSerializable {
         this.min = ChunkPosition.of(Math.min(a.getX(), b.getX()), Math.min(a.getZ(), b.getZ()), a.getWorld());
         this.max = ChunkPosition.of(Math.max(a.getX(), b.getX()), Math.max(a.getZ(), b.getZ()), a.getWorld());
 
-        this.width = this.max.getX() - this.min.getX();
-        this.depth = this.max.getZ() - this.min.getZ();
+        this.width = this.max.getX() - this.min.getX() + 1;
+        this.depth = this.max.getZ() - this.min.getZ() + 1;
     }
 
     public boolean inRegion(ChunkPosition pos) {

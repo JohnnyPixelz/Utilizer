@@ -49,9 +49,9 @@ public class BlockRegion implements GsonSerializable {
         this.min = BlockPosition.of(Math.min(a.getX(), b.getX()), Math.min(a.getY(), b.getY()), Math.min(a.getZ(), b.getZ()), a.getWorld());
         this.max = BlockPosition.of(Math.max(a.getX(), b.getX()), Math.max(a.getY(), b.getY()), Math.max(a.getZ(), b.getZ()), a.getWorld());
 
-        this.width = this.max.getX() - this.min.getX();
-        this.height = this.max.getY() - this.min.getY();
-        this.depth = this.max.getZ() - this.min.getZ();
+        this.width = this.max.getX() - this.min.getX() + 1;
+        this.height = this.max.getY() - this.min.getY() + 1;
+        this.depth = this.max.getZ() - this.min.getZ() + 1;
     }
 
     public boolean inRegion(BlockPosition pos) {
