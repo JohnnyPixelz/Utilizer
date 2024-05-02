@@ -1,26 +1,25 @@
 package io.github.johnnypixelz.utilizer.sql;
 
-import com.google.common.collect.ImmutableMap;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import org.bukkit.Bukkit;
+import io.github.johnnypixelz.utilizer.sql.handlers.PreparedStatementHandler;
+import io.github.johnnypixelz.utilizer.sql.handlers.ResultSetHandler;
+import io.github.johnnypixelz.utilizer.tasks.Tasks;
 
 import javax.annotation.Nonnull;
+import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * SQL class for opening SQL connections. Heavily inspired by lucko/helper library
  */
-public class SQLClient {
+public class SQLClient implements Closeable {
 
     private static final AtomicInteger POOL_COUNTER = new AtomicInteger(0);
 
@@ -46,34 +45,6 @@ public class SQLClient {
         hikari.setConnectionTimeout(CONNECTION_TIMEOUT);
         hikari.setLeakDetectionThreshold(LEAK_DETECTION_THRESHOLD);
 
-        Map<String, String> properties = ImmutableMap.<String, String>builder()
-                // Ensure we use utf8 encoding
-                .put("useUnicode", "true")
-                .put("characterEncoding", "utf8")
-
-                // https://github.com/brettwooldridge/HikariCP/wiki/MySQL-Configuration
-                .put("cachePrepStmts", "true")
-                .put("prepStmtCacheSize", "250")
-                .put("prepStmtCacheSqlLimit", "2048")
-                .put("useServerPrepStmts", "true")
-                .put("useLocalSessionState", "true")
-                .put("rewriteBatchedStatements", "true")
-                .put("cacheResultSetMetadata", "true")
-                .put("cacheServerConfiguration", "true")
-                .put("elideSetAutoCommits", "true")
-                .put("maintainTimeStats", "false")
-                .put("alwaysSendSetIsolation", "false")
-                .put("cacheCallableStmts", "true")
-
-                // Set the driver level TCP socket timeout
-                // See: https://github.com/brettwooldridge/HikariCP/wiki/Rapid-Recovery
-                .put("socketTimeout", String.valueOf(TimeUnit.SECONDS.toMillis(30)))
-                .build();
-
-        for (Map.Entry<String, String> property : properties.entrySet()) {
-            hikari.addDataSourceProperty(property.getKey(), property.getValue());
-        }
-
         this.hikariDataSource = new HikariDataSource(hikari);
     }
 
@@ -86,25 +57,61 @@ public class SQLClient {
         return hikariDataSource.getConnection();
     }
 
-    public void execute(@Nonnull String statement, @Nonnull Consumer<PreparedStatement> preparer) {
-        try (Connection c = this.getConnection(); PreparedStatement s = c.prepareStatement(statement)) {
-            preparer.accept(s);
-            s.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
+    public void execute(@Nonnull String statement) {
+        try (Connection connection = this.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(statement)) {
+            preparedStatement.execute();
+        } catch (SQLException exception) {
+            exception.printStackTrace();
         }
     }
 
-    public <R> Optional<R> query(@Nonnull String query, @Nonnull Consumer<PreparedStatement> preparer, @Nonnull Function<ResultSet, R> handler) {
-        try (Connection c = this.getConnection(); PreparedStatement s = c.prepareStatement(query)) {
-            preparer.accept(s);
-            try (ResultSet r = s.executeQuery()) {
-                return Optional.ofNullable(handler.apply(r));
+    public void execute(@Nonnull String statement, @Nonnull PreparedStatementHandler preparer) {
+        try (Connection connection = this.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(statement)) {
+            preparer.handle(preparedStatement);
+            preparedStatement.execute();
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+        }
+    }
+
+    public void executeAsync(@Nonnull String statement) {
+        Tasks.async().run(() -> execute(statement));
+    }
+
+    public void executeAsync(@Nonnull String statement, @Nonnull PreparedStatementHandler preparer) {
+        Tasks.async().run(() -> execute(statement, preparer));
+    }
+
+    public <R> Optional<R> executeQuery(@Nonnull String query, @Nonnull ResultSetHandler<R> handler) {
+        try (Connection connection = this.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return Optional.ofNullable(handler.handle(resultSet));
+            } catch (SQLException sqlException) {
+                return Optional.empty();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException sqlException) {
+            sqlException.printStackTrace();
             return Optional.empty();
         }
+    }
+
+    public <R> Optional<R> executeQuery(@Nonnull String query, @Nonnull PreparedStatementHandler preparer, @Nonnull ResultSetHandler<R> handler) {
+        try (Connection connection = this.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparer.handle(preparedStatement);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return Optional.ofNullable(handler.handle(resultSet));
+            } catch (SQLException sqlException) {
+                return Optional.empty();
+            }
+        } catch (SQLException sqlException) {
+            sqlException.printStackTrace();
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public void close() {
+        hikariDataSource.close();
     }
 
 }

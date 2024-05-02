@@ -3,11 +3,9 @@ package io.github.johnnypixelz.utilizer.sql;
 import com.zaxxer.hikari.HikariConfig;
 import io.github.johnnypixelz.utilizer.sql.drivers.SQLDriver;
 import org.bukkit.configuration.ConfigurationSection;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class DatabaseCredentials {
 
@@ -43,8 +41,8 @@ public class DatabaseCredentials {
         final String mode = section.getString("mode");
         if (mode != null) {
             final Optional<SQLDriver> optionalSQLDriver = Arrays.stream(supportedDrivers)
-                .filter(driver -> driver.getName().equalsIgnoreCase(mode))
-                .findFirst();
+                    .filter(driver -> driver.getName().equalsIgnoreCase(mode))
+                    .findFirst();
             sqlDriver = optionalSQLDriver.orElseThrow(() -> new IllegalArgumentException("Mode " + mode + " is unsupported"));
         } else {
             sqlDriver = supportedDrivers[0];
@@ -114,45 +112,14 @@ public class DatabaseCredentials {
     }
 
     @Nonnull
-    public String getJdbcURL() {
-        String format = "jdbc:{source}://{address}:{port}/{database}";
-
-        Map<String, String> options = new HashMap<>(getOptions());
-        options.put("user", getUsername());
-        options.put("password", getPassword());
-
-        final String optionsString = options.entrySet()
-                .stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
-                .collect(Collectors.joining("&"));
-
-        if (!optionsString.isEmpty()) {
-            format += "?" + optionsString;
-        }
-
-        return format.replace("{source}", sqlDriver.getName())
-                .replace("{address}", address)
-                .replace("{port}", String.valueOf(port))
-                .replace("{database}", database);
-    }
-
-    @NonNull
     public HikariConfig getHikariConfig() {
-        final HikariConfig hikariConfig = new HikariConfig();
-
-        hikariConfig.setDataSourceClassName(sqlDriver.getDataSourceClassName());
-        hikariConfig.setJdbcUrl(getJdbcURL());
-        hikariConfig.setUsername(username);
-        hikariConfig.setPassword(password);
-
-        return hikariConfig;
+        return sqlDriver.generateHikariConfig(this);
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
-        if (!(o instanceof DatabaseCredentials)) return false;
-        final DatabaseCredentials other = (DatabaseCredentials) o;
+        if (!(o instanceof DatabaseCredentials other)) return false;
 
         return this.getAddress().equals(other.getAddress()) &&
                 this.getPort() == other.getPort() &&

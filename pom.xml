@@ -6,7 +6,7 @@
 
     <groupId>io.github.johnnypixelz</groupId>
     <artifactId>Utilizer</artifactId>
-    <version>0.17.6</version>
+    <version>sql</version>
     <packaging>jar</packaging>
     <description>Powerful but easy to use library for Bukkit Plugin Development</description>
     <url>https://github.com/JohnnyPixelz/Utilizer</url>
@@ -79,18 +79,6 @@
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.mariadb.jdbc</groupId>
-            <artifactId>mariadb-java-client</artifactId>
-            <version>2.7.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>42.7.3</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.mojang</groupId>

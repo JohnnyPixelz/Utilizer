@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.internal.$Gson$Types;
 import io.github.johnnypixelz.utilizer.file.storage.container.database.DatabaseStorageContainer;
 import io.github.johnnypixelz.utilizer.file.storage.handler.database.sql.SQLStorageHandler;
-import io.github.johnnypixelz.utilizer.sql.OldSQLMessenger;
+import io.github.johnnypixelz.utilizer.sql.SQLPoller;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.Map;
@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 public class SQLStorageContainer<K, V> extends DatabaseStorageContainer<Map<K, V>> {
     protected final SQLStorageHandler<K, V> storageHandler;
     private final Gson gson;
-    private OldSQLMessenger sqlMessenger;
+    private SQLPoller sqlPoller;
 
     public SQLStorageContainer(SQLStorageHandler<K, V> storageHandler, Supplier<Map<K, V>> supplier, Gson gson) {
         super(supplier);
@@ -33,10 +33,10 @@ public class SQLStorageContainer<K, V> extends DatabaseStorageContainer<Map<K, V
             get().put(key, value);
         }
 
-        if (sqlMessenger != null) {
+        if (sqlPoller != null) {
             final SQLMessage<K, V> message = new SQLMessage<>(key, value);
             final String payload = gson.toJson(message);
-            sqlMessenger.sendMessage(payload);
+            sqlPoller.sendMessage(payload);
         }
     }
 
@@ -53,10 +53,10 @@ public class SQLStorageContainer<K, V> extends DatabaseStorageContainer<Map<K, V
     }
 
     public SQLStorageContainer<K, V> setupSync(BiConsumer<K, V> callback, long tickInterval) {
-        if (sqlMessenger != null) return this;
+        if (sqlPoller != null) return this;
 
-        sqlMessenger = OldSQLMessenger.setup(storageHandler.getCredentials(), storageHandler.getTable() + "_messages", tickInterval);
-        sqlMessenger.getEventEmitter().listen(payload -> {
+        sqlPoller = SQLPoller.setup(storageHandler.getCredentials(), storageHandler.getTable() + "_messages", tickInterval);
+        sqlPoller.getEventEmitter().listen(payload -> {
             final ParameterizedType type = $Gson$Types.newParameterizedTypeWithOwner(null, SQLMessage.class, storageHandler.getKeyType(), storageHandler.getValueType());
             final SQLMessage<K, V> sqlMessage = gson.fromJson(payload, type);
             if (sqlMessage.value == null) {

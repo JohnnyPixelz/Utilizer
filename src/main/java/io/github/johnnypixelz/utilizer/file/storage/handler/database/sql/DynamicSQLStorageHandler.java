@@ -2,17 +2,16 @@ package io.github.johnnypixelz.utilizer.file.storage.handler.database.sql;
 
 import com.google.gson.Gson;
 import io.github.johnnypixelz.utilizer.sql.DatabaseCredentials;
-import io.github.johnnypixelz.utilizer.tasks.Tasks;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class StringSQLStorageHandler<V> extends SQLStorageHandler<String, V> {
+public class DynamicSQLStorageHandler<K, V> extends SQLStorageHandler<K, V> {
     private boolean initializedTable = false;
 
-    public StringSQLStorageHandler(DatabaseCredentials credentials, String table, Gson gson, Class<V> valueType) {
-        super(credentials, table, gson, String.class, valueType);
+    public DynamicSQLStorageHandler(DatabaseCredentials credentials, String table, Gson gson, Class<K> keyType, Class<V> valueType) {
+        super(credentials, table, gson, keyType, valueType);
     }
 
     private void checkTableInitialization() {
@@ -30,7 +29,7 @@ public class StringSQLStorageHandler<V> extends SQLStorageHandler<String, V> {
     }
 
     @Override
-    public Optional<Map<String, V>> load() {
+    public Optional<Map<K, V>> load() {
         checkTableInitialization();
 
         return sqlClient.executeQuery("""
@@ -38,43 +37,45 @@ public class StringSQLStorageHandler<V> extends SQLStorageHandler<String, V> {
                 FROM %s
                 """.formatted(table), preparedStatement -> {
         }, resultSet -> {
-            final Map<String, V> dataMap = new HashMap<>();
+            final Map<K, V> dataMap = new HashMap<>();
             while (resultSet.next()) {
                 final String id = resultSet.getString("id");
                 final String data = resultSet.getString("data");
+                final K parsedKey = gson.fromJson(id, keyType);
                 final V parsedData = gson.fromJson(data, valueType);
-                dataMap.put(id, parsedData);
+                dataMap.put(parsedKey, parsedData);
             }
 
             return dataMap;
         });
     }
 
-    public void insert(String key, V value) {
-        Tasks.async().run(() -> {
-            checkTableInitialization();
+    @Override
+    public void insert(K key, V value) {
+        checkTableInitialization();
 
-            if (value == null) {
-                sqlClient.executeAsync("""
+        if (value == null) {
+            sqlClient.executeAsync("""
                     DELETE FROM %s
                     WHERE id = ?
                     """.formatted(table), preparedStatement -> {
-                    preparedStatement.setString(1, key);
-                });
+                final String keyJson = gson.toJson(key, keyType);
+                preparedStatement.setString(1, keyJson);
+            });
 
-                return;
-            }
+            return;
+        }
 
-            final String jsonString = gson.toJson(value, valueType);
+        final String keyJson = gson.toJson(key, keyType);
+        final String valueJson = gson.toJson(value, valueType);
 
-            sqlClient.executeAsync("""
+        sqlClient.executeAsync("""
                 INSERT INTO %s (ID, DATA)
                 VALUES (?, ?)
                 ON DUPLICATE KEY UPDATE DATA = VALUES(DATA);
                 """.formatted(table), preparedStatement -> {
-                preparedStatement.setString(1, key);
-                preparedStatement.setString(2, jsonString);
-            });
+            preparedStatement.setString(1, keyJson);
+            preparedStatement.setString(2, valueJson);
         });
     }
 

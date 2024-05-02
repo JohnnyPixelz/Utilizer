@@ -5,26 +5,26 @@ import io.github.johnnypixelz.utilizer.maven.Dependency;
 import io.github.johnnypixelz.utilizer.maven.DependencyLoader;
 import io.github.johnnypixelz.utilizer.sql.DatabaseCredentials;
 
-public class PostgresqlDriver implements SQLDriver {
+public class MariaDBDriver implements SQLDriver {
 
     @Override
     public String getName() {
-        return "postgres";
+        return "mariadb";
     }
 
     @Override
     public String getDriverClassName() {
-        return "org.postgresql.Driver";
+        return "org.mariadb.jdbc.Driver";
     }
 
     @Override
     public String getDataSourceClassName() {
-        return "org.postgresql.ds.PGSimpleDataSource";
+        return "org.mariadb.jdbc.MariaDbDataSource";
     }
 
     @Override
     public Dependency getDriverDependency() {
-        return Dependency.of("org.postgresql", "postgresql", "42.7.3");
+        return Dependency.of("org.mariadb.jdbc", "mariadb-java-client", "3.3.3");
     }
 
     @Override
@@ -34,13 +34,19 @@ public class PostgresqlDriver implements SQLDriver {
         DependencyLoader.load(getDriverDependency());
         hikariConfig.setDataSourceClassName(getDataSourceClassName());
 
-        hikariConfig.addDataSourceProperty("serverName", databaseCredentials.getAddress());
-        hikariConfig.addDataSourceProperty("portNumber", String.valueOf(databaseCredentials.getPort()));
-        hikariConfig.addDataSourceProperty("databaseName", databaseCredentials.getDatabase());
-        hikariConfig.addDataSourceProperty("user", databaseCredentials.getUsername());
-        hikariConfig.addDataSourceProperty("password", databaseCredentials.getPassword());
+        final String jdbc = getJdbcUrl(
+                databaseCredentials.getAddress(),
+                String.valueOf(databaseCredentials.getPort()),
+                databaseCredentials.getUsername(),
+                databaseCredentials.getPassword(),
+                databaseCredentials.getDatabase(),
+                databaseCredentials.getOptions()
+        );
 
-        databaseCredentials.getOptions().forEach(hikariConfig::addDataSourceProperty);
+        hikariConfig.addDataSourceProperty("url", jdbc);
+
+        hikariConfig.setUsername(databaseCredentials.getUsername());
+        hikariConfig.setPassword(databaseCredentials.getPassword());
 
         return hikariConfig;
     }
