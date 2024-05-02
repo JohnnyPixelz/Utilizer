@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.internal.$Gson$Types;
 import io.github.johnnypixelz.utilizer.file.storage.container.database.DatabaseStorageContainer;
 import io.github.johnnypixelz.utilizer.file.storage.handler.database.sql.SQLStorageHandler;
+import io.github.johnnypixelz.utilizer.sql.SQL;
 import io.github.johnnypixelz.utilizer.sql.SQLPoller;
 
 import java.lang.reflect.ParameterizedType;
@@ -55,7 +56,7 @@ public class SQLStorageContainer<K, V> extends DatabaseStorageContainer<Map<K, V
     public SQLStorageContainer<K, V> setupSync(BiConsumer<K, V> callback, long tickInterval) {
         if (sqlPoller != null) return this;
 
-        sqlPoller = SQLPoller.setup(storageHandler.getCredentials(), storageHandler.getTable() + "_messages", tickInterval);
+        sqlPoller = SQL.newPoller(storageHandler.getCredentials(), storageHandler.getTable() + "_messages", (int) tickInterval);
         sqlPoller.getEventEmitter().listen(payload -> {
             final ParameterizedType type = $Gson$Types.newParameterizedTypeWithOwner(null, SQLMessage.class, storageHandler.getKeyType(), storageHandler.getValueType());
             final SQLMessage<K, V> sqlMessage = gson.fromJson(payload, type);
