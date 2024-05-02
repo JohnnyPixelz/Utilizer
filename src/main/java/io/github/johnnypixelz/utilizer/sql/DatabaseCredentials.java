@@ -1,50 +1,60 @@
 package io.github.johnnypixelz.utilizer.sql;
 
+import com.zaxxer.hikari.HikariConfig;
+import io.github.johnnypixelz.utilizer.sql.drivers.SQLDriver;
 import org.bukkit.configuration.ConfigurationSection;
 
 import javax.annotation.Nonnull;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class DatabaseCredentials {
 
     @Nonnull
-    public static DatabaseCredentials of(@Nonnull String address, int port, @Nonnull String database, @Nonnull String username, @Nonnull String password) {
-        return of(address, port, database, username, password, "mariadb", new HashMap<>());
+    public static DatabaseCredentials of(@Nonnull String address, int port, @Nonnull String database, @Nonnull String username, @Nonnull String password, @Nonnull SQLDriver driver) {
+        return of(address, port, database, username, password, driver, new HashMap<>());
     }
 
     @Nonnull
-    public static DatabaseCredentials of(@Nonnull String address, int port, @Nonnull String database, @Nonnull String username, @Nonnull String password, @Nonnull String dataSource) {
-        return of(address, port, database, username, password, dataSource, new HashMap<>());
+    public static DatabaseCredentials of(@Nonnull String address, int port, @Nonnull String database, @Nonnull String username, @Nonnull String password, @Nonnull SQLDriver driver, @Nonnull Map<String, String> options) {
+        return new DatabaseCredentials(address, port, database, username, password, driver, options);
     }
 
     @Nonnull
-    public static DatabaseCredentials of(@Nonnull String address, int port, @Nonnull String database, @Nonnull String username, @Nonnull String password, @Nonnull String dataSource, @Nonnull Map<String, String> options) {
-        return new DatabaseCredentials(address, port, database, username, password, dataSource, options);
-    }
+    public static DatabaseCredentials fromConfig(@Nonnull ConfigurationSection section, SQLDriver... supportedDrivers) {
+        if (supportedDrivers.length == 0) {
+            throw new IllegalArgumentException("No supported drivers found.");
+        }
 
-    @Nonnull
-    public static DatabaseCredentials fromConfig(@Nonnull ConfigurationSection config) {
         Map<String, String> options = new HashMap<>();
 
-        if (config.isConfigurationSection("properties")) {
-            final ConfigurationSection section = config.getConfigurationSection("properties");
-            Objects.requireNonNull(section);
+        if (section.isConfigurationSection("properties")) {
+            final ConfigurationSection propertiesSection = section.getConfigurationSection("properties");
+            Objects.requireNonNull(propertiesSection);
 
-            for (String property : section.getKeys(false)) {
-                options.put(property, section.getString(property));
+            for (String property : propertiesSection.getKeys(false)) {
+                options.put(property, propertiesSection.getString(property));
             }
         }
 
+        final SQLDriver sqlDriver;
+
+        final String mode = section.getString("mode");
+        if (mode != null) {
+            final Optional<SQLDriver> optionalSQLDriver = Arrays.stream(supportedDrivers)
+                    .filter(driver -> driver.getName().equalsIgnoreCase(mode))
+                    .findFirst();
+            sqlDriver = optionalSQLDriver.orElseThrow(() -> new IllegalArgumentException("Mode " + mode + " is unsupported"));
+        } else {
+            sqlDriver = supportedDrivers[0];
+        }
+
         return of(
-                config.getString("address", "localhost"),
-                config.getInt("port", 3306),
-                config.getString("database", "minecraft"),
-                config.getString("username", "root"),
-                config.getString("password", "passw0rd"),
-                config.getString("datasource", "mariadb"),
+                section.getString("address", "localhost"),
+                section.getInt("port", 3306),
+                section.getString("database", "minecraft"),
+                section.getString("username", "root"),
+                section.getString("password", "password"),
+                sqlDriver,
                 options
         );
     }
@@ -54,16 +64,16 @@ public class DatabaseCredentials {
     private final String database;
     private final String username;
     private final String password;
-    private final String dataSource;
+    private final SQLDriver sqlDriver;
     private final Map<String, String> options;
 
-    private DatabaseCredentials(@Nonnull String address, int port, @Nonnull String database, @Nonnull String username, @Nonnull String password, @Nonnull String dataSource, @Nonnull Map<String, String> options) {
+    private DatabaseCredentials(@Nonnull String address, int port, @Nonnull String database, @Nonnull String username, @Nonnull String password, @Nonnull SQLDriver sqlDriver, @Nonnull Map<String, String> options) {
         this.address = Objects.requireNonNull(address);
         this.port = port;
         this.database = Objects.requireNonNull(database);
         this.username = Objects.requireNonNull(username);
         this.password = Objects.requireNonNull(password);
-        this.dataSource = Objects.requireNonNull(dataSource);
+        this.sqlDriver = Objects.requireNonNull(sqlDriver);
         this.options = Objects.requireNonNull(options);
     }
 
@@ -92,8 +102,8 @@ public class DatabaseCredentials {
     }
 
     @Nonnull
-    public String getDataSource() {
-        return dataSource;
+    public SQLDriver getSqlDriver() {
+        return sqlDriver;
     }
 
     @Nonnull
@@ -102,30 +112,14 @@ public class DatabaseCredentials {
     }
 
     @Nonnull
-    public String getJdbcURL() {
-        String format = "jdbc:{source}://{address}:{port}/{database}?{options}";
-
-        Map<String, String> options = new HashMap<>(getOptions());
-        options.put("user", getUsername());
-        options.put("password", getPassword());
-
-        final String optionsString = options.entrySet()
-                .stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
-                .collect(Collectors.joining("&"));
-
-        return format.replace("{source}", dataSource)
-                .replace("{address}", address)
-                .replace("{port}", String.valueOf(port))
-                .replace("{database}", database)
-                .replace("{options}", optionsString);
+    public HikariConfig getHikariConfig() {
+        return sqlDriver.generateHikariConfig(this);
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == this) return true;
-        if (!(o instanceof DatabaseCredentials)) return false;
-        final DatabaseCredentials other = (DatabaseCredentials) o;
+        if (!(o instanceof DatabaseCredentials other)) return false;
 
         return this.getAddress().equals(other.getAddress()) &&
                 this.getPort() == other.getPort() &&
