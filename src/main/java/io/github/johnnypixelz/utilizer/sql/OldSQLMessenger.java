@@ -12,17 +12,17 @@ import java.util.UUID;
 
 import static org.jooq.impl.DSL.*;
 
-public class SQLMessenger {
+public class OldSQLMessenger {
     private static final Field<Long> ID = field("id", SQLDataType.BIGINT.identity(true));
     private static final Field<Long> TIME = field("time", SQLDataType.BIGINT.notNull());
     private static final Field<String> MESSAGE = field("message", SQLDataType.VARCHAR.notNull());
     private static final Field<String> MESSENGER_ID = field("messengerId", SQLDataType.VARCHAR.notNull());
 
-    public static SQLMessenger setup(DatabaseCredentials credentials, String table) {
+    public static OldSQLMessenger setup(DatabaseCredentials credentials, String table) {
         return setup(credentials, table, 20);
     }
 
-    public static SQLMessenger setup(DatabaseCredentials credentials, String table, long tickInterval) {
+    public static OldSQLMessenger setup(DatabaseCredentials credentials, String table, long tickInterval) {
         final String dataSource = credentials.getDataSource();
 
         SQLDialect dialect;
@@ -36,12 +36,12 @@ public class SQLMessenger {
         return setup(credentials, table, dialect, tickInterval);
     }
 
-    public static SQLMessenger setup(DatabaseCredentials credentials, String table, SQLDialect dialect) {
+    public static OldSQLMessenger setup(DatabaseCredentials credentials, String table, SQLDialect dialect) {
         return setup(credentials, table, dialect, 20);
     }
 
-    public static SQLMessenger setup(DatabaseCredentials credentials, String table, SQLDialect dialect, long tickInterval) {
-        SQLMessenger messenger = new SQLMessenger(credentials, table, dialect);
+    public static OldSQLMessenger setup(DatabaseCredentials credentials, String table, SQLDialect dialect, long tickInterval) {
+        OldSQLMessenger messenger = new OldSQLMessenger(credentials, table, dialect);
 
         messenger.sql.execute(dslContext -> {
             dslContext.createTableIfNotExists(table(table))
@@ -70,7 +70,7 @@ public class SQLMessenger {
         return messenger;
     }
 
-    private final SQL sql;
+    private final OldSQL sql;
     private final String table;
     private final StatefulEventEmitter<String> eventEmitter;
     private final UUID messengerId;
@@ -79,8 +79,8 @@ public class SQLMessenger {
     private BukkitTask pollTask;
     private BukkitTask cleanOldMessagesTask;
 
-    private SQLMessenger(DatabaseCredentials credentials, String table, SQLDialect dialect) {
-        this.sql = SQL.connect(credentials, dialect);
+    private OldSQLMessenger(DatabaseCredentials credentials, String table, SQLDialect dialect) {
+        this.sql = OldSQL.connect(credentials, dialect);
         this.table = table;
         this.eventEmitter = new StatefulEventEmitter<>();
         this.messengerId = UUID.randomUUID();
