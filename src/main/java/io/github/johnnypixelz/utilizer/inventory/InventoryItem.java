@@ -1,35 +1,57 @@
 package io.github.johnnypixelz.utilizer.inventory;
 
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.function.Consumer;
+public abstract class InventoryItem {
+    private InventoryContents inventoryContents;
+    private Integer rawSlot;
 
-public class InventoryItem {
+    void mount(InventoryContents inventoryContents, int rawSlot) {
+        this.inventoryContents = inventoryContents;
+        this.rawSlot = rawSlot;
 
-    private final ItemStack item;
-    private final Consumer<InventoryClickEvent> consumer;
-
-    private InventoryItem(ItemStack item, Consumer<InventoryClickEvent> consumer) {
-        this.item = item;
-        this.consumer = consumer;
+        onMount();
     }
 
-    public static InventoryItem dummy(ItemStack item) {
-        return clickable(item, e -> {
-        });
+    void unmount() {
+        onUnmount();
+
+        this.inventoryContents = null;
+        this.rawSlot = null;
     }
 
-    public static InventoryItem clickable(ItemStack item, Consumer<InventoryClickEvent> consumer) {
-        return new InventoryItem(item, consumer);
+    protected InventoryContents contents() {
+        return inventoryContents;
     }
 
-    public void run(InventoryClickEvent event) {
-        consumer.accept(event);
+    protected Inventory inventory() {
+        return inventoryContents.inventory().getInventory();
     }
 
-    public ItemStack getItem() {
-        return item;
+    protected void set(ItemStack itemStack) {
+        inventory().setItem(rawSlot, itemStack);
+    }
+
+    protected void remove() {
+        inventory().setItem(rawSlot, null);
+    }
+
+    void handleClick(InventoryClickEvent event) {
+        onClick(event);
+    }
+
+    protected void onMount() {
+
+    }
+
+    protected void onUnmount() {
+
+    }
+
+    protected void onClick(InventoryClickEvent event) {
+
     }
 
 }

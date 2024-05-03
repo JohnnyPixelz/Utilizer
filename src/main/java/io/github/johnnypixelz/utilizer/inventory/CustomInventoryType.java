@@ -2,7 +2,6 @@ package io.github.johnnypixelz.utilizer.inventory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import io.github.johnnypixelz.utilizer.inventory.content.Slot;
 import org.bukkit.event.inventory.InventoryType;
 
 import java.util.*;

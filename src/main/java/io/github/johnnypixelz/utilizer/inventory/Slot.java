@@ -1,4 +1,4 @@
-package io.github.johnnypixelz.utilizer.inventory.content;
+package io.github.johnnypixelz.utilizer.inventory;
 
 public class Slot {
     private final int row;

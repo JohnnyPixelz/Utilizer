@@ -1,7 +1,9 @@
 package io.github.johnnypixelz.utilizer.inventory;
 
-import io.github.johnnypixelz.utilizer.inventory.content.InventoryContents;
-import io.github.johnnypixelz.utilizer.inventory.content.Slot;
+import io.github.johnnypixelz.utilizer.inventory.items.ClickableItem;
+import io.github.johnnypixelz.utilizer.inventory.items.DisplayItem;
+import io.github.johnnypixelz.utilizer.smartinvs.PaneType;
+import io.github.johnnypixelz.utilizer.smartinvs.PremadeItems;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -40,16 +42,16 @@ public class CustomInventory {
 
     }
 
+    void handleClick(InventoryClickEvent event) {
+        contents.handleClick(event);
+    }
+
     public Inventory getInventory() {
         return inventory;
     }
 
     public InventoryContents getContents() {
         return contents;
-    }
-
-    public void open(Player player) {
-        open(player, 0);
     }
 
     private void init() {
@@ -84,6 +86,10 @@ public class CustomInventory {
         onDraw();
     }
 
+    public void open(Player player) {
+        open(player, 0);
+    }
+
     public void open(Player player, int page) {
         if (!loaded) {
             onLoad();
@@ -97,9 +103,14 @@ public class CustomInventory {
 
         contents.pagination().page(page);
 
+        InventoryManager.getInventory(player).ifPresent(customInventory -> {
+            customInventory.close(player);
+        });
+
         try {
-            player.openInventory(inventory);
             InventoryManager.setInventory(player, this);
+            player.openInventory(inventory);
+            onOpen(player);
         } catch (Exception exception) {
             InventoryManager.handleInventoryOpenError(this, player, exception);
         }
@@ -108,6 +119,8 @@ public class CustomInventory {
     public void close(Player player) {
         InventoryManager.setInventory(player, null);
         player.closeInventory();
+
+        onClose(player);
     }
 
     public CustomInventory title(String title) {
@@ -126,20 +139,36 @@ public class CustomInventory {
 
     // Protected methods
 
-    protected InventoryItem item(ItemStack itemStack) {
-        return InventoryItem.dummy(itemStack);
+    protected DisplayItem display(ItemStack itemStack) {
+        return new DisplayItem(itemStack);
     }
 
-    protected InventoryItem item(ItemStack itemStack, Consumer<InventoryClickEvent> event) {
-        return InventoryItem.clickable(itemStack, event);
+    protected DisplayItem pane(PaneType paneType) {
+        return display(PremadeItems.getCustomPane(paneType));
     }
 
-    protected void set(InventoryItem item, int row, int column) {
-
+    protected ClickableItem clickable(ItemStack itemStack) {
+        return new ClickableItem(itemStack);
     }
 
-    protected void set(InventoryItem item, Slot slot) {
+    protected ClickableItem clickable(ItemStack itemStack, Consumer<InventoryClickEvent> click) {
+        return new ClickableItem(itemStack, click);
+    }
 
+    protected void add(InventoryItem item) {
+        contents.add(item);
+    }
+
+    protected void set(int row, int column, InventoryItem item) {
+        contents.set(row, column, item);
+    }
+
+    protected void set(Slot slot, InventoryItem item) {
+        contents.set(slot, item);
+    }
+
+    protected void set(int rawSlot, InventoryItem item) {
+        contents.set(rawSlot, item);
     }
 
     protected Slot slot(int row, int column) {
@@ -147,35 +176,31 @@ public class CustomInventory {
     }
 
     protected void fill(InventoryItem item) {
-
+        contents.fill(item);
     }
 
     protected void fillRow(int row, InventoryItem item) {
-
+        contents.fillRow(row, item);
     }
 
     protected void fillColumn(int column, InventoryItem item) {
-
+        contents.fillColumn(column, item);
     }
 
     protected void fillBorders(InventoryItem item) {
-
+        contents.fillBorders(item);
     }
 
     protected void fillRect(int fromRow, int fromColumn, int toRow, int toColumn, InventoryItem item) {
-
+        contents.fillRect(fromRow, fromColumn, toRow, toColumn, item);
     }
 
     protected void fillRect(Slot fromPos, Slot toPos, InventoryItem item) {
-
+        contents.fillRect(fromPos, toPos, item);
     }
 
     protected void clear() {
-
+        contents.clear();
     }
-
-//    public Optional<CustomInventory> getParent() {
-//        return Optional.ofNullable(parent);
-//    }
 
 }

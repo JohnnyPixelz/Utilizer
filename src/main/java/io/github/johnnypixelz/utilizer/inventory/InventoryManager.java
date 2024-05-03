@@ -1,5 +1,6 @@
 package io.github.johnnypixelz.utilizer.inventory;
 
+import io.github.johnnypixelz.utilizer.plugin.Logs;
 import io.github.johnnypixelz.utilizer.plugin.Provider;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -92,14 +93,9 @@ public class InventoryManager {
                 final int inventorySize = inv.getType().getSize();
                 if (event.getSlot() >= inventorySize) return;
 
-                // TODO on click event
-//                inv.getListeners().stream()
-//                        .filter(listener -> listener.getType() == InventoryClickEvent.class)
-//                        .forEach(listener -> ((InventoryListener<InventoryClickEvent>) listener).accept(event));
+                inv.handleClick(event);
 
-                inv.getContents().get(event.getSlot()).ifPresent(item -> item.run(event));
-
-                player.updateInventory();
+                player.updateInventory(); // TODO remove this and test
             }
         }
 
@@ -133,6 +129,7 @@ public class InventoryManager {
                 return;
 
             CustomInventory inv = inventories.get(player.getUniqueId());
+//            inv.onOpen(player);
 
             // TODO inventoryOpenEvent
 //            inv.getListeners().stream()

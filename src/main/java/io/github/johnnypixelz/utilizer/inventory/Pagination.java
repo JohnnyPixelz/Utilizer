@@ -1,6 +1,4 @@
-package io.github.johnnypixelz.utilizer.inventory.content;
-
-import io.github.johnnypixelz.utilizer.inventory.InventoryItem;
+package io.github.johnnypixelz.utilizer.inventory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,17 +52,6 @@ public class Pagination {
 
     public Pagination last() {
         this.currentPage = this.items.size() / this.itemsPerPage;
-        return this;
-    }
-
-    public Pagination addToIterator(SlotIterator iterator) {
-        for (InventoryItem item : getPageItems()) {
-            iterator.next().set(item);
-
-            if (iterator.ended())
-                break;
-        }
-
         return this;
     }
 

@@ -1,13 +1,7 @@
-package io.github.johnnypixelz.utilizer.inventory.content;
+package io.github.johnnypixelz.utilizer.inventory;
 
-import io.github.johnnypixelz.utilizer.inventory.CustomInventory;
-import io.github.johnnypixelz.utilizer.inventory.InventoryItem;
-import io.github.johnnypixelz.utilizer.inventory.InventoryManager;
 import io.github.johnnypixelz.utilizer.plugin.Logs;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.event.inventory.InventoryClickEvent;
 
 import java.util.*;
 
@@ -15,15 +9,19 @@ public class InventoryContents {
 
     private final CustomInventory inv;
 
-    private final List<InventoryItem> contents;
+    private final Map<Integer, InventoryItem> contents;
 
     private final Pagination pagination = new Pagination();
-    private final Map<String, SlotIterator> iterators = new HashMap<>();
     private final Map<String, Object> properties = new HashMap<>();
 
-    public InventoryContents(CustomInventory inv) {
+    InventoryContents(CustomInventory inv) {
         this.inv = inv;
-        this.contents = new ArrayList<>();
+        this.contents = new HashMap<>();
+    }
+
+    void handleClick(InventoryClickEvent event) {
+        final int slot = event.getSlot();
+        get(slot).ifPresent(item -> item.handleClick(event));
     }
 
     public CustomInventory inventory() {
@@ -32,34 +30,6 @@ public class InventoryContents {
 
     public Pagination pagination() {
         return pagination;
-    }
-
-    public Optional<SlotIterator> iterator(String id) {
-        return Optional.ofNullable(this.iterators.get(id));
-    }
-
-    public SlotIterator newIterator(String id, SlotIterator.Type type, int startRow, int startColumn) {
-        SlotIterator iterator = new SlotIterator(this, inv,
-                type, startRow, startColumn);
-
-        this.iterators.put(id, iterator);
-        return iterator;
-    }
-
-    public SlotIterator newIterator(String id, SlotIterator.Type type, Slot startPos) {
-        return newIterator(id, type, startPos.getRow(), startPos.getColumn());
-    }
-
-    public SlotIterator newIterator(SlotIterator.Type type, int startRow, int startColumn) {
-        return new SlotIterator(this, inv, type, startRow, startColumn);
-    }
-
-    public SlotIterator newIterator(SlotIterator.Type type, Slot startPos) {
-        return newIterator(type, startPos.getRow(), startPos.getColumn());
-    }
-
-    public List<InventoryItem> all() {
-        return contents;
     }
 
     public Optional<Slot> firstEmpty() {
@@ -98,9 +68,11 @@ public class InventoryContents {
             throw new IllegalArgumentException("rawSlot out of bounds");
         }
 
-        contents.set(rawSlot, item);
+        get(rawSlot).ifPresent(InventoryItem::unmount);
 
-        update(rawSlot, item.getItem());
+        contents.put(rawSlot, item);
+
+        item.mount(this, rawSlot);
     }
 
     public void set(int row, int column, InventoryItem item) {
@@ -109,9 +81,7 @@ public class InventoryContents {
             throw new IllegalArgumentException("Slot position out of bounds");
         }
 
-        contents.set(rawSlot.get(), item);
-
-        update(row, column, item != null ? item.getItem() : null);
+        set(rawSlot.get(), item);
     }
 
     public void set(Slot slotPos, InventoryItem item) {
@@ -189,39 +159,20 @@ public class InventoryContents {
         properties.put(name, value);
         return this;
     }
-
-    private void update(int rawSlot, ItemStack item) {
-        if (rawSlot < 0 || rawSlot >= inventory().getType().getSize()) {
-            throw new IllegalArgumentException("rawSlot out of bounds");
-        }
-
-        inventory().getInventory().setItem(rawSlot, item);
-    }
-
-    private void update(int row, int column, ItemStack item) {
-        final Optional<Integer> optionalRawSlot = inv.getType().getRawSlot(Slot.of(row, column));
-        if (optionalRawSlot.isEmpty()) {
-            throw new IllegalArgumentException("slot out of bounds");
-        }
-
-        final Integer rawSlot = optionalRawSlot.get();
-
-        update(rawSlot, item);
-    }
     
     public void update() {
-        inv.getInventory().clear();
         for (int i = 0; i < contents.size(); i++) {
             final InventoryItem inventoryItem = contents.get(i);
             if (inventoryItem == null) continue;
 
-            inv.getInventory().setItem(i, inventoryItem.getItem());
+            inventoryItem.unmount();
+            inventoryItem.mount(this, i);
         }
     }
 
     public void clear() {
+        contents.values().forEach(InventoryItem::unmount);
         contents.clear();
-        update();
     }
 
 }
