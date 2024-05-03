@@ -1,223 +1,181 @@
 package io.github.johnnypixelz.utilizer.inventory;
 
 import io.github.johnnypixelz.utilizer.inventory.content.InventoryContents;
-import io.github.johnnypixelz.utilizer.inventory.content.InventoryProvider;
-import io.github.johnnypixelz.utilizer.inventory.openers.InventoryOpener;
+import io.github.johnnypixelz.utilizer.inventory.content.Slot;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.function.Consumer;
 
-@SuppressWarnings("unchecked")
 public class CustomInventory {
 
-    private String id;
+    private Inventory inventory;
+    private InventoryContents contents;
+
+    // Inventory Options
     private String title;
-    private InventoryType type;
-    private int rows, columns;
-    private boolean closeable;
-    private boolean openParentOnClose;
+    private CustomInventoryType type;
+//    private boolean closeable;
+//    private boolean openParentOnClose;
 
-    private InventoryProvider provider;
-    private CustomInventory parent;
+    private boolean loaded = false;
 
-    private List<InventoryListener<? extends Event>> listeners;
+    protected void onLoad() {
 
-    private CustomInventory() {
     }
 
-    public Inventory open(Player player) {
-        return open(player, 0);
+    protected void onDraw() {
+
     }
 
-    public Inventory open(Player player, int page) {
-        Optional<CustomInventory> oldInv = InventoryManager.getInventory(player);
+    protected void onOpen(Player player) {
 
-        oldInv.ifPresent(inv -> {
-            inv.getListeners().stream()
-                    .filter(listener -> listener.getType() == InventoryCloseEvent.class)
-                    .forEach(listener -> ((InventoryListener<InventoryCloseEvent>) listener)
-                            .accept(new InventoryCloseEvent(player.getOpenInventory())));
+    }
 
-            InventoryManager.setInventory(player, null);
-        });
+    protected void onClose(Player player) {
 
-        InventoryContents contents = new InventoryContents(this, player.getUniqueId());
+    }
+
+    public Inventory getInventory() {
+        return inventory;
+    }
+
+    public InventoryContents getContents() {
+        return contents;
+    }
+
+    public void open(Player player) {
+        open(player, 0);
+    }
+
+    private void init() {
+        if (type == null) {
+            throw new IllegalStateException("Inventory type not configured.");
+        }
+
+        if (title == null) {
+            this.title = type.getInventoryType().getDefaultTitle();
+        }
+
+        if (type.getInventoryType() == InventoryType.CHEST) {
+            int size = switch (type) {
+                case CHEST_1 -> 9;
+                case CHEST_2 -> 18;
+                case CHEST_3 -> 27;
+                case CHEST_4 -> 36;
+                case CHEST_5 -> 45;
+                case CHEST_6 -> 54;
+                default -> throw new IllegalStateException("Unreachable code");
+            };
+            inventory = Bukkit.createInventory(null, size, title);
+        } else {
+            inventory = Bukkit.createInventory(null, type.getInventoryType());
+        }
+
+        this.contents = new InventoryContents(this);
+    }
+
+    public void redraw() {
+        contents.clear();
+        onDraw();
+    }
+
+    public void open(Player player, int page) {
+        if (!loaded) {
+            onLoad();
+
+            init();
+
+            this.loaded = true;
+
+            onDraw();
+        }
+
         contents.pagination().page(page);
 
-        InventoryManager.setContents(player, contents);
-
         try {
-            this.provider.init(player, contents);
-
-            // If the current inventory has been closed or replaced within the init method, returns
-            if (!InventoryManager.getContents(player).equals(Optional.of(contents))) {
-                return null;
-            }
-
-            InventoryOpener opener = InventoryManager.findOpener(type)
-                    .orElseThrow(() -> new IllegalStateException("No opener found for the inventory type " + type.name()));
-            Inventory handle = opener.open(this, player);
-
+            player.openInventory(inventory);
             InventoryManager.setInventory(player, this);
-
-            return handle;
-        } catch (Exception e) {
-            InventoryManager.handleInventoryOpenError(this, player, e);
-            return null;
+        } catch (Exception exception) {
+            InventoryManager.handleInventoryOpenError(this, player, exception);
         }
     }
 
     public void close(Player player) {
-        listeners.stream()
-                .filter(listener -> listener.getType() == InventoryCloseEvent.class)
-                .forEach(listener -> ((InventoryListener<InventoryCloseEvent>) listener)
-                        .accept(new InventoryCloseEvent(player.getOpenInventory())));
-
         InventoryManager.setInventory(player, null);
         player.closeInventory();
-
-        InventoryManager.setContents(player, null);
     }
 
-    public String getId() {
-        return id;
+    public CustomInventory title(String title) {
+        this.title = title;
+        return this;
     }
 
-    public String getTitle() {
-        return title;
+    public CustomInventory type(CustomInventoryType type) {
+        this.type = type;
+        return this;
     }
 
-    public InventoryType getType() {
+    public CustomInventoryType getType() {
         return type;
     }
 
-    public int getRows() {
-        return rows;
+    // Protected methods
+
+    protected InventoryItem item(ItemStack itemStack) {
+        return InventoryItem.dummy(itemStack);
     }
 
-    public int getColumns() {
-        return columns;
+    protected InventoryItem item(ItemStack itemStack, Consumer<InventoryClickEvent> event) {
+        return InventoryItem.clickable(itemStack, event);
     }
 
-    public boolean doesOpenParentOnClose() {
-        return openParentOnClose;
+    protected void set(InventoryItem item, int row, int column) {
+
     }
 
-    public void setOpenParentOnClose(boolean openParentOnClose) {
-        this.openParentOnClose = openParentOnClose;
+    protected void set(InventoryItem item, Slot slot) {
+
     }
 
-    public boolean isCloseable() {
-        return closeable;
+    protected Slot slot(int row, int column) {
+        return Slot.of(row, column);
     }
 
-    public void setCloseable(boolean closeable) {
-        this.closeable = closeable;
+    protected void fill(InventoryItem item) {
+
     }
 
-    public InventoryProvider getProvider() {
-        return provider;
+    protected void fillRow(int row, InventoryItem item) {
+
     }
 
-    public Optional<CustomInventory> getParent() {
-        return Optional.ofNullable(parent);
+    protected void fillColumn(int column, InventoryItem item) {
+
     }
 
-    List<InventoryListener<? extends Event>> getListeners() {
-        return listeners;
+    protected void fillBorders(InventoryItem item) {
+
     }
 
-    public static Builder builder() {
-        return new Builder();
+    protected void fillRect(int fromRow, int fromColumn, int toRow, int toColumn, InventoryItem item) {
+
     }
 
-    public static final class Builder {
+    protected void fillRect(Slot fromPos, Slot toPos, InventoryItem item) {
 
-        private String id = "unknown";
-        private String title = "";
-        private InventoryType type = InventoryType.CHEST;
-        private int rows = 6, columns = 9;
-        private boolean closeable = true;
-        private boolean openParentOnClose = false;
-
-        private InventoryProvider provider;
-        private CustomInventory parent;
-
-        private final List<InventoryListener<? extends Event>> listeners = new ArrayList<>();
-
-        private Builder() {
-        }
-
-        public Builder id(String id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder title(String title) {
-            this.title = title;
-            return this;
-        }
-
-        public Builder type(InventoryType type) {
-            this.type = type;
-            return this;
-        }
-
-        public Builder size(int rows, int columns) {
-            this.rows = rows;
-            this.columns = columns;
-            return this;
-        }
-
-        public Builder closeable(boolean closeable) {
-            this.closeable = closeable;
-            return this;
-        }
-
-        public Builder provider(InventoryProvider provider) {
-            this.provider = provider;
-            return this;
-        }
-
-        public Builder parent(CustomInventory parent) {
-            this.parent = parent;
-            return this;
-        }
-
-        public Builder openParentOnClose() {
-            this.openParentOnClose = true;
-            return this;
-        }
-
-        public Builder listener(InventoryListener<? extends Event> listener) {
-            this.listeners.add(listener);
-            return this;
-        }
-
-        public CustomInventory build() {
-            if (this.provider == null)
-                throw new IllegalStateException("The provider of the SmartInventory.Builder must be set.");
-
-            CustomInventory inv = new CustomInventory();
-            inv.id = this.id;
-            inv.title = this.title;
-            inv.type = this.type;
-            inv.rows = this.rows;
-            inv.columns = this.columns;
-            inv.closeable = this.closeable;
-            inv.provider = this.provider;
-            inv.parent = this.parent;
-            inv.listeners = this.listeners;
-            inv.openParentOnClose = this.openParentOnClose;
-
-            return inv;
-        }
     }
+
+    protected void clear() {
+
+    }
+
+//    public Optional<CustomInventory> getParent() {
+//        return Optional.ofNullable(parent);
+//    }
 
 }

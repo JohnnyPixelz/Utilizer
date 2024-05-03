@@ -3,31 +3,27 @@ package io.github.johnnypixelz.utilizer.inventory.content;
 import io.github.johnnypixelz.utilizer.inventory.CustomInventory;
 import io.github.johnnypixelz.utilizer.inventory.InventoryItem;
 import io.github.johnnypixelz.utilizer.inventory.InventoryManager;
+import io.github.johnnypixelz.utilizer.plugin.Logs;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class InventoryContents {
 
     private final CustomInventory inv;
-    private final UUID player;
 
-    private final InventoryItem[][] contents;
+    private final List<InventoryItem> contents;
 
     private final Pagination pagination = new Pagination();
     private final Map<String, SlotIterator> iterators = new HashMap<>();
     private final Map<String, Object> properties = new HashMap<>();
 
-    public InventoryContents(CustomInventory inv, UUID player) {
+    public InventoryContents(CustomInventory inv) {
         this.inv = inv;
-        this.player = player;
-        this.contents = new InventoryItem[inv.getRows()][inv.getColumns()];
+        this.contents = new ArrayList<>();
     }
 
     public CustomInventory inventory() {
@@ -62,107 +58,121 @@ public class InventoryContents {
         return newIterator(type, startPos.getRow(), startPos.getColumn());
     }
 
-    public InventoryItem[][] all() {
+    public List<InventoryItem> all() {
         return contents;
     }
 
     public Optional<Slot> firstEmpty() {
-        for (int row = 0; row < contents.length; row++) {
-            for (int column = 0; column < contents[0].length; column++) {
-                if (!this.get(row, column).isPresent())
-                    return Optional.of(new Slot(row, column));
-            }
+        for (int i = 0; i < contents.size(); i++) {
+            final Optional<InventoryItem> inventoryItem = get(i);
+            if (inventoryItem.isEmpty()) return Optional.ofNullable(inv.getType().getSlotFromRaw(i));
         }
 
         return Optional.empty();
     }
 
     public Optional<InventoryItem> get(int row, int column) {
-        if (row >= contents.length)
-            return Optional.empty();
-        if (column >= contents[row].length)
-            return Optional.empty();
+        final Optional<Integer> rawSlot = inv.getType().getRawSlot(Slot.of(row, column));
+        if (rawSlot.isEmpty()) {
+            throw new IllegalStateException("Slot out of bounds");
+        }
 
-        return Optional.ofNullable(contents[row][column]);
+        return Optional.ofNullable(contents.get(rawSlot.get()));
+    }
+
+    public Optional<InventoryItem> get(int slot) {
+        if (inv.getType().getSize() <= slot) {
+            Logs.warn("Attempted to get item from slot " + slot + " while the maximum slots are " + inv.getType().getSize() + ".");
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(contents.get(slot));
     }
 
     public Optional<InventoryItem> get(Slot slotPos) {
         return get(slotPos.getRow(), slotPos.getColumn());
     }
 
-    public InventoryContents set(int row, int column, InventoryItem item) {
-        if (row >= contents.length)
-            return this;
-        if (column >= contents[row].length)
-            return this;
-
-        contents[row][column] = item;
-        update(row, column, item != null ? item.getItem() : null);
-        return this;
-    }
-
-    public InventoryContents set(Slot slotPos, InventoryItem item) {
-        return set(slotPos.getRow(), slotPos.getColumn(), item);
-    }
-
-    public InventoryContents add(InventoryItem item) {
-        for (int row = 0; row < contents.length; row++) {
-            for (int column = 0; column < contents[0].length; column++) {
-                if (contents[row][column] == null) {
-                    set(row, column, item);
-                    return this;
-                }
-            }
+    public void set(int rawSlot, InventoryItem item) {
+        if (inv.getType().getSize() <= rawSlot) {
+            throw new IllegalArgumentException("rawSlot out of bounds");
         }
 
-        return this;
+        contents.set(rawSlot, item);
+
+        update(rawSlot, item.getItem());
     }
 
-    public InventoryContents fill(InventoryItem item) {
-        for (int row = 0; row < contents.length; row++)
-            for (int column = 0; column < contents[row].length; column++)
-                set(row, column, item);
+    public void set(int row, int column, InventoryItem item) {
+        final Optional<Integer> rawSlot = inv.getType().getRawSlot(Slot.of(row, column));
+        if (rawSlot.isEmpty()) {
+            throw new IllegalArgumentException("Slot position out of bounds");
+        }
 
-        return this;
+        contents.set(rawSlot.get(), item);
+
+        update(row, column, item != null ? item.getItem() : null);
     }
 
-    public InventoryContents fillRow(int row, InventoryItem item) {
-        if (row >= contents.length)
-            return this;
-
-        for (int column = 0; column < contents[row].length; column++)
-            set(row, column, item);
-
-        return this;
+    public void set(Slot slotPos, InventoryItem item) {
+        set(slotPos.getRow(), slotPos.getColumn(), item);
     }
 
-    public InventoryContents fillColumn(int column, InventoryItem item) {
-        for (int row = 0; row < contents.length; row++)
-            set(row, column, item);
+    public void add(InventoryItem item) {
+        final Optional<Slot> optionalEmptySlot = firstEmpty();
+        if (optionalEmptySlot.isEmpty()) return;
 
-        return this;
+        set(optionalEmptySlot.get(), item);
     }
 
-    public InventoryContents fillBorders(InventoryItem item) {
-        fillRect(0, 0, inv.getRows() - 1, inv.getColumns() - 1, item);
-        return this;
+    public void fill(InventoryItem item) {
+        for (int i = 0; i < inv.getType().getSize(); i++) {
+            set(i, item);
+        }
     }
 
-    public InventoryContents fillRect(int fromRow, int fromColumn, int toRow, int toColumn, InventoryItem item) {
+    public void fillRow(int row, InventoryItem item) {
+        for (Slot slot : inv.getType().getSlots()) {
+            if (slot.getRow() != row) continue;
+
+            set(slot, item);
+        }
+    }
+
+    public void fillColumn(int column, InventoryItem item) {
+        for (Slot slot : inv.getType().getSlots()) {
+            if (slot.getColumn() != column) continue;
+
+            set(slot, item);
+        }
+    }
+
+    public void fillBorders(InventoryItem item) {
+        final List<Slot> slots = inv.getType().getBorderSlots().get();
+        for (Slot slot : slots) {
+            set(slot, item);
+        }
+    }
+
+    public void fillRect(int fromRow, int fromColumn, int toRow, int toColumn, InventoryItem item) {
+        List<Integer> slotsToFill = new ArrayList<>();
+
         for (int row = fromRow; row <= toRow; row++) {
             for (int column = fromColumn; column <= toColumn; column++) {
-                if (row != fromRow && row != toRow && column != fromColumn && column != toColumn)
-                    continue;
+                final Optional<Integer> optionalRawSlot = inv.getType().getRawSlot(Slot.of(row, column));
+                if (optionalRawSlot.isEmpty()) {
+                    throw new IllegalArgumentException("rect out of bounds");
+                }
 
-                set(row, column, item);
+                slotsToFill.add(optionalRawSlot.get());
             }
         }
 
-        return this;
+        slotsToFill.forEach(integer -> set(integer, item));
     }
 
-    public InventoryContents fillRect(Slot fromPos, Slot toPos, InventoryItem item) {
-        return fillRect(fromPos.getRow(), fromPos.getColumn(), toPos.getRow(), toPos.getColumn(), item);
+    public void fillRect(Slot fromPos, Slot toPos, InventoryItem item) {
+        fillRect(fromPos.getRow(), fromPos.getColumn(), toPos.getRow(), toPos.getColumn(), item);
     }
 
     @SuppressWarnings("unchecked")
@@ -180,13 +190,38 @@ public class InventoryContents {
         return this;
     }
 
-    private void update(int row, int column, ItemStack item) {
-        Player currentPlayer = Bukkit.getPlayer(player);
-        if (!InventoryManager.getOpenedPlayers(inv).contains(currentPlayer))
-            return;
+    private void update(int rawSlot, ItemStack item) {
+        if (rawSlot < 0 || rawSlot >= inventory().getType().getSize()) {
+            throw new IllegalArgumentException("rawSlot out of bounds");
+        }
 
-        Inventory topInventory = currentPlayer.getOpenInventory().getTopInventory();
-        topInventory.setItem(inv.getColumns() * row + column, item);
+        inventory().getInventory().setItem(rawSlot, item);
+    }
+
+    private void update(int row, int column, ItemStack item) {
+        final Optional<Integer> optionalRawSlot = inv.getType().getRawSlot(Slot.of(row, column));
+        if (optionalRawSlot.isEmpty()) {
+            throw new IllegalArgumentException("slot out of bounds");
+        }
+
+        final Integer rawSlot = optionalRawSlot.get();
+
+        update(rawSlot, item);
+    }
+    
+    public void update() {
+        inv.getInventory().clear();
+        for (int i = 0; i < contents.size(); i++) {
+            final InventoryItem inventoryItem = contents.get(i);
+            if (inventoryItem == null) continue;
+
+            inv.getInventory().setItem(i, inventoryItem.getItem());
+        }
+    }
+
+    public void clear() {
+        contents.clear();
+        update();
     }
 
 }
