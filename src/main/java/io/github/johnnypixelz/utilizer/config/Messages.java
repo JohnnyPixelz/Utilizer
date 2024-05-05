@@ -121,6 +121,64 @@ public class Messages {
     }
 
     @Nonnull
+    public static Message parse(ConfigurationSection section, String path) {
+        Message message = new Message();
+
+        if (section.isConfigurationSection(path)) {
+            ConfigurationSection messageSection = section.getConfigurationSection(path);
+            for (String key : messageSection.getKeys(false)) {
+                switch (key.toLowerCase()) {
+                    case "message":
+                        if (messageSection.isList(key)) {
+                            message.setMessageList(messageSection.getStringList(key));
+                            break;
+                        }
+                        if (messageSection.isString(key)) {
+                            message.setMessage(messageSection.getString(key));
+                            break;
+                        }
+                        break;
+                    case "title":
+                        if (!messageSection.isString(key)) break;
+                        message.setTitle(messageSection.getString(key));
+                        break;
+                    case "subtitle":
+                        if (!messageSection.isString(key)) break;
+                        message.setSubtitle(messageSection.getString(key));
+                        break;
+                    case "actionbar":
+                        if (!messageSection.isString(key)) break;
+                        message.setActionbar(messageSection.getString(key));
+                        break;
+                    case "sound":
+                        if (!messageSection.isString(key)) break;
+                        String soundString = messageSection.getString(key);
+                        XSound.matchXSound(soundString).ifPresent(xSound -> message.setSound(xSound.parseSound()));
+                        break;
+                    case "fade-in":
+                        if (!messageSection.isInt(key)) break;
+                        message.getTitleSettings().setTitleFadeIn(messageSection.getInt(key));
+                        break;
+                    case "stay":
+                        if (!messageSection.isInt(key)) break;
+                        message.getTitleSettings().setTitleStay(messageSection.getInt(key));
+                        break;
+                    case "fade-out":
+                        if (!messageSection.isInt(key)) break;
+                        message.getTitleSettings().setTitleFadeOut(messageSection.getInt(key));
+                        break;
+                }
+            }
+        } else if (section.isList(path)) {
+            message.setMessageList(section.getStringList(path));
+        } else if (section.isString(path)) {
+            message.setMessage(section.getString(path));
+        }
+
+        return message;
+    }
+
+    @Nonnull
     public static Message cfg(@Nonnull String configPath) {
         return cfg("config", configPath);
     }
@@ -129,60 +187,7 @@ public class Messages {
     public static Message cfg(@Nonnull String config, @Nonnull String configPath) {
         FileConfiguration fileConfiguration = Configs.get(config);
 
-        Message message = new Message();
-
-        if (fileConfiguration.isConfigurationSection(configPath)) {
-            ConfigurationSection section = fileConfiguration.getConfigurationSection(configPath);
-            for (String key : section.getKeys(false)) {
-                switch (key.toLowerCase()) {
-                    case "message":
-                        if (section.isList(key)) {
-                            message.setMessageList(section.getStringList(key));
-                            break;
-                        }
-                        if (section.isString(key)) {
-                            message.setMessage(section.getString(key));
-                            break;
-                        }
-                        break;
-                    case "title":
-                        if (!section.isString(key)) break;
-                        message.setTitle(section.getString(key));
-                        break;
-                    case "subtitle":
-                        if (!section.isString(key)) break;
-                        message.setSubtitle(section.getString(key));
-                        break;
-                    case "actionbar":
-                        if (!section.isString(key)) break;
-                        message.setActionbar(section.getString(key));
-                        break;
-                    case "sound":
-                        if (!section.isString(key)) break;
-                        String soundString = section.getString(key);
-                        XSound.matchXSound(soundString).ifPresent(xSound -> message.setSound(xSound.parseSound()));
-                        break;
-                    case "fade-in":
-                        if (!section.isInt(key)) break;
-                        message.getTitleSettings().setTitleFadeIn(section.getInt(key));
-                        break;
-                    case "stay":
-                        if (!section.isInt(key)) break;
-                        message.getTitleSettings().setTitleStay(section.getInt(key));
-                        break;
-                    case "fade-out":
-                        if (!section.isInt(key)) break;
-                        message.getTitleSettings().setTitleFadeOut(section.getInt(key));
-                        break;
-                }
-            }
-        } else if (fileConfiguration.isList(configPath)) {
-            message.setMessageList(fileConfiguration.getStringList(configPath));
-        } else if (fileConfiguration.isString(configPath)) {
-            message.setMessage(fileConfiguration.getString(configPath));
-        }
-
-        return message;
+        return parse(fileConfiguration, configPath);
     }
 
 }

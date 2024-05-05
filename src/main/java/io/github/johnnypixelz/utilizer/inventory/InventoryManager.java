@@ -1,6 +1,5 @@
 package io.github.johnnypixelz.utilizer.inventory;
 
-import io.github.johnnypixelz.utilizer.plugin.Logs;
 import io.github.johnnypixelz.utilizer.plugin.Provider;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -60,7 +59,6 @@ public class InventoryManager {
         Bukkit.getLogger().log(Level.SEVERE, "Error while updating CustomInventory:", exception);
     }
 
-    @SuppressWarnings("unchecked")
     private static class InvListener implements Listener {
 
         @EventHandler(priority = EventPriority.LOW)
@@ -148,25 +146,6 @@ public class InventoryManager {
 
             inventories.remove(player.getUniqueId());
             inv.onClose(player);
-
-//            inv.getListeners().stream()
-//                    .filter(listener -> listener.getType() == InventoryCloseEvent.class)
-//                    .forEach(listener -> ((InventoryListener<InventoryCloseEvent>) listener).accept(event));
-//
-//            if (inv.isCloseable() && inv.doesOpenParentOnClose()) {
-//                inv.getParent().ifPresent(parent -> {
-//                    Bukkit.getScheduler().runTask(Provider.getPlugin(), () -> parent.open(player));
-//                });
-//            }
-//
-//            if (inv.isCloseable()) {
-//                event.getInventory().clear();
-//
-//                inventories.remove(player.getUniqueId());
-//                contents.remove(player.getUniqueId());
-//            } else {
-//                Bukkit.getScheduler().runTask(Provider.getPlugin(), () -> player.openInventory(event.getInventory()));
-//            }
         }
 
         @EventHandler(priority = EventPriority.LOW)
@@ -178,9 +157,7 @@ public class InventoryManager {
 
             CustomInventory inv = inventories.get(player.getUniqueId());
 
-//            inv.getListeners().stream()
-//                    .filter(listener -> listener.getType() == PlayerQuitEvent.class)
-//                    .forEach(listener -> ((InventoryListener<PlayerQuitEvent>) listener).accept(event));
+            inv.onQuit(player);
 
             inventories.remove(player.getUniqueId());
         }

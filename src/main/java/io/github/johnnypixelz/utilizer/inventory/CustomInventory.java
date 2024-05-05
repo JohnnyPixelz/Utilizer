@@ -1,16 +1,25 @@
 package io.github.johnnypixelz.utilizer.inventory;
 
+import io.github.johnnypixelz.utilizer.config.Message;
 import io.github.johnnypixelz.utilizer.inventory.items.ClickableItem;
-import io.github.johnnypixelz.utilizer.inventory.items.DisplayItem;
+import io.github.johnnypixelz.utilizer.inventory.items.CloseItem;
+import io.github.johnnypixelz.utilizer.inventory.items.SimpleItem;
+import io.github.johnnypixelz.utilizer.inventory.items.SwitchItem;
+import io.github.johnnypixelz.utilizer.inventory.parser.InventoryConfig;
+import io.github.johnnypixelz.utilizer.inventory.parser.InventoryConfigItem;
+import io.github.johnnypixelz.utilizer.inventory.slot.Slot;
 import io.github.johnnypixelz.utilizer.smartinvs.PaneType;
 import io.github.johnnypixelz.utilizer.smartinvs.PremadeItems;
+import io.github.johnnypixelz.utilizer.text.Colors;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class CustomInventory {
@@ -21,8 +30,7 @@ public class CustomInventory {
     // Inventory Options
     private String title;
     private CustomInventoryType type;
-//    private boolean closeable;
-//    private boolean openParentOnClose;
+    private InventoryConfig config;
 
     private boolean loaded = false;
 
@@ -39,6 +47,10 @@ public class CustomInventory {
     }
 
     protected void onClose(Player player) {
+
+    }
+
+    protected void onQuit(Player player) {
 
     }
 
@@ -73,7 +85,7 @@ public class CustomInventory {
                 case CHEST_6 -> 54;
                 default -> throw new IllegalStateException("Unreachable code");
             };
-            inventory = Bukkit.createInventory(null, size, title);
+            inventory = Bukkit.createInventory(null, size, Colors.color(title));
         } else {
             inventory = Bukkit.createInventory(null, type.getInventoryType());
         }
@@ -83,6 +95,7 @@ public class CustomInventory {
 
     public void redraw() {
         contents.clear();
+        config.draw(this);
         onDraw();
     }
 
@@ -93,10 +106,17 @@ public class CustomInventory {
     public void open(Player player, int page) {
         if (!loaded) {
             onLoad();
+            if (config != null) {
+                config.load(this);
+            }
 
             init();
 
             this.loaded = true;
+
+            if (config != null) {
+                config.draw(this);
+            }
 
             onDraw();
         }
@@ -133,17 +153,41 @@ public class CustomInventory {
         return this;
     }
 
+    protected CustomInventory config(ConfigurationSection section) {
+        this.config = InventoryConfig.parse(section);
+        return this;
+    }
+
+    protected CustomInventory config(String configFile, String configPath) {
+        this.config = InventoryConfig.parse(configFile, configPath);
+        return this;
+    }
+
     public CustomInventoryType getType() {
         return type;
     }
 
     // Protected methods
 
-    protected DisplayItem display(ItemStack itemStack) {
-        return new DisplayItem(itemStack);
+    protected ItemStack paneStack(PaneType paneType) {
+        return PremadeItems.getCustomPane(paneType);
     }
 
-    protected DisplayItem pane(PaneType paneType) {
+    protected Optional<InventoryConfigItem> configItem(String configItemId) {
+        if (config == null) return Optional.empty();
+        return config.getConfigItem(configItemId);
+    }
+
+    protected Optional<Message> configMessage(String messageId) {
+        if (config == null) return Optional.empty();
+        return config.getMessage(messageId);
+    }
+
+    protected SimpleItem display(ItemStack itemStack) {
+        return new SimpleItem(itemStack);
+    }
+
+    protected SimpleItem pane(PaneType paneType) {
         return display(PremadeItems.getCustomPane(paneType));
     }
 
@@ -151,8 +195,24 @@ public class CustomInventory {
         return new ClickableItem(itemStack);
     }
 
-    protected ClickableItem clickable(ItemStack itemStack, Consumer<InventoryClickEvent> click) {
-        return new ClickableItem(itemStack, click);
+    protected ClickableItem clickable(ItemStack itemStack, Consumer<InventoryClickEvent> leftClick) {
+        return new ClickableItem(itemStack).leftClick(leftClick);
+    }
+
+    protected ClickableItem clickable(ItemStack itemStack, Consumer<InventoryClickEvent> leftClick, Consumer<InventoryClickEvent> rightClick) {
+        return new ClickableItem(itemStack).leftClick(leftClick).rightClick(rightClick);
+    }
+
+    protected CloseItem closeButton(ItemStack itemStack) {
+        return new CloseItem(itemStack);
+    }
+
+    protected SwitchItem switchButton(ItemStack offStack, ItemStack onStack) {
+        return new SwitchItem(offStack, onStack);
+    }
+
+    protected SwitchItem switchButton(ItemStack offStack, ItemStack onStack, boolean state) {
+        return new SwitchItem(offStack, onStack, state);
     }
 
     protected void add(InventoryItem item) {

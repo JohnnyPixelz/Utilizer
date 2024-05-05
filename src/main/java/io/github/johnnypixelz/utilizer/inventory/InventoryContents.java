@@ -1,5 +1,7 @@
 package io.github.johnnypixelz.utilizer.inventory;
 
+import io.github.johnnypixelz.utilizer.inventory.slot.PositionedSlot;
+import io.github.johnnypixelz.utilizer.inventory.slot.Slot;
 import io.github.johnnypixelz.utilizer.plugin.Logs;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
@@ -12,7 +14,6 @@ public class InventoryContents {
     private final Map<Integer, InventoryItem> contents;
 
     private final Pagination pagination = new Pagination();
-    private final Map<String, Object> properties = new HashMap<>();
 
     InventoryContents(CustomInventory inv) {
         this.inv = inv;
@@ -42,33 +43,33 @@ public class InventoryContents {
     }
 
     public Optional<InventoryItem> get(int row, int column) {
-        final Optional<Integer> rawSlot = inv.getType().getRawSlot(Slot.of(row, column));
-        if (rawSlot.isEmpty()) {
-            throw new IllegalStateException("Slot out of bounds");
-        }
-
-        return Optional.ofNullable(contents.get(rawSlot.get()));
+        return get(Slot.of(row, column));
     }
 
     public Optional<InventoryItem> get(int slot) {
         if (inv.getType().getSize() <= slot) {
-            Logs.warn("Attempted to get item from slot " + slot + " while the maximum slots are " + inv.getType().getSize() + ".");
+            Logs.warn("Attempted to get item from slot %d while the maximum slots are %d.".formatted(slot, inventory().getInventory().getSize()));
             return Optional.empty();
         }
 
         return Optional.ofNullable(contents.get(slot));
     }
 
-    public Optional<InventoryItem> get(Slot slotPos) {
-        return get(slotPos.getRow(), slotPos.getColumn());
+    public Optional<InventoryItem> get(Slot slot) {
+        final Optional<Integer> rawSlot = slot.getRawSlot(inventory().getType());
+        if (rawSlot.isEmpty()) {
+            throw new IllegalArgumentException("slot %s out of bounds".formatted(slot));
+        }
+
+        return get(rawSlot.get());
     }
 
     public void set(int rawSlot, InventoryItem item) {
         if (inv.getType().getSize() <= rawSlot) {
-            throw new IllegalArgumentException("rawSlot out of bounds");
+            throw new IllegalArgumentException("rawSlot %d out of bounds".formatted(rawSlot));
         }
 
-        get(rawSlot).ifPresent(InventoryItem::unmount);
+        get(rawSlot).ifPresent(mountedItem -> mountedItem.unmount(rawSlot));
 
         contents.put(rawSlot, item);
 
@@ -76,16 +77,15 @@ public class InventoryContents {
     }
 
     public void set(int row, int column, InventoryItem item) {
-        final Optional<Integer> rawSlot = inv.getType().getRawSlot(Slot.of(row, column));
-        if (rawSlot.isEmpty()) {
-            throw new IllegalArgumentException("Slot position out of bounds");
-        }
-
-        set(rawSlot.get(), item);
+        set(Slot.of(row, column), item);
     }
 
-    public void set(Slot slotPos, InventoryItem item) {
-        set(slotPos.getRow(), slotPos.getColumn(), item);
+    public void set(Slot slot, InventoryItem item) {
+        final Optional<Integer> rawSlot = slot.getRawSlot(inventory().getType());
+        if (rawSlot.isEmpty()) {
+            throw new IllegalArgumentException("slot %s out of bounds".formatted(slot));
+        }
+        set(rawSlot.get(), item);
     }
 
     public void add(InventoryItem item) {
@@ -102,7 +102,7 @@ public class InventoryContents {
     }
 
     public void fillRow(int row, InventoryItem item) {
-        for (Slot slot : inv.getType().getSlots()) {
+        for (PositionedSlot slot : inv.getType().getSlots()) {
             if (slot.getRow() != row) continue;
 
             set(slot, item);
@@ -110,7 +110,7 @@ public class InventoryContents {
     }
 
     public void fillColumn(int column, InventoryItem item) {
-        for (Slot slot : inv.getType().getSlots()) {
+        for (PositionedSlot slot : inv.getType().getSlots()) {
             if (slot.getColumn() != column) continue;
 
             set(slot, item);
@@ -118,60 +118,61 @@ public class InventoryContents {
     }
 
     public void fillBorders(InventoryItem item) {
-        final List<Slot> slots = inv.getType().getBorderSlots().get();
+        final List<PositionedSlot> slots = inv.getType().getBorderSlots().get();
         for (Slot slot : slots) {
             set(slot, item);
         }
     }
 
     public void fillRect(int fromRow, int fromColumn, int toRow, int toColumn, InventoryItem item) {
+        fillRect(Slot.of(fromRow, fromColumn), Slot.of(toRow, toColumn), item);
+    }
+
+    public void fillRect(Slot fromSlot, Slot toSlot, InventoryItem item) {
+        final Optional<Integer> fromRawSlot = fromSlot.getRawSlot(inventory().getType());
+        if (fromRawSlot.isEmpty()) {
+            throw new IllegalArgumentException("fromRawSlot %s out of bounds".formatted(fromSlot));
+        }
+
+        final Optional<Integer> toRawSlot = toSlot.getRawSlot(inventory().getType());
+        if (toRawSlot.isEmpty()) {
+            throw new IllegalArgumentException("toRawSlot %s out of bounds".formatted(toSlot));
+        }
+
+        fillRect(fromRawSlot.get(), toRawSlot.get(), item);
+    }
+
+    public void fillRect(int fromRawSlot, int toRawSlot, InventoryItem item) {
+        if (fromRawSlot > toRawSlot) {
+            throw new IllegalArgumentException("fromRawSlot %d cannot be bigger than toRawSlot %d".formatted(fromRawSlot, toRawSlot));
+        }
+
         List<Integer> slotsToFill = new ArrayList<>();
 
-        for (int row = fromRow; row <= toRow; row++) {
-            for (int column = fromColumn; column <= toColumn; column++) {
-                final Optional<Integer> optionalRawSlot = inv.getType().getRawSlot(Slot.of(row, column));
-                if (optionalRawSlot.isEmpty()) {
-                    throw new IllegalArgumentException("rect out of bounds");
-                }
+        final int inventorySize = inventory().getType().getSize();
+        if (fromRawSlot < 0 || fromRawSlot >= inventorySize || toRawSlot >= inventorySize) {
+            throw new IllegalArgumentException("rect out of bounds");
+        }
 
-                slotsToFill.add(optionalRawSlot.get());
-            }
+        for (int i = fromRawSlot; i <= toRawSlot; i++) {
+            slotsToFill.add(i);
         }
 
         slotsToFill.forEach(integer -> set(integer, item));
     }
 
-    public void fillRect(Slot fromPos, Slot toPos, InventoryItem item) {
-        fillRect(fromPos.getRow(), fromPos.getColumn(), toPos.getRow(), toPos.getColumn(), item);
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> T property(String name) {
-        return (T) properties.get(name);
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> T property(String name, T def) {
-        return properties.containsKey(name) ? (T) properties.get(name) : def;
-    }
-
-    public InventoryContents setProperty(String name, Object value) {
-        properties.put(name, value);
-        return this;
-    }
-    
     public void update() {
         for (int i = 0; i < contents.size(); i++) {
             final InventoryItem inventoryItem = contents.get(i);
             if (inventoryItem == null) continue;
 
-            inventoryItem.unmount();
+            inventoryItem.unmount(i);
             inventoryItem.mount(this, i);
         }
     }
 
     public void clear() {
-        contents.values().forEach(InventoryItem::unmount);
+        contents.forEach((integer, item) -> item.unmount(integer));
         contents.clear();
     }
 
