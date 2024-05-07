@@ -11,13 +11,8 @@ public class SimpleItem extends InventoryItem {
     }
 
     @Override
-    protected void onMount(int slot) {
-        set(slot, item);
-    }
-
-    @Override
-    protected void onUnmount(int slot) {
-        remove(slot);
+    protected void onMount() {
+        set(item);
     }
 
 }

@@ -1,8 +1,6 @@
 package io.github.johnnypixelz.utilizer.inventory.slot;
 
-import io.github.johnnypixelz.utilizer.inventory.CustomInventoryType;
-
-import java.util.Optional;
+import io.github.johnnypixelz.utilizer.inventory.shape.InventoryShape;
 
 public class RawSlot implements Slot {
     private final int rawSlot;
@@ -16,8 +14,12 @@ public class RawSlot implements Slot {
     }
 
     @Override
-    public Optional<Integer> getRawSlot(CustomInventoryType customInventoryType) {
-        return rawSlot < 0 || rawSlot >= customInventoryType.getSize() ? Optional.empty() : Optional.of(rawSlot);
+    public int getRawSlot(InventoryShape inventoryShape) {
+        if (rawSlot < 0 || rawSlot >= inventoryShape.getSize()) {
+            throw new IllegalArgumentException("rawSlot %s out of bounds [%d, %d]".formatted(this, 0, inventoryShape.getSize() - 1));
+        }
+
+        return rawSlot;
     }
 
     @Override

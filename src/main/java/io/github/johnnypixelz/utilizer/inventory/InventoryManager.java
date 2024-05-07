@@ -88,7 +88,7 @@ public class InventoryManager {
                 if (event.getSlot() < 0) return;
 
                 CustomInventory inv = inventories.get(player.getUniqueId());
-                final int inventorySize = inv.getType().getSize();
+                final int inventorySize = inv.getCustomInventoryType().getInventoryShape().getSize();
                 if (event.getSlot() >= inventorySize) return;
 
                 inv.handleClick(event);

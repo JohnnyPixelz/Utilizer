@@ -108,11 +108,11 @@ public class InventoryConfig {
             try {
                 switch (key) {
                     case "border" ->
-                            customInventory.getContents().fillBorders(new SimpleItem(configItem.getItemStack()));
-                    case "fill" -> customInventory.getContents().fill(new SimpleItem(configItem.getItemStack()));
+                            customInventory.getRootPane().fillBorders(() -> new SimpleItem(configItem.getItemStack()));
+                    case "fill" -> customInventory.getRootPane().fill(() -> new SimpleItem(configItem.getItemStack()));
                     default -> {
                         configItem.getSlot().ifPresent(slot -> {
-                            customInventory.getContents().set(slot, new SimpleItem(configItem.getItemStack()));
+                            customInventory.getRootPane().setInventoryItem(slot, new SimpleItem(configItem.getItemStack()));
                         });
                     }
                 }

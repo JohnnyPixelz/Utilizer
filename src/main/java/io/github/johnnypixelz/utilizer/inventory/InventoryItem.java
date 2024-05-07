@@ -2,57 +2,45 @@ package io.github.johnnypixelz.utilizer.inventory;
 
 import io.github.johnnypixelz.utilizer.event.StatefulEventEmitter;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public abstract class InventoryItem {
-    private InventoryContents inventoryContents;
-    private final List<Integer> mountedSlots = new ArrayList<>();
+    private final StatefulEventEmitter<InventoryClickEvent> onClick;
+    private final StatefulEventEmitter<InventoryClickEvent> onLeftClick;
+    private final StatefulEventEmitter<InventoryClickEvent> onRightClick;
+    private final StatefulEventEmitter<InventoryClickEvent> onShiftLeftClick;
+    private final StatefulEventEmitter<InventoryClickEvent> onShiftRightClick;
 
-    private final StatefulEventEmitter<InventoryClickEvent> onClick = new StatefulEventEmitter<>();
-    private final StatefulEventEmitter<InventoryClickEvent> onLeftClick = new StatefulEventEmitter<>();
-    private final StatefulEventEmitter<InventoryClickEvent> onRightClick = new StatefulEventEmitter<>();
-    private final StatefulEventEmitter<InventoryClickEvent> onShiftLeftClick = new StatefulEventEmitter<>();
-    private final StatefulEventEmitter<InventoryClickEvent> onShiftRightClick = new StatefulEventEmitter<>();
+    private MountedSlot mountedSlot;
 
-    void mount(InventoryContents inventoryContents, int rawSlot) {
-        this.inventoryContents = inventoryContents;
-        this.mountedSlots.add(rawSlot);
+    public InventoryItem() {
+        this.onClick = new StatefulEventEmitter<>();
+        this.onLeftClick = new StatefulEventEmitter<>();
+        this.onRightClick = new StatefulEventEmitter<>();
+        this.onShiftLeftClick = new StatefulEventEmitter<>();
+        this.onShiftRightClick = new StatefulEventEmitter<>();
 
-        onMount(rawSlot);
+        this.mountedSlot = null;
     }
 
-    void unmount(int rawSlot) {
-        onUnmount(rawSlot);
+    void mount(ContentHolder contentHolder, int rawSlot) {
+        if (this.mountedSlot != null) {
+            throw new IllegalStateException("attempted to mount an already mounted item");
+        }
 
-        this.mountedSlots.remove((Integer) rawSlot);
+        this.mountedSlot = new MountedSlot(contentHolder, rawSlot);
+
+        onMount();
     }
 
-    protected InventoryContents contents() {
-        return inventoryContents;
+    void unmount() {
+        onUnmount();
+
+        this.mountedSlot = null;
     }
 
-    protected Inventory inventory() {
-        return inventoryContents.inventory().getInventory();
-    }
-
-    protected void set(int rawSlot, ItemStack itemStack) {
-        inventory().setItem(rawSlot, itemStack);
-    }
-
-    protected void setAll(ItemStack itemStack) {
-        this.mountedSlots.forEach(integer -> inventory().setItem(integer, itemStack));
-    }
-
-    protected void remove(int rawSlot) {
-        inventory().setItem(rawSlot, null);
-    }
-
-    protected void removeAll() {
-        this.mountedSlots.forEach(integer -> inventory().setItem(integer, null));
+    public MountedSlot getMountedSlot() {
+        return mountedSlot;
     }
 
     void handleClick(InventoryClickEvent event) {
@@ -76,11 +64,19 @@ public abstract class InventoryItem {
         }
     }
 
-    protected void onMount(int slot) {
+    protected void set(ItemStack itemStack) {
+        if (mountedSlot == null) {
+            throw new IllegalStateException("cannot use set(ItemStack) when not mounted");
+        }
+
+        this.mountedSlot.getContentHolder().setRenderedItem(mountedSlot.getRawSlot(), itemStack);
+    }
+
+    protected void onMount() {
 
     }
 
-    protected void onUnmount(int slot) {
+    protected void onUnmount() {
 
     }
 

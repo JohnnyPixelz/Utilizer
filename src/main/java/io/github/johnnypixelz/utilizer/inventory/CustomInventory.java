@@ -5,6 +5,7 @@ import io.github.johnnypixelz.utilizer.inventory.items.ClickableItem;
 import io.github.johnnypixelz.utilizer.inventory.items.CloseItem;
 import io.github.johnnypixelz.utilizer.inventory.items.SimpleItem;
 import io.github.johnnypixelz.utilizer.inventory.items.SwitchItem;
+import io.github.johnnypixelz.utilizer.inventory.panes.PaginatedPane;
 import io.github.johnnypixelz.utilizer.inventory.parser.InventoryConfig;
 import io.github.johnnypixelz.utilizer.inventory.parser.InventoryConfigItem;
 import io.github.johnnypixelz.utilizer.inventory.slot.Slot;
@@ -21,16 +22,17 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class CustomInventory {
 
-    private Inventory inventory;
-    private InventoryContents contents;
+    private Inventory bukkitInventory;
+    private Pane rootPane;
 
     // Inventory Options
     private String title;
-    private CustomInventoryType type;
-    private InventoryConfig config;
+    private CustomInventoryType inventoryType;
+    private InventoryConfig inventoryConfig;
 
     private boolean loaded = false;
 
@@ -55,28 +57,29 @@ public class CustomInventory {
     }
 
     void handleClick(InventoryClickEvent event) {
-        contents.handleClick(event);
+        final Optional<InventoryItem> topInventoryItem = rootPane.getTopInventoryItem(event.getRawSlot());
+        topInventoryItem.ifPresent(item -> item.handleClick(event));
     }
 
-    public Inventory getInventory() {
-        return inventory;
+    public Inventory getBukkitInventory() {
+        return bukkitInventory;
     }
 
-    public InventoryContents getContents() {
-        return contents;
+    public Pane getRootPane() {
+        return rootPane;
     }
 
     private void init() {
-        if (type == null) {
+        if (inventoryType == null) {
             throw new IllegalStateException("Inventory type not configured.");
         }
 
         if (title == null) {
-            this.title = type.getInventoryType().getDefaultTitle();
+            this.title = inventoryType.getInventoryType().getDefaultTitle();
         }
 
-        if (type.getInventoryType() == InventoryType.CHEST) {
-            int size = switch (type) {
+        if (inventoryType.getInventoryType() == InventoryType.CHEST) {
+            int size = switch (inventoryType) {
                 case CHEST_1 -> 9;
                 case CHEST_2 -> 18;
                 case CHEST_3 -> 27;
@@ -85,43 +88,41 @@ public class CustomInventory {
                 case CHEST_6 -> 54;
                 default -> throw new IllegalStateException("Unreachable code");
             };
-            inventory = Bukkit.createInventory(null, size, Colors.color(title));
+            bukkitInventory = Bukkit.createInventory(null, size, Colors.color(title));
         } else {
-            inventory = Bukkit.createInventory(null, type.getInventoryType());
+            bukkitInventory = Bukkit.createInventory(null, inventoryType.getInventoryType());
         }
 
-        this.contents = new InventoryContents(this);
+        this.rootPane = new Pane(inventoryType.getInventoryShape());
+        rootPane.getRenderSignaller().listen(integer -> {
+            final ItemStack itemStack = rootPane.getTopRenderedItem(integer).orElse(null);
+            bukkitInventory.setItem(integer, itemStack);
+        });
     }
 
     public void redraw() {
-        contents.clear();
-        config.draw(this);
+        rootPane.clear();
+        inventoryConfig.draw(this);
         onDraw();
     }
 
     public void open(Player player) {
-        open(player, 0);
-    }
-
-    public void open(Player player, int page) {
         if (!loaded) {
             onLoad();
-            if (config != null) {
-                config.load(this);
+            if (inventoryConfig != null) {
+                inventoryConfig.load(this);
             }
 
             init();
 
             this.loaded = true;
 
-            if (config != null) {
-                config.draw(this);
+            if (inventoryConfig != null) {
+                inventoryConfig.draw(this);
             }
 
             onDraw();
         }
-
-        contents.pagination().page(page);
 
         InventoryManager.getInventory(player).ifPresent(customInventory -> {
             customInventory.close(player);
@@ -129,7 +130,7 @@ public class CustomInventory {
 
         try {
             InventoryManager.setInventory(player, this);
-            player.openInventory(inventory);
+            player.openInventory(bukkitInventory);
             onOpen(player);
         } catch (Exception exception) {
             InventoryManager.handleInventoryOpenError(this, player, exception);
@@ -149,118 +150,157 @@ public class CustomInventory {
     }
 
     public CustomInventory type(CustomInventoryType type) {
-        this.type = type;
+        this.inventoryType = type;
         return this;
     }
 
     protected CustomInventory config(ConfigurationSection section) {
-        this.config = InventoryConfig.parse(section);
+        this.inventoryConfig = InventoryConfig.parse(section);
         return this;
     }
 
     protected CustomInventory config(String configFile, String configPath) {
-        this.config = InventoryConfig.parse(configFile, configPath);
+        this.inventoryConfig = InventoryConfig.parse(configFile, configPath);
         return this;
     }
 
-    public CustomInventoryType getType() {
-        return type;
+    public CustomInventoryType getCustomInventoryType() {
+        return inventoryType;
     }
 
     // Protected methods
+
+    protected Pane pane(int rawSlot) {
+        final Pane pane = new Pane(inventoryType.getInventoryShape());
+        rootPane.addPane(rawSlot, pane);
+        pane.mount(rootPane);
+
+        return pane;
+    }
+
+    protected Pane pane(Pane pane) {
+        rootPane.addPane(0, pane);
+        pane.mount(rootPane);
+
+        return pane;
+    }
+
+    protected PaginatedPane paginatedPane() {
+        return paginatedPane(0, inventoryType.getInventoryShape().getSize() - 1);
+    }
+
+    protected PaginatedPane paginatedPane(int fromRow, int fromColumn, int toRow, int toColumn) {
+        return paginatedPane(Slot.of(fromRow, fromColumn), Slot.of(toRow, toColumn));
+    }
+
+    protected PaginatedPane paginatedPane(Slot fromSlot, Slot toSlot) {
+        final int fromRawSlot = fromSlot.getRawSlot(inventoryType.getInventoryShape());
+        final int toRawSlot = toSlot.getRawSlot(inventoryType.getInventoryShape());
+
+        return paginatedPane(fromRawSlot, toRawSlot);
+    }
+
+    protected PaginatedPane paginatedPane(int fromRawSlot, int toRawSlot) {
+        final PaginatedPane paginatedPane = new PaginatedPane(inventoryType.getInventoryShape().getSubShape(fromRawSlot, toRawSlot));
+
+        rootPane.addPane(fromRawSlot, paginatedPane);
+        paginatedPane.mount(rootPane);
+
+        return paginatedPane;
+    }
 
     protected ItemStack paneStack(PaneType paneType) {
         return PremadeItems.getCustomPane(paneType);
     }
 
     protected Optional<InventoryConfigItem> configItem(String configItemId) {
-        if (config == null) return Optional.empty();
-        return config.getConfigItem(configItemId);
+        if (inventoryConfig == null) return Optional.empty();
+        return inventoryConfig.getConfigItem(configItemId);
     }
 
     protected Optional<Message> configMessage(String messageId) {
-        if (config == null) return Optional.empty();
-        return config.getMessage(messageId);
+        if (inventoryConfig == null) return Optional.empty();
+        return inventoryConfig.getMessage(messageId);
     }
 
-    protected SimpleItem display(ItemStack itemStack) {
+    protected SimpleItem displayItem(ItemStack itemStack) {
         return new SimpleItem(itemStack);
     }
 
-    protected SimpleItem pane(PaneType paneType) {
-        return display(PremadeItems.getCustomPane(paneType));
+    protected SimpleItem paneItem(PaneType paneType) {
+        return displayItem(PremadeItems.getCustomPane(paneType));
     }
 
-    protected ClickableItem clickable(ItemStack itemStack) {
+    protected ClickableItem clickableItem(ItemStack itemStack) {
         return new ClickableItem(itemStack);
     }
 
-    protected ClickableItem clickable(ItemStack itemStack, Consumer<InventoryClickEvent> leftClick) {
+    protected ClickableItem clickableItem(ItemStack itemStack, Consumer<InventoryClickEvent> leftClick) {
         return new ClickableItem(itemStack).leftClick(leftClick);
     }
 
-    protected ClickableItem clickable(ItemStack itemStack, Consumer<InventoryClickEvent> leftClick, Consumer<InventoryClickEvent> rightClick) {
+    protected ClickableItem clickableItem(ItemStack itemStack, Consumer<InventoryClickEvent> leftClick, Consumer<InventoryClickEvent> rightClick) {
         return new ClickableItem(itemStack).leftClick(leftClick).rightClick(rightClick);
     }
 
-    protected CloseItem closeButton(ItemStack itemStack) {
+    protected CloseItem closeItem(ItemStack itemStack) {
         return new CloseItem(itemStack);
     }
 
-    protected SwitchItem switchButton(ItemStack offStack, ItemStack onStack) {
+    protected SwitchItem switchItem(ItemStack offStack, ItemStack onStack) {
         return new SwitchItem(offStack, onStack);
     }
 
-    protected SwitchItem switchButton(ItemStack offStack, ItemStack onStack, boolean state) {
+    protected SwitchItem switchItem(ItemStack offStack, ItemStack onStack, boolean state) {
         return new SwitchItem(offStack, onStack, state);
     }
 
     protected void add(InventoryItem item) {
-        contents.add(item);
+        rootPane.addInventoryItem(item);
     }
 
     protected void set(int row, int column, InventoryItem item) {
-        contents.set(row, column, item);
+        rootPane.setInventoryItem(row, column, item);
     }
 
     protected void set(Slot slot, InventoryItem item) {
-        contents.set(slot, item);
+        rootPane.setInventoryItem(slot, item);
     }
 
     protected void set(int rawSlot, InventoryItem item) {
-        contents.set(rawSlot, item);
+        rootPane.setInventoryItem(rawSlot, item);
     }
 
     protected Slot slot(int row, int column) {
         return Slot.of(row, column);
     }
 
-    protected void fill(InventoryItem item) {
-        contents.fill(item);
+    protected void fill(Supplier<InventoryItem> item) {
+        rootPane.fill(item);
     }
 
-    protected void fillRow(int row, InventoryItem item) {
-        contents.fillRow(row, item);
+    protected void fillRow(int row, Supplier<InventoryItem>  item) {
+        rootPane.fillRow(row, item);
     }
 
-    protected void fillColumn(int column, InventoryItem item) {
-        contents.fillColumn(column, item);
+    protected void fillColumn(int column, Supplier<InventoryItem>  item) {
+        rootPane.fillColumn(column, item);
     }
 
-    protected void fillBorders(InventoryItem item) {
-        contents.fillBorders(item);
+    protected void fillBorders(Supplier<InventoryItem>  item) {
+        rootPane.fillBorders(item);
     }
 
-    protected void fillRect(int fromRow, int fromColumn, int toRow, int toColumn, InventoryItem item) {
-        contents.fillRect(fromRow, fromColumn, toRow, toColumn, item);
+    protected void fillRect(int fromRow, int fromColumn, int toRow, int toColumn, Supplier<InventoryItem>  item) {
+        rootPane.fillRect(fromRow, fromColumn, toRow, toColumn, item);
     }
 
-    protected void fillRect(Slot fromPos, Slot toPos, InventoryItem item) {
-        contents.fillRect(fromPos, toPos, item);
+    protected void fillRect(Slot fromPos, Slot toPos, Supplier<InventoryItem>  item) {
+        rootPane.fillRect(fromPos, toPos, item);
     }
 
     protected void clear() {
-        contents.clear();
+        rootPane.clear();
     }
 
 }

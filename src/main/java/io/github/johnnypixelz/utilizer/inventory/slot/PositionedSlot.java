@@ -1,9 +1,8 @@
 package io.github.johnnypixelz.utilizer.inventory.slot;
 
-import io.github.johnnypixelz.utilizer.inventory.CustomInventoryType;
+import io.github.johnnypixelz.utilizer.inventory.shape.InventoryShape;
 
 import java.util.Objects;
-import java.util.Optional;
 
 public class PositionedSlot implements Slot {
     private final int row;
@@ -23,8 +22,8 @@ public class PositionedSlot implements Slot {
     }
 
     @Override
-    public Optional<Integer> getRawSlot(CustomInventoryType customInventoryType) {
-        return Optional.ofNullable(customInventoryType.getSlotToRawMap().get(this));
+    public int getRawSlot(InventoryShape inventoryShape) {
+        return inventoryShape.getRawSlotFromPositionedSlot(this);
     }
 
     @Override

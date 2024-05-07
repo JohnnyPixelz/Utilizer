@@ -1,12 +1,10 @@
 package io.github.johnnypixelz.utilizer.inventory.slot;
 
-import io.github.johnnypixelz.utilizer.inventory.CustomInventoryType;
-
-import java.util.Optional;
+import io.github.johnnypixelz.utilizer.inventory.shape.InventoryShape;
 
 public interface Slot {
 
-    Optional<Integer> getRawSlot(CustomInventoryType customInventoryType);
+    int getRawSlot(InventoryShape inventoryShape);
 
     static Slot of(int row, int column) {
         return new PositionedSlot(row, column);
