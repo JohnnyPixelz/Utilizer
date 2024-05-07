@@ -5,7 +5,6 @@ import io.github.johnnypixelz.utilizer.inventory.Pane;
 import io.github.johnnypixelz.utilizer.inventory.items.ClickableItem;
 import io.github.johnnypixelz.utilizer.inventory.shape.InventoryShape;
 import io.github.johnnypixelz.utilizer.itemstack.Items;
-import io.github.johnnypixelz.utilizer.plugin.Logs;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -48,8 +47,6 @@ public class PaginatedPane extends Pane {
 
         renderCurrentPage();
 
-        Logs.info("Filled paginated pane with " + inventoryItems.size() + " items");
-
         return this;
     }
 
@@ -81,7 +78,6 @@ public class PaginatedPane extends Pane {
     }
 
     public int next() {
-        Logs.info("Clicked next, getMaxPage is " + getMaxPage());
         if (this.currentPage >= getMaxPage()) return this.currentPage;
 
         this.currentPage += 1;
@@ -144,12 +140,8 @@ public class PaginatedPane extends Pane {
     }
 
     private List<InventoryItem> getInventoryItemsForPage(int page) {
-        Logs.info("Getting inventory items for page " + page);
-
         int fromIncluded = page * getPageSize();
         int toExcluded = (page + 1) * getPageSize();
-
-        Logs.info("Page " + page + ", index from " + fromIncluded + " to " + toExcluded + ", items " + inventoryItems.size());
 
         if (fromIncluded > inventoryItems.size()) {
             return Collections.emptyList();
@@ -163,22 +155,19 @@ public class PaginatedPane extends Pane {
             throw new IllegalStateException("Attempted to draw page without initializing items. Please do so using PaginatedPane#setItems");
         }
 
-        Logs.info("Rendering current page");
         clear();
 
         final List<InventoryItem> inventoryItemsForPage = getInventoryItemsForPage(currentPage);
-        Logs.info("Inventory Items for current page " + currentPage + " is " + inventoryItemsForPage.size());
 
-//        inventoryItemsForPage.forEach(this::add);
         for (int i = 0; i < inventoryItemsForPage.size(); i++) {
             setInventoryItem(i, inventoryItemsForPage.get(i));
         }
+
         return this;
     }
 
     @Override
     protected void onDraw() {
-        Logs.info("onDraw");
         renderCurrentPage();
     }
 

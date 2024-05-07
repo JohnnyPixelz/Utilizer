@@ -197,8 +197,7 @@ public class Pane implements ContentHolder {
     @Override
     public Optional<InventoryItem> getInventoryItem(int rawSlot) {
         if (inventoryShape.getSize() <= rawSlot) {
-            Logs.warn("Attempted to get item from slot %d while the maximum slots are %d.".formatted(rawSlot, inventoryShape.getSize()));
-            return Optional.empty();
+            throw new IllegalArgumentException("Attempted to get item from slot %d while the maximum slots are %d.".formatted(rawSlot, inventoryShape.getSize()));
         }
 
         return Optional.ofNullable(inventoryItems.get(rawSlot));
