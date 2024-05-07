@@ -156,6 +156,10 @@ public class PaginatedPane extends Pane {
     }
 
     private PaginatedPane renderCurrentPage() {
+        if (inventoryItems == null) {
+            throw new IllegalStateException("Attempted to draw page without initializing items. Please do so using PaginatedPane#setItems");
+        }
+
         Logs.info("Rendering current page");
         clear();
 
