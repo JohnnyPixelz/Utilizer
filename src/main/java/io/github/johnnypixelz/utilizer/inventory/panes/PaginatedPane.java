@@ -38,12 +38,15 @@ public class PaginatedPane extends Pane {
     public PaginatedPane(InventoryShape inventoryShape) {
         super(inventoryShape);
         this.currentPage = 0;
+        this.inventoryItems = Collections.emptyList();
     }
 
     public <T> PaginatedPane setItems(List<T> items, Function<T, InventoryItem> converter) {
         inventoryItems = items.stream()
                 .map(converter)
                 .toList();
+
+        renderCurrentPage();
 
         Logs.info("Filled paginated pane with " + inventoryItems.size() + " items");
 
