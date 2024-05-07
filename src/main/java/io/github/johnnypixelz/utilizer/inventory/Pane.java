@@ -18,7 +18,7 @@ public class Pane implements ContentHolder {
     private final Map<Integer, InventoryItem> inventoryItems; // InventoryItem objects set to a specific position.
     private final Map<Integer, ItemStack> renderedItems;
 
-    private final Map<Integer, Pane> panes; // Panes and their rawSlot
+    private final List<ContainedPane> panes;
 
     private Pane parentPane;
     private boolean mounted;
@@ -30,7 +30,7 @@ public class Pane implements ContentHolder {
         this.inventoryItems = new HashMap<>();
         this.renderedItems = new HashMap<>();
         this.inventoryShape = inventoryShape;
-        this.panes = new HashMap<>();
+        this.panes = new ArrayList<>();
         this.priority = 0;
 
         this.parentPane = null;
@@ -59,10 +59,6 @@ public class Pane implements ContentHolder {
         return this.mounted;
     }
 
-    public void draw() {
-
-    }
-
     public void mount(Pane parentPane) {
         if (this.mounted) {
             throw new IllegalStateException("cannot mount an already mounted pane");
@@ -71,7 +67,7 @@ public class Pane implements ContentHolder {
         this.parentPane = parentPane;
         this.mounted = true;
 
-        this.panes.forEach((rawSlot, pane) -> pane.mount(this));
+        this.panes.forEach((containedPane) -> containedPane.getPane().mount(this));
 
         onMount();
 
@@ -84,7 +80,7 @@ public class Pane implements ContentHolder {
             throw new IllegalStateException("cannot unmount a non-mounted pane");
         }
 
-        this.panes.forEach((rawSlot, pane) -> pane.unmount());
+        this.panes.forEach(containedPane -> containedPane.getPane().unmount());
 
         onUnmount();
 
@@ -103,14 +99,14 @@ public class Pane implements ContentHolder {
     }
 
     @Override
-    public Map<Integer, Pane> getPanes() {
+    public List<ContainedPane> getPanes() {
         return panes;
     }
 
     @Override
     public void addPane(int rawSlot, Pane pane) {
         pane.setPriority(priority + 1);
-        this.panes.put(rawSlot, pane);
+        this.panes.add(new ContainedPane(pane, rawSlot));
 
         pane.getRenderSignaller().listen(integer -> {
             this.getRenderSignaller().emit(integer - rawSlot);
@@ -120,13 +116,13 @@ public class Pane implements ContentHolder {
     @Override
     public void removePane(Pane pane) {
         pane.getRenderSignaller().getListeners().clear();
-        this.panes.values().remove(pane);
+        this.panes.removeIf(containedPane -> containedPane.getPane() == pane);
     }
 
     @Override
     public void setPriority(int priority) {
         this.priority = priority;
-        this.panes.forEach((rawSlot, pane) -> pane.setPriority(priority + 1));
+        this.panes.forEach(containedPane -> containedPane.getPane().setPriority(priority + 1));
     }
 
     @Override
@@ -146,37 +142,37 @@ public class Pane implements ContentHolder {
 
     @Override
     public Optional<Pane> getTopPane(int rawSlot) {
-        return this.panes.entrySet()
+        return this.panes
                 .stream()
-                .filter(paneEntry -> paneEntry.getKey() <= rawSlot && paneEntry.getValue().inventoryShape.getSize() + paneEntry.getKey() > rawSlot)
-                .max(Comparator.comparingInt(value -> value.getValue().getPriority()))
-                .map(Map.Entry::getValue);
+                .filter(containedPane -> containedPane.getRawSlot() <= rawSlot && containedPane.getPane().getInventoryShape().getSize() + containedPane.getRawSlot() > rawSlot)
+                .max(Comparator.comparingInt(containedPane -> containedPane.getPane().getPriority()))
+                .map(ContainedPane::getPane);
     }
 
     @Override
     public Optional<InventoryItem> getTopInventoryItem(int rawSlot) {
-        return this.panes.entrySet()
+        return this.panes
                 .stream()
-                .filter(paneEntry -> paneEntry.getValue().isMounted())
-                .filter(paneEntry -> paneEntry.getKey() <= rawSlot && paneEntry.getValue().inventoryShape.getSize() + paneEntry.getKey() > rawSlot)
-                .map(paneEntry -> Map.entry(paneEntry, paneEntry.getValue().getTopInventoryItem(rawSlot - paneEntry.getKey())))
+                .filter(paneEntry -> paneEntry.getPane().isMounted())
+                .filter(paneEntry -> paneEntry.getRawSlot() <= rawSlot && paneEntry.getPane().getInventoryShape().getSize() + paneEntry.getRawSlot() > rawSlot)
+                .map(paneEntry -> Map.entry(paneEntry, paneEntry.getPane().getTopInventoryItem(rawSlot - paneEntry.getRawSlot())))
                 .filter(paneEntry -> paneEntry.getValue().isPresent())
                 .map(paneEntry -> Map.entry(paneEntry.getKey(), paneEntry.getValue().get()))
-                .max(Comparator.comparingInt(paneEntry -> paneEntry.getKey().getValue().getPriority()))
+                .max(Comparator.comparingInt(paneEntry -> paneEntry.getKey().getPane().getPriority()))
                 .map(Map.Entry::getValue)
                 .or(() -> Optional.ofNullable(inventoryItems.get(rawSlot)));
     }
 
     @Override
     public Optional<ItemStack> getTopRenderedItem(int rawSlot) {
-        return this.panes.entrySet()
+        return this.panes
                 .stream()
-                .filter(paneEntry -> paneEntry.getValue().isMounted())
-                .filter(paneEntry -> paneEntry.getKey() <= rawSlot && paneEntry.getValue().inventoryShape.getSize() + paneEntry.getKey() > rawSlot)
-                .map(paneEntry -> Map.entry(paneEntry, paneEntry.getValue().getTopRenderedItem(rawSlot - paneEntry.getKey())))
+                .filter(paneEntry -> paneEntry.getPane().isMounted())
+                .filter(paneEntry -> paneEntry.getRawSlot() <= rawSlot && paneEntry.getPane().getInventoryShape().getSize() + paneEntry.getRawSlot() > rawSlot)
+                .map(paneEntry -> Map.entry(paneEntry, paneEntry.getPane().getTopRenderedItem(rawSlot - paneEntry.getRawSlot())))
                 .filter(paneEntry -> paneEntry.getValue().isPresent())
                 .map(paneEntry -> Map.entry(paneEntry.getKey(), paneEntry.getValue().get()))
-                .max(Comparator.comparingInt(value -> value.getKey().getValue().getPriority()))
+                .max(Comparator.comparingInt(value -> value.getKey().getPane().getPriority()))
                 .map(Map.Entry::getValue)
                 .or(() -> getRenderedItem(rawSlot));
     }

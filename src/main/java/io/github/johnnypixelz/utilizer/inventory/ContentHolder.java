@@ -4,6 +4,7 @@ import io.github.johnnypixelz.utilizer.inventory.shape.InventoryShape;
 import io.github.johnnypixelz.utilizer.inventory.slot.Slot;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -14,7 +15,7 @@ public interface ContentHolder {
 
     void setPriority(int priority);
 
-    Map<Integer, Pane> getPanes();
+    List<ContainedPane> getPanes();
 
     void addPane(int rawSlot, Pane pane);
 

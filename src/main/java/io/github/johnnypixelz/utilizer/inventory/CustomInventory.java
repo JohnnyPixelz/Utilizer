@@ -102,7 +102,11 @@ public class CustomInventory {
 
     public void redraw() {
         rootPane.clear();
-        inventoryConfig.draw(this);
+
+        if (inventoryConfig != null) {
+            inventoryConfig.draw(this);
+        }
+
         onDraw();
     }
 
