@@ -51,6 +51,18 @@ public class InventoryConfig {
         }
 
         if (!initializedType) {
+            final int rows = configurationSection.getInt("size", -1);
+            if (rows != -1) {
+                final int rowConstraint = Parse.constrain(1, 6, rows);
+                try {
+                    inventoryConfig.customInventoryType = CustomInventoryType.valueOf("CHEST_" + rowConstraint);
+                    initializedType = true;
+                } catch (Exception ignored) {
+                }
+            }
+        }
+
+        if (!initializedType) {
             inventoryConfig.customInventoryType = CustomInventoryType.CHEST_3;
             initializedType = true;
         }
@@ -58,6 +70,11 @@ public class InventoryConfig {
         final String title = configurationSection.getString("title");
         if (title != null) {
             inventoryConfig.title = title;
+        }
+
+        final long refresh = configurationSection.getLong("refresh", -1);
+        if (refresh != -1) {
+            inventoryConfig.refresh = Parse.constrain(1, Long.MAX_VALUE, refresh);
         }
 
         final ConfigurationSection itemsSection = configurationSection.getConfigurationSection("items");
@@ -84,12 +101,14 @@ public class InventoryConfig {
 
     private String title;
     private CustomInventoryType customInventoryType;
+    private Long refresh;
     private final Map<String, InventoryConfigItem> inventoryConfigItemMap;
     private final Map<String, Message> messages;
 
     private InventoryConfig() {
         this.title = null;
         this.customInventoryType = null;
+        this.refresh = null;
         this.inventoryConfigItemMap = new HashMap<>();
         this.messages = new HashMap<>();
     }
@@ -101,6 +120,7 @@ public class InventoryConfig {
     public void load(CustomInventory customInventory) {
         customInventory.title(title);
         customInventory.type(customInventoryType);
+        customInventory.refresh(refresh);
     }
 
     public void draw(CustomInventory customInventory) {

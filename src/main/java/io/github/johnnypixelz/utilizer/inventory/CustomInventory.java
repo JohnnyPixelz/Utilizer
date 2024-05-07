@@ -1,6 +1,7 @@
 package io.github.johnnypixelz.utilizer.inventory;
 
 import io.github.johnnypixelz.utilizer.config.Message;
+import io.github.johnnypixelz.utilizer.config.Parse;
 import io.github.johnnypixelz.utilizer.inventory.items.ClickableItem;
 import io.github.johnnypixelz.utilizer.inventory.items.CloseItem;
 import io.github.johnnypixelz.utilizer.inventory.items.SimpleItem;
@@ -11,6 +12,7 @@ import io.github.johnnypixelz.utilizer.inventory.parser.InventoryConfigItem;
 import io.github.johnnypixelz.utilizer.inventory.slot.Slot;
 import io.github.johnnypixelz.utilizer.smartinvs.PaneType;
 import io.github.johnnypixelz.utilizer.smartinvs.PremadeItems;
+import io.github.johnnypixelz.utilizer.tasks.Tasks;
 import io.github.johnnypixelz.utilizer.text.Colors;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -19,7 +21,10 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitTask;
 
+import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -34,7 +39,22 @@ public class CustomInventory {
     private CustomInventoryType inventoryType;
     private InventoryConfig inventoryConfig;
 
-    private boolean loaded = false;
+    private boolean loaded;
+    private long refreshInterval;;
+    private BukkitTask refreshTask;
+
+    public CustomInventory() {
+        this.bukkitInventory = null;
+        this.rootPane = null;
+
+        this.title = null;
+        this.inventoryType = null;
+        this.inventoryConfig = null;
+
+        this.loaded = false;
+        this.refreshInterval = -1;
+        this.refreshTask = null;
+    }
 
     protected void onLoad() {
 
@@ -136,6 +156,7 @@ public class CustomInventory {
             InventoryManager.setInventory(player, this);
             player.openInventory(bukkitInventory);
             onOpen(player);
+            ensureRefreshTask();
         } catch (Exception exception) {
             InventoryManager.handleInventoryOpenError(this, player, exception);
         }
@@ -158,6 +179,49 @@ public class CustomInventory {
         return this;
     }
 
+    public CustomInventory refresh(@Nullable Long refreshInterval) {
+        this.refreshInterval = refreshInterval == null ? -1 : Parse.constrain(1, Long.MAX_VALUE, refreshInterval);
+
+        // Cancel old task
+        if (this.refreshTask != null && !this.refreshTask.isCancelled()) {
+            this.refreshTask.cancel();
+            this.refreshTask = null;
+        }
+
+        // Create a new task if applicable
+        ensureRefreshTask();
+
+        return this;
+    }
+
+    private void ensureRefreshTask() {
+        // Cancel task if refresh interval is -1
+        if (this.refreshInterval == -1 && this.refreshTask != null) {
+            if (!this.refreshTask.isCancelled()) {
+                this.refreshTask.cancel();
+            }
+
+            this.refreshTask = null;
+        }
+
+        // Set task as null if it's cancelled
+        if (this.refreshTask != null && this.refreshTask.isCancelled()) {
+            this.refreshTask = null;
+        }
+
+        // Create task if refreshInterval is positive and if there's no current task and if there are viewers
+        if (this.refreshInterval != -1 && this.refreshTask == null && !getViewers().isEmpty()) {
+            this.refreshTask = Tasks.sync().delayedTimer(task -> {
+                if (getViewers().isEmpty()) {
+                    task.cancel();
+                    return;
+                }
+
+                this.redraw();
+            }, 1L, this.refreshInterval);
+        }
+    }
+
     protected CustomInventory config(ConfigurationSection section) {
         this.inventoryConfig = InventoryConfig.parse(section);
         return this;
@@ -170,6 +234,10 @@ public class CustomInventory {
 
     public CustomInventoryType getCustomInventoryType() {
         return inventoryType;
+    }
+
+    public List<Player> getViewers() {
+        return InventoryManager.getOpenedPlayers(this);
     }
 
     // Protected methods
