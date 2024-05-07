@@ -4,7 +4,8 @@ import io.github.johnnypixelz.utilizer.inventory.shape.InventoryShape;
 import io.github.johnnypixelz.utilizer.inventory.slot.PositionedSlot;
 import org.bukkit.event.inventory.InventoryType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 public enum CustomInventoryType {

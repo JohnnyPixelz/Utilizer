@@ -57,17 +57,17 @@ public interface ContentHolder {
 
     void removeRenderedItem(int rawSlot);
 
-    void fill(Supplier<InventoryItem>  item);
+    void fill(Supplier<InventoryItem> item);
 
-    void fillRow(int row, Supplier<InventoryItem>  item);
+    void fillRow(int row, Supplier<InventoryItem> item);
 
-    void fillColumn(int column, Supplier<InventoryItem>  item);
+    void fillColumn(int column, Supplier<InventoryItem> item);
 
-    void fillBorders(Supplier<InventoryItem>  item);
+    void fillBorders(Supplier<InventoryItem> item);
 
-    void fillRect(int fromRow, int fromColumn, int toRow, int toColumn, Supplier<InventoryItem>  item);
+    void fillRect(int fromRow, int fromColumn, int toRow, int toColumn, Supplier<InventoryItem> item);
 
-    void fillRect(Slot fromSlot, Slot toSlot, Supplier<InventoryItem>  item);
+    void fillRect(Slot fromSlot, Slot toSlot, Supplier<InventoryItem> item);
 
     void fillRect(int fromRawSlot, int toRawSlot, Supplier<InventoryItem> item);
 

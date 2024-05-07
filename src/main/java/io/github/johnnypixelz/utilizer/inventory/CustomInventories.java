@@ -1,6 +1,5 @@
 package io.github.johnnypixelz.utilizer.inventory;
 
-import com.google.common.base.Converter;
 import com.google.common.collect.ImmutableList;
 import io.github.johnnypixelz.utilizer.inventory.inventories.PickerInventory;
 import io.github.johnnypixelz.utilizer.itemstack.Items;

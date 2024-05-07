@@ -283,23 +283,23 @@ public class CustomInventory {
         rootPane.fill(item);
     }
 
-    protected void fillRow(int row, Supplier<InventoryItem>  item) {
+    protected void fillRow(int row, Supplier<InventoryItem> item) {
         rootPane.fillRow(row, item);
     }
 
-    protected void fillColumn(int column, Supplier<InventoryItem>  item) {
+    protected void fillColumn(int column, Supplier<InventoryItem> item) {
         rootPane.fillColumn(column, item);
     }
 
-    protected void fillBorders(Supplier<InventoryItem>  item) {
+    protected void fillBorders(Supplier<InventoryItem> item) {
         rootPane.fillBorders(item);
     }
 
-    protected void fillRect(int fromRow, int fromColumn, int toRow, int toColumn, Supplier<InventoryItem>  item) {
+    protected void fillRect(int fromRow, int fromColumn, int toRow, int toColumn, Supplier<InventoryItem> item) {
         rootPane.fillRect(fromRow, fromColumn, toRow, toColumn, item);
     }
 
-    protected void fillRect(Slot fromPos, Slot toPos, Supplier<InventoryItem>  item) {
+    protected void fillRect(Slot fromPos, Slot toPos, Supplier<InventoryItem> item) {
         rootPane.fillRect(fromPos, toPos, item);
     }
 

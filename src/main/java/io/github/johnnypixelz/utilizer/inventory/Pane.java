@@ -5,7 +5,6 @@ import io.github.johnnypixelz.utilizer.event.StatefulEventEmitter;
 import io.github.johnnypixelz.utilizer.inventory.shape.InventoryShape;
 import io.github.johnnypixelz.utilizer.inventory.slot.PositionedSlot;
 import io.github.johnnypixelz.utilizer.inventory.slot.Slot;
-import io.github.johnnypixelz.utilizer.plugin.Logs;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
@@ -273,7 +272,7 @@ public class Pane implements ContentHolder {
     }
 
     @Override
-    public void fillRow(int row, Supplier<InventoryItem>  item) {
+    public void fillRow(int row, Supplier<InventoryItem> item) {
         for (PositionedSlot slot : inventoryShape.getSlots()) {
             if (slot.getRow() != row) continue;
 
@@ -282,7 +281,7 @@ public class Pane implements ContentHolder {
     }
 
     @Override
-    public void fillColumn(int column, Supplier<InventoryItem>  item) {
+    public void fillColumn(int column, Supplier<InventoryItem> item) {
         for (PositionedSlot slot : inventoryShape.getSlots()) {
             if (slot.getColumn() != column) continue;
 
@@ -291,7 +290,7 @@ public class Pane implements ContentHolder {
     }
 
     @Override
-    public void fillBorders(Supplier<InventoryItem>  item) {
+    public void fillBorders(Supplier<InventoryItem> item) {
         final List<PositionedSlot> slots = inventoryShape.getBorderSlots();
         for (Slot slot : slots) {
             setInventoryItem(slot, item.get());
@@ -299,12 +298,12 @@ public class Pane implements ContentHolder {
     }
 
     @Override
-    public void fillRect(int fromRow, int fromColumn, int toRow, int toColumn, Supplier<InventoryItem>  item) {
+    public void fillRect(int fromRow, int fromColumn, int toRow, int toColumn, Supplier<InventoryItem> item) {
         fillRect(Slot.of(fromRow, fromColumn), Slot.of(toRow, toColumn), item);
     }
 
     @Override
-    public void fillRect(Slot fromSlot, Slot toSlot, Supplier<InventoryItem>  item) {
+    public void fillRect(Slot fromSlot, Slot toSlot, Supplier<InventoryItem> item) {
         final int fromRawSlot = fromSlot.getRawSlot(inventoryShape);
         final int toRawSlot = toSlot.getRawSlot(inventoryShape);
 
@@ -312,7 +311,7 @@ public class Pane implements ContentHolder {
     }
 
     @Override
-    public void fillRect(int fromRawSlot, int toRawSlot, Supplier<InventoryItem>  item) {
+    public void fillRect(int fromRawSlot, int toRawSlot, Supplier<InventoryItem> item) {
         if (fromRawSlot > toRawSlot) {
             throw new IllegalArgumentException("fromRawSlot %d cannot be bigger than toRawSlot %d".formatted(fromRawSlot, toRawSlot));
         }
