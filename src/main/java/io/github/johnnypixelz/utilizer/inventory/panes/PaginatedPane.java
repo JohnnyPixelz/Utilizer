@@ -2,11 +2,16 @@ package io.github.johnnypixelz.utilizer.inventory.panes;
 
 import io.github.johnnypixelz.utilizer.inventory.InventoryItem;
 import io.github.johnnypixelz.utilizer.inventory.Pane;
+import io.github.johnnypixelz.utilizer.inventory.items.ClickableItem;
 import io.github.johnnypixelz.utilizer.inventory.shape.InventoryShape;
+import io.github.johnnypixelz.utilizer.itemstack.Items;
 import io.github.johnnypixelz.utilizer.plugin.Logs;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public class PaginatedPane extends Pane {
@@ -14,6 +19,17 @@ public class PaginatedPane extends Pane {
     public static <T> PaginatedPane of(InventoryShape shape, List<T> items, Function<T, InventoryItem> converter) {
         return new PaginatedPane(shape)
                 .setItems(items, converter);
+    }
+
+    public static InventoryItem pageButton(ButtonDirection buttonDirection, PaginatedPane paginatedPane) {
+        final ItemStack itemStack = Items.create(buttonDirection.getDefaultIcon(), buttonDirection.getDefaultName());
+        return new ClickableItem(itemStack)
+                .leftClick(event -> {
+                    switch (buttonDirection) {
+                        case PREVIOUS -> paginatedPane.previous();
+                        case NEXT -> paginatedPane.next();
+                    }
+                });
     }
 
     private int currentPage;
@@ -72,6 +88,54 @@ public class PaginatedPane extends Pane {
         return this.currentPage;
     }
 
+    public InventoryItem pageButton(ButtonDirection buttonDirection) {
+        return pageButton(buttonDirection, buttonDirection.getDefaultIcon(), buttonDirection.getDefaultName());
+    }
+
+    public InventoryItem pageButton(ButtonDirection buttonDirection, Material material, String displayName) {
+        return pageButton(buttonDirection, Items.create(material, displayName));
+    }
+
+    public InventoryItem pageButton(ButtonDirection buttonDirection, ItemStack itemStack) {
+        return new ClickableItem(itemStack)
+                .leftClick(event -> {
+                    switch (buttonDirection) {
+                        case PREVIOUS -> this.previous();
+                        case NEXT -> this.next();
+                    }
+                });
+    }
+
+    public PaginatedPane pageButtons(Material material, String previousDisplayName, String nextDisplayName, BiConsumer<InventoryItem, InventoryItem> buttonsConsumer) {
+        return pageButtons(material, material, previousDisplayName, nextDisplayName, buttonsConsumer);
+    }
+
+    public PaginatedPane pageButtons(Material previousMaterial, Material nextMaterial, String previousDisplayName, String nextDisplayName, BiConsumer<InventoryItem, InventoryItem> buttonsConsumer) {
+        return pageButtons(
+                Items.create(previousMaterial, previousDisplayName),
+                Items.create(nextMaterial, nextDisplayName),
+                buttonsConsumer
+        );
+    }
+
+    public PaginatedPane pageButtons(ItemStack previousStack, ItemStack nextStack, BiConsumer<InventoryItem, InventoryItem> buttonsConsumer) {
+        final InventoryItem previousItem = pageButton(ButtonDirection.PREVIOUS, previousStack);
+        final InventoryItem nextItem = pageButton(ButtonDirection.NEXT, nextStack);
+
+        buttonsConsumer.accept(previousItem, nextItem);
+
+        return this;
+    }
+
+    public PaginatedPane pageButtons(BiConsumer<InventoryItem, InventoryItem> buttonsConsumer) {
+        final InventoryItem previousItem = pageButton(ButtonDirection.PREVIOUS);
+        final InventoryItem nextItem = pageButton(ButtonDirection.NEXT);
+
+        buttonsConsumer.accept(previousItem, nextItem);
+
+        return this;
+    }
+
     private int getPageSize() {
         return getInventoryShape().getSize();
     }
@@ -109,6 +173,32 @@ public class PaginatedPane extends Pane {
     protected void onDraw() {
         Logs.info("onDraw");
         renderCurrentPage();
+    }
+
+    public enum ButtonDirection {
+        PREVIOUS(Material.ARROW, "&8Previous Page"),
+        NEXT(Material.ARROW, "&8Next Page");
+
+        private final Material defaultIcon;
+        private final String defaultName;
+
+        ButtonDirection(Material defaultIcon, String defaultName) {
+            this.defaultIcon = defaultIcon;
+            this.defaultName = defaultName;
+        }
+
+        public Material getDefaultIcon() {
+            return defaultIcon;
+        }
+
+        public String getDefaultName() {
+            return defaultName;
+        }
+
+        public ItemStack getDefaultItemStack() {
+            return Items.create(getDefaultIcon(), getDefaultName());
+        }
+
     }
 
 }
