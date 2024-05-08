@@ -20,6 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -46,6 +47,8 @@ public class CustomInventory {
     private CustomInventory parentInventory;
     private boolean openParentInventoryOnClose;
 
+    private boolean updatedTitle;
+
     public CustomInventory() {
         this.bukkitInventory = null;
         this.rootPane = null;
@@ -57,6 +60,8 @@ public class CustomInventory {
         this.loaded = false;
         this.refreshInterval = -1;
         this.refreshTask = null;
+
+        this.updatedTitle = false;
     }
 
     protected void onLoad() {
@@ -172,7 +177,13 @@ public class CustomInventory {
 
         try {
             InventoryManager.setInventory(player, this);
-            player.openInventory(bukkitInventory);
+            final InventoryView inventoryView = player.openInventory(bukkitInventory);
+
+            // Update title if it has been changed
+            if (inventoryView != null && updatedTitle) {
+                inventoryView.setTitle(title);
+            }
+
             onOpen(player);
             ensureRefreshTask();
         } catch (Exception exception) {
@@ -190,12 +201,29 @@ public class CustomInventory {
         onClose(player);
 
         if (this.openParentInventoryOnClose && this.parentInventory != null) {
-            this.parentInventory.open(player);
+            Tasks.sync().run(() -> {
+                if (!player.isOnline()) return;
+                this.parentInventory.open(player);
+            });
         }
     }
 
     public CustomInventory title(String title) {
         this.title = title;
+
+        // Update title to all viewers
+        if (bukkitInventory != null) {
+            bukkitInventory.getViewers().forEach(humanEntity -> {
+                try {
+                    humanEntity.getOpenInventory().setTitle(title);
+                } catch (Exception ignored) {}
+            });
+        }
+
+        if (loaded) {
+            updatedTitle = true;
+        }
+
         return this;
     }
 
@@ -258,6 +286,11 @@ public class CustomInventory {
 
     protected CustomInventory config(String configFile, String configPath) {
         this.inventoryConfig = InventoryConfig.parse(configFile, configPath);
+        return this;
+    }
+
+    protected CustomInventory config(InventoryConfig inventoryConfig) {
+        this.inventoryConfig = inventoryConfig;
         return this;
     }
 
