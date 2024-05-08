@@ -40,7 +40,9 @@ public class InventoryConfigItem {
                 .map(Optional::get)
                 .toList();
 
-        return new InventoryConfigItem(section, parsedStack, messages, slot, actions);
+        final int priority = section.getInt("priority", 0);
+
+        return new InventoryConfigItem(section, parsedStack, messages, slot, actions, priority);
     }
 
     private static Optional<Slot> getSlot(ConfigurationSection section) {
@@ -117,13 +119,15 @@ public class InventoryConfigItem {
     private final Map<String, Message> messages;
     private final Slot slot;
     private final List<Action> actions;
+    int priority;
 
-    private InventoryConfigItem(ConfigurationSection configurationSection, ItemStack itemStack, Map<String, Message> messages, Slot slot, List<Action> actions) {
+    private InventoryConfigItem(ConfigurationSection configurationSection, ItemStack itemStack, Map<String, Message> messages, Slot slot, List<Action> actions, int priority) {
         this.configurationSection = configurationSection;
         this.itemStack = itemStack;
         this.messages = messages;
         this.slot = slot;
         this.actions = actions;
+        this.priority = priority;
     }
 
     public ItemStack getItemStack() {
@@ -144,6 +148,10 @@ public class InventoryConfigItem {
 
     public List<Action> getActions() {
         return actions;
+    }
+
+    public int getPriority() {
+        return priority;
     }
 
     public InventoryItem getInventoryItem(CustomInventory customInventory) {

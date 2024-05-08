@@ -11,24 +11,23 @@ import org.bukkit.configuration.ConfigurationSection;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class InventoryConfig {
 
-    @Nullable
-    public static InventoryConfig parse(@Nonnull String configFile, @Nonnull String configPath) {
+    public static InventoryConfig parse(@Nullable String configFile, @Nullable String configPath) {
+        if (configFile == null || configPath == null) {
+            return parse(null);
+        }
+
         final ConfigurationSection configurationSection = Configs.get(configFile).getConfigurationSection(configPath);
         return parse(configurationSection);
     }
 
-    @Nullable
     public static InventoryConfig parse(@Nullable ConfigurationSection configurationSection) {
         final InventoryConfig inventoryConfig = new InventoryConfig();
 
-        if (configurationSection == null) return null;
+        if (configurationSection == null) return inventoryConfig;
 
         inventoryConfig.configurationSection = configurationSection;
 
@@ -111,21 +110,34 @@ public class InventoryConfig {
     }
 
     public static void draw(CustomInventory customInventory, InventoryConfig inventoryConfig) {
-        inventoryConfig.inventoryConfigItemMap.forEach((key, configItem) -> {
-            try {
-                switch (key) {
-                    case "border" -> customInventory.getRootPane().fillBorders(() -> configItem.getInventoryItem(customInventory));
-                    case "fill" -> customInventory.getRootPane().fill(() -> configItem.getInventoryItem(customInventory));
-                    default -> {
-                        configItem.getSlot().ifPresent(slot -> {
-                            customInventory.getRootPane().setInventoryItem(slot, configItem.getInventoryItem(customInventory));
-                        });
+        inventoryConfig.inventoryConfigItemMap
+                .entrySet()
+                .stream()
+                .peek(entry -> {
+                    if (entry.getKey().equals("border") || entry.getKey().equals("fill") && entry.getValue().getPriority() == 0) {
+                        entry.getValue().priority = -1;
                     }
-                }
-            } catch (Exception exception) {
-                throw new IllegalStateException("Error while setting config item %s".formatted(key), exception);
-            }
-        });
+                })
+                .sorted(Comparator.comparingInt(value -> value.getValue().getPriority()))
+                .forEach(entry -> {
+                    final String key = entry.getKey();
+                    final InventoryConfigItem configItem = entry.getValue();
+                    try {
+                        switch (key) {
+                            case "border" ->
+                                    customInventory.getRootPane().fillBorders(() -> configItem.getInventoryItem(customInventory));
+                            case "fill" ->
+                                    customInventory.getRootPane().fill(() -> configItem.getInventoryItem(customInventory));
+                            default -> {
+                                configItem.getSlot().ifPresent(slot -> {
+                                    customInventory.getRootPane().setInventoryItem(slot, configItem.getInventoryItem(customInventory));
+                                });
+                            }
+                        }
+                    } catch (Exception exception) {
+                        throw new IllegalStateException("Error while setting config item %s".formatted(key), exception);
+                    }
+                });
     }
 
     private String title;
@@ -137,7 +149,7 @@ public class InventoryConfig {
 
     private InventoryConfig() {
         this.title = null;
-        this.customInventoryType = null;
+        this.customInventoryType = CustomInventoryType.CHEST_3;
         this.refresh = null;
         this.inventoryConfigItemMap = new HashMap<>();
         this.messages = new HashMap<>();
@@ -152,10 +164,17 @@ public class InventoryConfig {
         return Optional.ofNullable(inventoryConfigItemMap.get(itemId));
     }
 
+    @Nullable
+    public Long getRefresh() {
+        return refresh;
+    }
+
+    @Nonnull
     public List<InventoryConfigItem> getItems() {
         return ImmutableList.copyOf(inventoryConfigItemMap.values());
     }
 
+    @Nullable
     public ConfigurationSection getConfigurationSection() {
         return configurationSection;
     }
