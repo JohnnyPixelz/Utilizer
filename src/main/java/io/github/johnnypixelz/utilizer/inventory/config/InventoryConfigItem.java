@@ -1,18 +1,20 @@
-package io.github.johnnypixelz.utilizer.inventory.parser;
+package io.github.johnnypixelz.utilizer.inventory.config;
 
 import io.github.johnnypixelz.utilizer.config.Message;
 import io.github.johnnypixelz.utilizer.config.Messages;
+import io.github.johnnypixelz.utilizer.inventory.CustomInventory;
+import io.github.johnnypixelz.utilizer.inventory.InventoryItem;
+import io.github.johnnypixelz.utilizer.inventory.items.ClickableItem;
+import io.github.johnnypixelz.utilizer.inventory.items.SimpleItem;
 import io.github.johnnypixelz.utilizer.inventory.slot.Slot;
 import io.github.johnnypixelz.utilizer.itemstack.Items;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public class InventoryConfigItem {
 
@@ -29,9 +31,16 @@ public class InventoryConfigItem {
             }
         }
 
-        final Optional<Slot> optionalSlot = getSlot(section);
+        final Slot slot = getSlot(section).orElse(null);
 
-        return new InventoryConfigItem(parsedStack, messages, optionalSlot.orElse(null));
+        final List<Action> actions = section.getStringList("actions")
+                .stream()
+                .map(Action::parse)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+
+        return new InventoryConfigItem(section, parsedStack, messages, slot, actions);
     }
 
     private static Optional<Slot> getSlot(ConfigurationSection section) {
@@ -103,14 +112,18 @@ public class InventoryConfigItem {
         }
     }
 
+    private final ConfigurationSection configurationSection;
     private final ItemStack itemStack;
     private final Map<String, Message> messages;
     private final Slot slot;
+    private final List<Action> actions;
 
-    private InventoryConfigItem(ItemStack itemStack, Map<String, Message> messages, Slot slot) {
+    private InventoryConfigItem(ConfigurationSection configurationSection, ItemStack itemStack, Map<String, Message> messages, Slot slot, List<Action> actions) {
+        this.configurationSection = configurationSection;
         this.itemStack = itemStack;
         this.messages = messages;
         this.slot = slot;
+        this.actions = actions;
     }
 
     public ItemStack getItemStack() {
@@ -123,6 +136,27 @@ public class InventoryConfigItem {
 
     public Optional<Slot> getSlot() {
         return Optional.ofNullable(slot);
+    }
+
+    public ConfigurationSection getConfigurationSection() {
+        return configurationSection;
+    }
+
+    public List<Action> getActions() {
+        return actions;
+    }
+
+    public InventoryItem getInventoryItem(CustomInventory customInventory) {
+        if (actions.isEmpty()) {
+            return new SimpleItem(getItemStack());
+        }
+
+        return new ClickableItem(getItemStack())
+                .leftClick(event -> {
+                    for (Action action : actions) {
+                        action.execute(customInventory, (Player) event.getWhoClicked());
+                    }
+                });
     }
 
 }

@@ -1,4 +1,4 @@
-package io.github.johnnypixelz.utilizer.inventory.parser;
+package io.github.johnnypixelz.utilizer.inventory.config;
 
 import com.google.common.collect.ImmutableList;
 import io.github.johnnypixelz.utilizer.config.Configs;
@@ -7,7 +7,6 @@ import io.github.johnnypixelz.utilizer.config.Messages;
 import io.github.johnnypixelz.utilizer.config.Parse;
 import io.github.johnnypixelz.utilizer.inventory.CustomInventory;
 import io.github.johnnypixelz.utilizer.inventory.CustomInventoryType;
-import io.github.johnnypixelz.utilizer.inventory.items.SimpleItem;
 import org.bukkit.configuration.ConfigurationSection;
 
 import javax.annotation.Nonnull;
@@ -19,15 +18,19 @@ import java.util.Optional;
 
 public class InventoryConfig {
 
+    @Nullable
     public static InventoryConfig parse(@Nonnull String configFile, @Nonnull String configPath) {
         final ConfigurationSection configurationSection = Configs.get(configFile).getConfigurationSection(configPath);
         return parse(configurationSection);
     }
 
+    @Nullable
     public static InventoryConfig parse(@Nullable ConfigurationSection configurationSection) {
         final InventoryConfig inventoryConfig = new InventoryConfig();
 
-        if (configurationSection == null) return inventoryConfig;
+        if (configurationSection == null) return null;
+
+        inventoryConfig.configurationSection = configurationSection;
 
         boolean initializedType = false;
 
@@ -111,12 +114,11 @@ public class InventoryConfig {
         inventoryConfig.inventoryConfigItemMap.forEach((key, configItem) -> {
             try {
                 switch (key) {
-                    case "border" ->
-                            customInventory.getRootPane().fillBorders(() -> new SimpleItem(configItem.getItemStack()));
-                    case "fill" -> customInventory.getRootPane().fill(() -> new SimpleItem(configItem.getItemStack()));
+                    case "border" -> customInventory.getRootPane().fillBorders(() -> configItem.getInventoryItem(customInventory));
+                    case "fill" -> customInventory.getRootPane().fill(() -> configItem.getInventoryItem(customInventory));
                     default -> {
                         configItem.getSlot().ifPresent(slot -> {
-                            customInventory.getRootPane().setInventoryItem(slot, new SimpleItem(configItem.getItemStack()));
+                            customInventory.getRootPane().setInventoryItem(slot, configItem.getInventoryItem(customInventory));
                         });
                     }
                 }
@@ -131,6 +133,7 @@ public class InventoryConfig {
     private Long refresh;
     private final Map<String, InventoryConfigItem> inventoryConfigItemMap;
     private final Map<String, Message> messages;
+    private ConfigurationSection configurationSection;
 
     private InventoryConfig() {
         this.title = null;
@@ -138,6 +141,7 @@ public class InventoryConfig {
         this.refresh = null;
         this.inventoryConfigItemMap = new HashMap<>();
         this.messages = new HashMap<>();
+        this.configurationSection = null;
     }
 
     public Optional<Message> getMessage(String messageId) {
@@ -150,6 +154,10 @@ public class InventoryConfig {
 
     public List<InventoryConfigItem> getItems() {
         return ImmutableList.copyOf(inventoryConfigItemMap.values());
+    }
+
+    public ConfigurationSection getConfigurationSection() {
+        return configurationSection;
     }
 
 }
