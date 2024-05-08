@@ -1,5 +1,6 @@
 package io.github.johnnypixelz.utilizer.inventory.parser;
 
+import com.google.common.collect.ImmutableList;
 import io.github.johnnypixelz.utilizer.config.Configs;
 import io.github.johnnypixelz.utilizer.config.Message;
 import io.github.johnnypixelz.utilizer.config.Messages;
@@ -12,6 +13,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -99,6 +101,31 @@ public class InventoryConfig {
         return inventoryConfig;
     }
 
+    public static void load(CustomInventory customInventory, InventoryConfig inventoryConfig) {
+        customInventory.title(inventoryConfig.title);
+        customInventory.type(inventoryConfig.customInventoryType);
+        customInventory.refresh(inventoryConfig.refresh);
+    }
+
+    public static void draw(CustomInventory customInventory, InventoryConfig inventoryConfig) {
+        inventoryConfig.inventoryConfigItemMap.forEach((key, configItem) -> {
+            try {
+                switch (key) {
+                    case "border" ->
+                            customInventory.getRootPane().fillBorders(() -> new SimpleItem(configItem.getItemStack()));
+                    case "fill" -> customInventory.getRootPane().fill(() -> new SimpleItem(configItem.getItemStack()));
+                    default -> {
+                        configItem.getSlot().ifPresent(slot -> {
+                            customInventory.getRootPane().setInventoryItem(slot, new SimpleItem(configItem.getItemStack()));
+                        });
+                    }
+                }
+            } catch (Exception exception) {
+                throw new IllegalStateException("Error while setting config item %s".formatted(key), exception);
+            }
+        });
+    }
+
     private String title;
     private CustomInventoryType customInventoryType;
     private Long refresh;
@@ -117,33 +144,12 @@ public class InventoryConfig {
         return Optional.ofNullable(messages.get(messageId));
     }
 
-    public void load(CustomInventory customInventory) {
-        customInventory.title(title);
-        customInventory.type(customInventoryType);
-        customInventory.refresh(refresh);
-    }
-
-    public void draw(CustomInventory customInventory) {
-        inventoryConfigItemMap.forEach((key, configItem) -> {
-            try {
-                switch (key) {
-                    case "border" ->
-                            customInventory.getRootPane().fillBorders(() -> new SimpleItem(configItem.getItemStack()));
-                    case "fill" -> customInventory.getRootPane().fill(() -> new SimpleItem(configItem.getItemStack()));
-                    default -> {
-                        configItem.getSlot().ifPresent(slot -> {
-                            customInventory.getRootPane().setInventoryItem(slot, new SimpleItem(configItem.getItemStack()));
-                        });
-                    }
-                }
-            } catch (Exception exception) {
-                throw new IllegalStateException("Error while setting config item %s".formatted(key), exception);
-            }
-        });
-    }
-
-    public Optional<InventoryConfigItem> getConfigItem(String itemId) {
+    public Optional<InventoryConfigItem> getItem(String itemId) {
         return Optional.ofNullable(inventoryConfigItemMap.get(itemId));
+    }
+
+    public List<InventoryConfigItem> getItems() {
+        return ImmutableList.copyOf(inventoryConfigItemMap.values());
     }
 
 }

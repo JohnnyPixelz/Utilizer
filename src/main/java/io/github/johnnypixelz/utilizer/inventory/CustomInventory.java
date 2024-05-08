@@ -124,7 +124,7 @@ public class CustomInventory {
         rootPane.clear();
 
         if (inventoryConfig != null) {
-            inventoryConfig.draw(this);
+            InventoryConfig.draw(this, inventoryConfig);
         }
 
         onDraw();
@@ -134,7 +134,7 @@ public class CustomInventory {
         if (!loaded) {
             onLoad();
             if (inventoryConfig != null) {
-                inventoryConfig.load(this);
+                InventoryConfig.load(this, inventoryConfig);
             }
 
             init();
@@ -142,7 +142,7 @@ public class CustomInventory {
             this.loaded = true;
 
             if (inventoryConfig != null) {
-                inventoryConfig.draw(this);
+                InventoryConfig.draw(this, inventoryConfig);
             }
 
             onDraw();
@@ -222,6 +222,10 @@ public class CustomInventory {
         }
     }
 
+    protected InventoryConfig config() {
+        return this.inventoryConfig;
+    }
+
     protected CustomInventory config(ConfigurationSection section) {
         this.inventoryConfig = InventoryConfig.parse(section);
         return this;
@@ -287,7 +291,7 @@ public class CustomInventory {
 
     protected Optional<InventoryConfigItem> configItem(String configItemId) {
         if (inventoryConfig == null) return Optional.empty();
-        return inventoryConfig.getConfigItem(configItemId);
+        return inventoryConfig.getItem(configItemId);
     }
 
     protected Optional<Message> configMessage(String messageId) {
