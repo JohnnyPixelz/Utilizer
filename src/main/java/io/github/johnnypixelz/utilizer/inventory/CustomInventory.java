@@ -2,13 +2,13 @@ package io.github.johnnypixelz.utilizer.inventory;
 
 import io.github.johnnypixelz.utilizer.config.Message;
 import io.github.johnnypixelz.utilizer.config.Parse;
+import io.github.johnnypixelz.utilizer.inventory.config.InventoryConfig;
+import io.github.johnnypixelz.utilizer.inventory.config.InventoryConfigItem;
 import io.github.johnnypixelz.utilizer.inventory.items.ClickableItem;
 import io.github.johnnypixelz.utilizer.inventory.items.CloseItem;
 import io.github.johnnypixelz.utilizer.inventory.items.SimpleItem;
 import io.github.johnnypixelz.utilizer.inventory.items.SwitchItem;
 import io.github.johnnypixelz.utilizer.inventory.panes.PaginatedPane;
-import io.github.johnnypixelz.utilizer.inventory.parser.InventoryConfig;
-import io.github.johnnypixelz.utilizer.inventory.parser.InventoryConfigItem;
 import io.github.johnnypixelz.utilizer.inventory.slot.Slot;
 import io.github.johnnypixelz.utilizer.smartinvs.PaneType;
 import io.github.johnnypixelz.utilizer.smartinvs.PremadeItems;
