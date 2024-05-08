@@ -143,9 +143,7 @@ public class InventoryManager {
                 return;
 
             CustomInventory inv = inventories.get(player.getUniqueId());
-
-            inventories.remove(player.getUniqueId());
-            inv.onClose(player);
+            inv.close(player);
         }
 
         @EventHandler(priority = EventPriority.LOW)

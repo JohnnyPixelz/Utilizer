@@ -43,6 +43,9 @@ public class CustomInventory {
     private long refreshInterval;;
     private BukkitTask refreshTask;
 
+    private CustomInventory parentInventory;
+    private boolean openParentInventoryOnClose;
+
     public CustomInventory() {
         this.bukkitInventory = null;
         this.rootPane = null;
@@ -87,6 +90,21 @@ public class CustomInventory {
 
     public Pane getRootPane() {
         return rootPane;
+    }
+
+    public boolean isOpenParentInventoryOnClose() {
+        return openParentInventoryOnClose;
+    }
+
+    public CustomInventory setParentInventory(CustomInventory parentInventory) {
+        this.parentInventory = parentInventory;
+        return this;
+    }
+
+    public CustomInventory openInventoryOnClose(CustomInventory parentInventory) {
+        this.parentInventory = parentInventory;
+        this.openParentInventoryOnClose = true;
+        return this;
     }
 
     private void init() {
@@ -164,9 +182,16 @@ public class CustomInventory {
 
     public void close(Player player) {
         InventoryManager.setInventory(player, null);
-        player.closeInventory();
+
+        if (player.getOpenInventory().getTopInventory() == this.bukkitInventory) {
+            player.closeInventory();
+        }
 
         onClose(player);
+
+        if (this.openParentInventoryOnClose && this.parentInventory != null) {
+            this.parentInventory.open(player);
+        }
     }
 
     public CustomInventory title(String title) {
