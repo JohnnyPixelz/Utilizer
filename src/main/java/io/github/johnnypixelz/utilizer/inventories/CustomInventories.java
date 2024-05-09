@@ -1,4 +1,4 @@
-package io.github.johnnypixelz.utilizer.inventory;
+package io.github.johnnypixelz.utilizer.inventories;
 
 import com.google.common.collect.ImmutableList;
 import io.github.johnnypixelz.utilizer.inventory.inventories.PickerInventory;

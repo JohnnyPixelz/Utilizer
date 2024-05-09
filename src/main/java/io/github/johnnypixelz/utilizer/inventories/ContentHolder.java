@@ -1,4 +1,4 @@
-package io.github.johnnypixelz.utilizer.inventory;
+package io.github.johnnypixelz.utilizer.inventories;
 
 import io.github.johnnypixelz.utilizer.inventory.shape.InventoryShape;
 import io.github.johnnypixelz.utilizer.inventory.slot.Slot;

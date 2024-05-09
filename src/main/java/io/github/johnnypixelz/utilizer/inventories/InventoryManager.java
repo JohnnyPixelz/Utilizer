@@ -1,4 +1,4 @@
-package io.github.johnnypixelz.utilizer.inventory;
+package io.github.johnnypixelz.utilizer.inventories;
 
 import io.github.johnnypixelz.utilizer.plugin.Provider;
 import org.bukkit.Bukkit;

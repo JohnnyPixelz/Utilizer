@@ -1,4 +1,4 @@
-package io.github.johnnypixelz.utilizer.inventory;
+package io.github.johnnypixelz.utilizer.inventories;
 
 public class MountedSlot {
     private final ContentHolder contentHolder;

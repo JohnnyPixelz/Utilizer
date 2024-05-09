@@ -1,4 +1,4 @@
-package io.github.johnnypixelz.utilizer.inventory;
+package io.github.johnnypixelz.utilizer.inventories;
 
 import io.github.johnnypixelz.utilizer.event.StatefulEventEmitter;
 import org.bukkit.event.inventory.InventoryClickEvent;
