@@ -15,6 +15,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
 
+@Deprecated
 public class UtilConfiguration extends YamlConfiguration {
 
     public static UtilConfiguration loadConfiguration(File file) {

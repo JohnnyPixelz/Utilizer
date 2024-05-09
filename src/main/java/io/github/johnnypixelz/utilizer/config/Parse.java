@@ -121,6 +121,23 @@ public class Parse {
      * @return the existing value if it was
      * included in the range or new if it was altered
      */
+    public static long constrain(long min, long max, long value) {
+        if (min > max) {
+            throw new IllegalArgumentException("min cannot be bigger than max");
+        }
+
+        return Math.max(min, Math.min(max, value));
+    }
+
+    /**
+     * Restricts a number to a given range
+     *
+     * @param min   minimum range value
+     * @param max   maximum range value
+     * @param value value to constrain
+     * @return the existing value if it was
+     * included in the range or new if it was altered
+     */
     public static double constrain(double min, double max, double value) {
         if (min > max) {
             throw new IllegalArgumentException("min cannot be bigger than max");

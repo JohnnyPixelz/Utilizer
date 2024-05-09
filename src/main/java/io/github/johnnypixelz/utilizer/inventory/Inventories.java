@@ -36,7 +36,6 @@ public class Inventories {
      *
      * @param player the player to give the items to.
      * @param items  the items to give.
-     *
      * @return the items that did not fit.
      */
     @Nonnull
@@ -50,7 +49,6 @@ public class Inventories {
      * @param player the player to give the items to.
      * @param items  the items to give.
      * @param split  same as {@link #addItems(Inventory, boolean, ItemStack...)}
-     *
      * @return the items that did not fit.
      */
     @Nonnull
@@ -65,7 +63,6 @@ public class Inventories {
      *
      * @param player the player to give the items to.
      * @param items  the items to give.
-     *
      * @return the items that did not fit and were dropped.
      */
     @Nonnull
@@ -79,7 +76,6 @@ public class Inventories {
      * @param player the player to give the items to.
      * @param items  the items to give.
      * @param split  same as {@link #addItems(Inventory, boolean, ItemStack...)}
-     *
      * @return the items that did not fit and were dropped.
      */
     @Nonnull
@@ -107,7 +103,6 @@ public class Inventories {
      *                        you're adding stacked tools such as swords that you'd like to split them to other slots.
      * @param modifiableSlots the slots that are allowed to be used for adding the items, otherwise null to allow all slots.
      * @param items           the items to add.
-     *
      * @return items that didn't fit in the inventory.
      */
     @Nonnull
@@ -192,7 +187,6 @@ public class Inventories {
      * @param item            the item to match.
      * @param beginIndex      the index which to start the search from in the inventory.
      * @param modifiableSlots the slots that can be used to share items.
-     *
      * @return the first matched item slot, otherwise -1
      * @throws IndexOutOfBoundsException if the beginning index is less than 0 or greater than the inventory storage size.
      */
@@ -206,7 +200,8 @@ public class Inventories {
             for (; beginIndex < invSize; beginIndex++) {
                 if (modifiableSlots != null && !modifiableSlots.test(beginIndex)) continue;
                 ItemStack cItem = items[beginIndex];
-                if (cItem != null && cItem.getAmount() < cItem.getMaxStackSize() && cItem.isSimilar(item)) return beginIndex;
+                if (cItem != null && cItem.getAmount() < cItem.getMaxStackSize() && cItem.isSimilar(item))
+                    return beginIndex;
             }
         }
         return -1;
@@ -226,7 +221,6 @@ public class Inventories {
      * }</pre>
      *
      * @param items the items to stack.
-     *
      * @return stacked up items.
      */
     @Nonnull
@@ -268,7 +262,6 @@ public class Inventories {
      * @param inventory       the inventory to search from.
      * @param beginIndex      the item slot to start the search from in the inventory.
      * @param modifiableSlots the slots that can be used.
-     *
      * @return first empty item slot, otherwise -1
      * @throws IndexOutOfBoundsException if the beginning index is less than 0 or greater than the inventory storage size.
      */
@@ -290,7 +283,6 @@ public class Inventories {
      *
      * @param inventory  the inventory to search from.
      * @param beginIndex the item slot to start the search from in the inventory.
-     *
      * @return first empty or partial item slot, otherwise -1
      * @throws IndexOutOfBoundsException if the beginning index is less than 0 or greater than the inventory storage size.
      * @see #firstEmpty(Inventory, int)
@@ -300,11 +292,13 @@ public class Inventories {
         if (item != null) {
             ItemStack[] items = inventory.getStorageContents();
             int len = items.length;
-            if (beginIndex < 0 || beginIndex >= len) throw new IndexOutOfBoundsException("Begin Index: " + beginIndex + ", Size: " + len);
+            if (beginIndex < 0 || beginIndex >= len)
+                throw new IndexOutOfBoundsException("Begin Index: " + beginIndex + ", Size: " + len);
 
             for (; beginIndex < len; beginIndex++) {
                 ItemStack cItem = items[beginIndex];
-                if (cItem == null || (cItem.getAmount() < cItem.getMaxStackSize() && cItem.isSimilar(item))) return beginIndex;
+                if (cItem == null || (cItem.getAmount() < cItem.getMaxStackSize() && cItem.isSimilar(item)))
+                    return beginIndex;
             }
         }
         return -1;
