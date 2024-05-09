@@ -1,12 +1,12 @@
-package io.github.johnnypixelz.utilizer.inventory.config;
+package io.github.johnnypixelz.utilizer.inventories.config;
 
 import io.github.johnnypixelz.utilizer.config.Message;
 import io.github.johnnypixelz.utilizer.config.Messages;
-import io.github.johnnypixelz.utilizer.inventory.CustomInventory;
-import io.github.johnnypixelz.utilizer.inventory.InventoryItem;
-import io.github.johnnypixelz.utilizer.inventory.items.ClickableItem;
-import io.github.johnnypixelz.utilizer.inventory.items.SimpleItem;
-import io.github.johnnypixelz.utilizer.inventory.slot.Slot;
+import io.github.johnnypixelz.utilizer.inventories.CustomInventory;
+import io.github.johnnypixelz.utilizer.inventories.InventoryItem;
+import io.github.johnnypixelz.utilizer.inventories.items.ClickableItem;
+import io.github.johnnypixelz.utilizer.inventories.items.SimpleItem;
+import io.github.johnnypixelz.utilizer.inventories.slot.Slot;
 import io.github.johnnypixelz.utilizer.itemstack.Items;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;

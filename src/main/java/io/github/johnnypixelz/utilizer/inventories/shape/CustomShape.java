@@ -1,7 +1,7 @@
-package io.github.johnnypixelz.utilizer.inventory.shape;
+package io.github.johnnypixelz.utilizer.inventories.shape;
 
 import com.google.common.collect.ImmutableList;
-import io.github.johnnypixelz.utilizer.inventory.slot.PositionedSlot;
+import io.github.johnnypixelz.utilizer.inventories.slot.PositionedSlot;
 
 import java.util.ArrayList;
 import java.util.Collections;

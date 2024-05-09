@@ -1,4 +1,4 @@
-package io.github.johnnypixelz.utilizer.inventory.items;
+package io.github.johnnypixelz.utilizer.inventories.items;
 
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;

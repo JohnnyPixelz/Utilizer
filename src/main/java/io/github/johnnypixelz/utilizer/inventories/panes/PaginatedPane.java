@@ -1,9 +1,9 @@
-package io.github.johnnypixelz.utilizer.inventory.panes;
+package io.github.johnnypixelz.utilizer.inventories.panes;
 
-import io.github.johnnypixelz.utilizer.inventory.InventoryItem;
-import io.github.johnnypixelz.utilizer.inventory.Pane;
-import io.github.johnnypixelz.utilizer.inventory.items.ClickableItem;
-import io.github.johnnypixelz.utilizer.inventory.shape.InventoryShape;
+import io.github.johnnypixelz.utilizer.inventories.InventoryItem;
+import io.github.johnnypixelz.utilizer.inventories.Pane;
+import io.github.johnnypixelz.utilizer.inventories.items.ClickableItem;
+import io.github.johnnypixelz.utilizer.inventories.shape.InventoryShape;
 import io.github.johnnypixelz.utilizer.itemstack.Items;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;

@@ -1,9 +1,9 @@
-package io.github.johnnypixelz.utilizer.inventory.inventories;
+package io.github.johnnypixelz.utilizer.inventories.inventories;
 
-import io.github.johnnypixelz.utilizer.inventory.CustomInventory;
-import io.github.johnnypixelz.utilizer.inventory.CustomInventoryType;
-import io.github.johnnypixelz.utilizer.inventory.panes.PaginatedPane;
-import io.github.johnnypixelz.utilizer.inventory.slot.Slot;
+import io.github.johnnypixelz.utilizer.inventories.CustomInventory;
+import io.github.johnnypixelz.utilizer.inventories.CustomInventoryType;
+import io.github.johnnypixelz.utilizer.inventories.panes.PaginatedPane;
+import io.github.johnnypixelz.utilizer.inventories.slot.Slot;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Collections;

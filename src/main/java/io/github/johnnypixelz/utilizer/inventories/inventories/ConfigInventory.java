@@ -1,7 +1,7 @@
-package io.github.johnnypixelz.utilizer.inventory.inventories;
+package io.github.johnnypixelz.utilizer.inventories.inventories;
 
-import io.github.johnnypixelz.utilizer.inventory.CustomInventory;
-import io.github.johnnypixelz.utilizer.inventory.config.InventoryConfig;
+import io.github.johnnypixelz.utilizer.inventories.CustomInventory;
+import io.github.johnnypixelz.utilizer.inventories.config.InventoryConfig;
 import org.bukkit.configuration.ConfigurationSection;
 
 import javax.annotation.Nonnull;

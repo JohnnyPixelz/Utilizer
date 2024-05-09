@@ -1,4 +1,4 @@
-package io.github.johnnypixelz.utilizer.inventory.suppliers;
+package io.github.johnnypixelz.utilizer.inventories.suppliers;
 
 import java.util.function.Supplier;
 

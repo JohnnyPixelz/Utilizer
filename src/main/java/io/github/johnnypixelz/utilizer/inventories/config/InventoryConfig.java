@@ -1,12 +1,12 @@
-package io.github.johnnypixelz.utilizer.inventory.config;
+package io.github.johnnypixelz.utilizer.inventories.config;
 
 import com.google.common.collect.ImmutableList;
 import io.github.johnnypixelz.utilizer.config.Configs;
 import io.github.johnnypixelz.utilizer.config.Message;
 import io.github.johnnypixelz.utilizer.config.Messages;
 import io.github.johnnypixelz.utilizer.config.Parse;
-import io.github.johnnypixelz.utilizer.inventory.CustomInventory;
-import io.github.johnnypixelz.utilizer.inventory.CustomInventoryType;
+import io.github.johnnypixelz.utilizer.inventories.CustomInventory;
+import io.github.johnnypixelz.utilizer.inventories.CustomInventoryType;
 import org.bukkit.configuration.ConfigurationSection;
 
 import javax.annotation.Nonnull;

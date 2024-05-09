@@ -1,7 +1,7 @@
-package io.github.johnnypixelz.utilizer.inventory.items;
+package io.github.johnnypixelz.utilizer.inventories.items;
 
 import io.github.johnnypixelz.utilizer.event.StatefulEventEmitter;
-import io.github.johnnypixelz.utilizer.inventory.InventoryItem;
+import io.github.johnnypixelz.utilizer.inventories.InventoryItem;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.function.Consumer;

@@ -1,7 +1,7 @@
 package io.github.johnnypixelz.utilizer.inventories;
 
-import io.github.johnnypixelz.utilizer.inventory.shape.InventoryShape;
-import io.github.johnnypixelz.utilizer.inventory.slot.Slot;
+import io.github.johnnypixelz.utilizer.inventories.shape.InventoryShape;
+import io.github.johnnypixelz.utilizer.inventories.slot.Slot;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;

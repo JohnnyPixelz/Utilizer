@@ -1,6 +1,6 @@
-package io.github.johnnypixelz.utilizer.inventory.items;
+package io.github.johnnypixelz.utilizer.inventories.items;
 
-import io.github.johnnypixelz.utilizer.inventory.InventoryItem;
+import io.github.johnnypixelz.utilizer.inventories.InventoryItem;
 import org.bukkit.inventory.ItemStack;
 
 public class SimpleItem extends InventoryItem {

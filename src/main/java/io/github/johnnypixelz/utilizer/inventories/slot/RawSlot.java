@@ -1,6 +1,6 @@
-package io.github.johnnypixelz.utilizer.inventory.slot;
+package io.github.johnnypixelz.utilizer.inventories.slot;
 
-import io.github.johnnypixelz.utilizer.inventory.shape.InventoryShape;
+import io.github.johnnypixelz.utilizer.inventories.shape.InventoryShape;
 
 public class RawSlot implements Slot {
     private final int rawSlot;

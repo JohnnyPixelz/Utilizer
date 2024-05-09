@@ -1,7 +1,7 @@
-package io.github.johnnypixelz.utilizer.inventory.config;
+package io.github.johnnypixelz.utilizer.inventories.config;
 
 import io.github.johnnypixelz.utilizer.depend.Dependencies;
-import io.github.johnnypixelz.utilizer.inventory.inventories.ConfigInventory;
+import io.github.johnnypixelz.utilizer.inventories.inventories.ConfigInventory;
 import io.github.johnnypixelz.utilizer.text.Colors;
 import org.bukkit.Bukkit;
 

@@ -1,6 +1,6 @@
-package io.github.johnnypixelz.utilizer.inventory.config;
+package io.github.johnnypixelz.utilizer.inventories.config;
 
-import io.github.johnnypixelz.utilizer.inventory.CustomInventory;
+import io.github.johnnypixelz.utilizer.inventories.CustomInventory;
 import org.bukkit.entity.Player;
 
 public class ActionContext {

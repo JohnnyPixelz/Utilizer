@@ -1,7 +1,7 @@
 package io.github.johnnypixelz.utilizer.inventories;
 
 import com.google.common.collect.ImmutableList;
-import io.github.johnnypixelz.utilizer.inventory.inventories.PickerInventory;
+import io.github.johnnypixelz.utilizer.inventories.inventories.PickerInventory;
 import io.github.johnnypixelz.utilizer.itemstack.Items;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;

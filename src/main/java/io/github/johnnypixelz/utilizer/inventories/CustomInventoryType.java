@@ -1,7 +1,7 @@
 package io.github.johnnypixelz.utilizer.inventories;
 
-import io.github.johnnypixelz.utilizer.inventory.shape.InventoryShape;
-import io.github.johnnypixelz.utilizer.inventory.slot.PositionedSlot;
+import io.github.johnnypixelz.utilizer.inventories.shape.InventoryShape;
+import io.github.johnnypixelz.utilizer.inventories.slot.PositionedSlot;
 import org.bukkit.event.inventory.InventoryType;
 
 import java.util.ArrayList;
