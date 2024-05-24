@@ -71,7 +71,7 @@ public class Items {
             return new ItemStack(Material.STONE);
         }
 
-        String materialString;
+        final String materialString;
         if (section.isSet("type") && section.isString("type")) {
             materialString = section.getString("type", "STONE");
         } else if (section.isSet("material") && section.isString("material")) {
