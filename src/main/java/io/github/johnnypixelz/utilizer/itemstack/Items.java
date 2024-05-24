@@ -130,7 +130,7 @@ public class Items {
                 for (String pattern : patterns.getKeys(false)) {
                     PatternType type = PatternType.getByIdentifier(pattern);
                     if (type == null) type = Enums.getIfPresent(PatternType.class, pattern.toUpperCase(Locale.ENGLISH)).or(PatternType.BASE);
-                    DyeColor color = Enums.getIfPresent(DyeColor.class, patterns.getString(pattern).toUpperCase(Locale.ENGLISH)).or(DyeColor.WHITE);
+                    DyeColor color = Enums.getIfPresent(DyeColor.class, patterns.getString(pattern, "").toUpperCase(Locale.ENGLISH)).or(DyeColor.WHITE);
 
                     bannerMeta.addPattern(new Pattern(color, type));
                 }
@@ -145,6 +145,7 @@ public class Items {
             // TODO needs work
             for (String effects : section.getStringList("effects")) {
                 XPotion.Effect effect = XPotion.parseEffect(effects);
+                if (effect == null) continue;
                 if (effect.hasChance()) potionMeta.addCustomEffect(effect.getEffect(), true);
             }
 
@@ -165,7 +166,7 @@ public class Items {
             BlockState state = blockStateMeta.getBlockState();
 
             if (state instanceof CreatureSpawner creatureSpawner) {
-                creatureSpawner.setSpawnedType(Enums.getIfPresent(EntityType.class, section.getString("spawner").toUpperCase(Locale.ENGLISH)).orNull());
+                creatureSpawner.setSpawnedType(Enums.getIfPresent(EntityType.class, section.getString("spawner", "").toUpperCase(Locale.ENGLISH)).orNull());
                 creatureSpawner.update(true);
                 blockStateMeta.setBlockState(creatureSpawner);
             } else if (state instanceof ShulkerBox shulkerBox) {
@@ -191,7 +192,7 @@ public class Items {
                     for (String pattern : patterns.getKeys(false)) {
                         PatternType type = PatternType.getByIdentifier(pattern);
                         if (type == null) type = Enums.getIfPresent(PatternType.class, pattern.toUpperCase(Locale.ENGLISH)).or(PatternType.BASE);
-                        DyeColor color = Enums.getIfPresent(DyeColor.class, patterns.getString(pattern).toUpperCase(Locale.ENGLISH)).or(DyeColor.WHITE);
+                        DyeColor color = Enums.getIfPresent(DyeColor.class, patterns.getString(pattern, "").toUpperCase(Locale.ENGLISH)).or(DyeColor.WHITE);
 
                         banner.addPattern(new Pattern(color, type));
                     }
@@ -208,14 +209,17 @@ public class Items {
                 FireworkEffect.Builder builder = FireworkEffect.builder();
                 for (String fws : fireworkSection.getKeys(false)) {
                     ConfigurationSection fw = section.getConfigurationSection("firework." + fws);
+                    if (fw == null) continue;
 
-                    builder.flicker(fw.getBoolean("flicker"));
+                    builder.flicker(fw.getBoolean("flicker", false));
                     builder.trail(fw.getBoolean("trail"));
-                    builder.with(Enums.getIfPresent(FireworkEffect.Type.class, fw.getString("type")
+                    builder.with(Enums.getIfPresent(FireworkEffect.Type.class, fw.getString("type", "")
                                     .toUpperCase(Locale.ENGLISH))
                             .or(FireworkEffect.Type.STAR));
 
                     ConfigurationSection colorsSection = fw.getConfigurationSection("colors");
+                    if (colorsSection == null) continue;
+
                     List<String> fwColors = colorsSection.getStringList("base");
                     List<Color> colors = new ArrayList<>(fwColors.size());
                     for (String colorStr : fwColors) colors.add(Parse.color(colorStr));
@@ -246,20 +250,22 @@ public class Items {
                 if (supports(14)) {
                     ConfigurationSection view = mapSection.getConfigurationSection("view");
                     if (view != null) {
-                        World world = Bukkit.getWorld(view.getString("world"));
+                        World world = Bukkit.getWorld(view.getString("world", ""));
                         if (world != null) {
                             MapView mapView = Bukkit.createMap(world);
                             mapView.setWorld(world);
-                            mapView.setScale(Enums.getIfPresent(MapView.Scale.class, view.getString("scale")).or(MapView.Scale.NORMAL));
+                            mapView.setScale(Enums.getIfPresent(MapView.Scale.class, view.getString("scale", "")).or(MapView.Scale.NORMAL));
                             mapView.setLocked(view.getBoolean("locked"));
                             mapView.setTrackingPosition(view.getBoolean("tracking-position"));
                             mapView.setUnlimitedTracking(view.getBoolean("unlimited-tracking"));
 
                             ConfigurationSection centerSection = view.getConfigurationSection("center");
-                            mapView.setCenterX(centerSection.getInt("x"));
-                            mapView.setCenterZ(centerSection.getInt("z"));
+                            if (centerSection != null) {
+                                mapView.setCenterX(centerSection.getInt("x"));
+                                mapView.setCenterZ(centerSection.getInt("z"));
 
-                            mapMeta.setMapView(mapView);
+                                mapMeta.setMapView(mapView);
+                            }
                         }
                     }
                 }
@@ -275,7 +281,7 @@ public class Items {
 
             ConfigurationSection lodestone = section.getConfigurationSection("lodestone");
             if (lodestone != null) {
-                World world = Bukkit.getWorld(lodestone.getString("world"));
+                World world = Bukkit.getWorld(lodestone.getString("world", ""));
                 double x = lodestone.getDouble("x");
                 double y = lodestone.getDouble("y");
                 double z = lodestone.getDouble("z");
@@ -284,6 +290,7 @@ public class Items {
         } else if (meta instanceof SuspiciousStewMeta suspiciousStewMeta) {
             for (String effects : section.getStringList("effects")) {
                 XPotion.Effect effect = XPotion.parseEffect(effects);
+                if (effect == null) continue;
                 if (effect.hasChance()) suspiciousStewMeta.addCustomEffect(effect.getEffect(), true);
             }
         } else if (meta instanceof CrossbowMeta crossbowMeta) {
@@ -298,9 +305,9 @@ public class Items {
                 }
             }
         } else if (meta instanceof TropicalFishBucketMeta tropicalFishBucketMeta) {
-            DyeColor color = Enums.getIfPresent(DyeColor.class, section.getString("color")).or(DyeColor.WHITE);
-            DyeColor patternColor = Enums.getIfPresent(DyeColor.class, section.getString("pattern-color")).or(DyeColor.WHITE);
-            TropicalFish.Pattern pattern = Enums.getIfPresent(TropicalFish.Pattern.class, section.getString("pattern")).or(TropicalFish.Pattern.BETTY);
+            DyeColor color = Enums.getIfPresent(DyeColor.class, section.getString("color", "")).or(DyeColor.WHITE);
+            DyeColor patternColor = Enums.getIfPresent(DyeColor.class, section.getString("pattern-color", "")).or(DyeColor.WHITE);
+            TropicalFish.Pattern pattern = Enums.getIfPresent(TropicalFish.Pattern.class, section.getString("pattern", "")).or(TropicalFish.Pattern.BETTY);
 
             tropicalFishBucketMeta.setBodyColor(color);
             tropicalFishBucketMeta.setPatternColor(patternColor);
