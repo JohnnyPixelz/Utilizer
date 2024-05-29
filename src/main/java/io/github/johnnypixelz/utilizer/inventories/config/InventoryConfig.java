@@ -106,7 +106,10 @@ public class InventoryConfig {
     public static void load(CustomInventory customInventory, InventoryConfig inventoryConfig) {
         customInventory.title(inventoryConfig.title);
         customInventory.type(inventoryConfig.customInventoryType);
-        customInventory.refresh(inventoryConfig.refresh);
+
+        if (inventoryConfig.refresh != null) {
+            customInventory.refresh(inventoryConfig.refresh);
+        }
     }
 
     public static void draw(CustomInventory customInventory, InventoryConfig inventoryConfig) {
