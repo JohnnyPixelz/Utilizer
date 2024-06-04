@@ -20,12 +20,12 @@ public class Symbols {
      *
      * @param beginColor starting stage of our shade
      * @param endColor final stage of our shade
-     * @param currentShade current iteration of our shade [0, maxShades - 1]
+     * @param currentShade current iteration of our shade [0, maxShades]
      * @param maxShades the total amount of shades
      * @return the transition shade
      */
     public static ChatColor getColorTransition(ChatColor beginColor, ChatColor endColor, int currentShade, int maxShades) {
-        double percentage = currentShade / (double) (maxShades - 1);
+        double percentage = currentShade / (double) maxShades;
 
         final Color bColor = beginColor.getColor();
         final Color eColor = endColor.getColor();
