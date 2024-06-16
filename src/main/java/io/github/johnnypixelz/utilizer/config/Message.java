@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -38,7 +39,7 @@ public class Message {
 
     public Message(Message message) {
         this.message = message.message;
-        this.messageList = message.messageList;
+        this.messageList = message.messageList == null ? null : new ArrayList<>(message.messageList);
         this.sound = message.sound;
         this.title = message.title;
         this.subtitle = message.subtitle;
