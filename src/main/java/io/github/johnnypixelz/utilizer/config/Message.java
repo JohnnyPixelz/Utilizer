@@ -24,7 +24,27 @@ public class Message {
     private String title;
     private String subtitle;
     private String actionbar;
-    private TitleSettings titleSettings = new TitleSettings();
+    private TitleSettings titleSettings;
+
+    public Message() {
+        this.message = null;
+        this.messageList = null;
+        this.sound = null;
+        this.title = null;
+        this.subtitle = null;
+        this.actionbar = null;
+        this.titleSettings = null;
+    }
+
+    public Message(Message message) {
+        this.message = message.message;
+        this.messageList = message.messageList;
+        this.sound = message.sound;
+        this.title = message.title;
+        this.subtitle = message.subtitle;
+        this.actionbar = message.actionbar;
+        this.titleSettings = message.titleSettings == null ? null : new TitleSettings(message.titleSettings);
+    }
 
     @Nonnull
     public Message send(@Nonnull CommandSender commandSender) {
@@ -227,7 +247,7 @@ public class Message {
         return this;
     }
 
-    @Nonnull
+    @Nullable
     public TitleSettings getTitleSettings() {
         return titleSettings;
     }

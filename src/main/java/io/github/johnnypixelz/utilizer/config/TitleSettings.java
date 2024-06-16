@@ -15,6 +15,10 @@ public class TitleSettings {
         this.titleFadeOut = titleFadeOut;
     }
 
+    public TitleSettings(TitleSettings titleSettings) {
+        this(titleSettings.titleFadeIn, titleSettings.titleStay, titleSettings.titleFadeOut);
+    }
+
     public int getTitleFadeIn() {
         return titleFadeIn;
     }
@@ -38,4 +42,5 @@ public class TitleSettings {
     public void setTitleFadeOut(int titleFadeOut) {
         this.titleFadeOut = titleFadeOut;
     }
+
 }

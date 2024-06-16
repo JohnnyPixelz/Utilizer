@@ -126,6 +126,8 @@ public class Messages {
 
         if (section.isConfigurationSection(path)) {
             ConfigurationSection messageSection = section.getConfigurationSection(path);
+            if (messageSection == null) return message;
+
             for (String key : messageSection.getKeys(false)) {
                 switch (key.toLowerCase()) {
                     case "message":
@@ -157,14 +159,26 @@ public class Messages {
                         break;
                     case "fade-in":
                         if (!messageSection.isInt(key)) break;
+                        if (message.getTitleSettings() == null) {
+                            message.setTitleSettings(new TitleSettings());
+                        }
+
                         message.getTitleSettings().setTitleFadeIn(messageSection.getInt(key));
                         break;
                     case "stay":
                         if (!messageSection.isInt(key)) break;
+                        if (message.getTitleSettings() == null) {
+                            message.setTitleSettings(new TitleSettings());
+                        }
+
                         message.getTitleSettings().setTitleStay(messageSection.getInt(key));
                         break;
                     case "fade-out":
                         if (!messageSection.isInt(key)) break;
+                        if (message.getTitleSettings() == null) {
+                            message.setTitleSettings(new TitleSettings());
+                        }
+
                         message.getTitleSettings().setTitleFadeOut(messageSection.getInt(key));
                         break;
                 }
