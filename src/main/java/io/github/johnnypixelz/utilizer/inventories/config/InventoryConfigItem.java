@@ -135,7 +135,8 @@ public class InventoryConfigItem {
     }
 
     public Optional<Message> getMessage(String messageId) {
-        return Optional.ofNullable(messages.get(messageId));
+        return Optional.ofNullable(messages.get(messageId))
+                .map(Message::new);
     }
 
     public Optional<Slot> getSlot() {

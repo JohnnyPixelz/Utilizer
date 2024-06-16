@@ -160,7 +160,8 @@ public class InventoryConfig {
     }
 
     public Optional<Message> getMessage(String messageId) {
-        return Optional.ofNullable(messages.get(messageId));
+        return Optional.ofNullable(messages.get(messageId))
+                .map(Message::new);
     }
 
     public Optional<InventoryConfigItem> getItem(String itemId) {
