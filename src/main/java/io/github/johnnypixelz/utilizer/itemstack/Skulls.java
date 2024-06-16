@@ -72,7 +72,7 @@ public class Skulls {
             throw new IllegalArgumentException("Skull must be of type PLAYER_HEAD");
         }
 
-        meta.setOwner(name);
+        meta.setOwnerProfile(Bukkit.createPlayerProfile(name));
         skull.setItemMeta(meta);
 
         return skull;
@@ -85,6 +85,10 @@ public class Skulls {
 
     @Nonnull
     public static ItemStack mutateSkullFromURL(@Nonnull ItemStack skull, @Nonnull String url) {
+        if (!(skull.getItemMeta() instanceof SkullMeta meta)) {
+            throw new IllegalArgumentException("Skull must be of type PLAYER_HEAD");
+        }
+
         return mutateSkullFromBase64(skull, urlToBase64(url));
     }
 
@@ -172,7 +176,6 @@ public class Skulls {
      * https://help.minecraft.net/hc/en-us/articles/360034636712
      *
      * @param name the username to check.
-     *
      * @return true if the string matches the Minecraft username rule, otherwise false.
      */
     private static boolean isUsername(@Nonnull String name) {
@@ -181,7 +184,8 @@ public class Skulls {
 
         // For some reasons Apache's Lists.charactersOf is faster than character indexing for small strings.
         for (char ch : Lists.charactersOf(name)) {
-            if (ch != '_' && !(ch >= 'A' && ch <= 'Z') && !(ch >= 'a' && ch <= 'z') && !(ch >= '0' && ch <= '9')) return false;
+            if (ch != '_' && !(ch >= 'A' && ch <= 'Z') && !(ch >= 'a' && ch <= 'z') && !(ch >= '0' && ch <= '9'))
+                return false;
         }
         return true;
     }
