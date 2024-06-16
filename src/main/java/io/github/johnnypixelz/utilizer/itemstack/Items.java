@@ -314,9 +314,6 @@ public class Items {
             tropicalFishBucketMeta.setPattern(pattern);
         }
 
-        final ItemStack item = itemEditor.getItem();
-        item.setItemMeta(meta);
-
         return itemEditor.getItem();
     }
 
