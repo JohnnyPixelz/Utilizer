@@ -131,7 +131,7 @@ public class Pane implements ContentHolder {
 
     @Override
     public Optional<Integer> firstEmptyRawSlot() {
-        for (int i = 0; i < inventoryItems.size(); i++) {
+        for (int i = 0; i < inventoryShape.getSize(); i++) {
             final Optional<InventoryItem> inventoryItem = getInventoryItem(i);
             if (inventoryItem.isEmpty()) return Optional.of(i);
         }
