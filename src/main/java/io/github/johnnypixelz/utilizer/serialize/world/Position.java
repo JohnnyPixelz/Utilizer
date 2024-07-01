@@ -59,7 +59,7 @@ public class Position implements GsonSerializable {
     }
 
     public synchronized Location toLocation() {
-        if (this.bukkitLocation == null) {
+        if (this.bukkitLocation == null || this.bukkitLocation.getWorld() == null) {
             this.bukkitLocation = new Location(Bukkit.getWorld(point.getWorld()), this.point.getX(), this.point.getY(), this.point.getZ(), this.direction.getYaw(), this.direction.getPitch());
         }
 
