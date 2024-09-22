@@ -131,7 +131,7 @@ public class InventoryConfigItem {
     }
 
     public ItemStack getItemStack() {
-        return itemStack;
+        return itemStack.clone();
     }
 
     public Optional<Message> getMessage(String messageId) {

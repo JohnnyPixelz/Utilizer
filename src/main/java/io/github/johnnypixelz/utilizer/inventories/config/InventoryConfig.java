@@ -81,6 +81,9 @@ public class InventoryConfig {
             inventoryConfig.refresh = Parse.constrain(1, Long.MAX_VALUE, refresh);
         }
 
+        final boolean papi = configurationSection.getBoolean("papi", true);
+        inventoryConfig.placeholderApiSupport = papi;
+
         final ConfigurationSection itemsSection = configurationSection.getConfigurationSection("items");
         if (itemsSection != null) {
             for (String key : itemsSection.getKeys(false)) {
@@ -109,6 +112,10 @@ public class InventoryConfig {
 
         if (inventoryConfig.refresh != null) {
             customInventory.refresh(inventoryConfig.refresh);
+        }
+
+        if (inventoryConfig.placeholderApiSupport) {
+            customInventory.papi();
         }
     }
 
@@ -149,6 +156,7 @@ public class InventoryConfig {
     private final Map<String, InventoryConfigItem> inventoryConfigItemMap;
     private final Map<String, Message> messages;
     private ConfigurationSection configurationSection;
+    private boolean placeholderApiSupport;
 
     private InventoryConfig() {
         this.title = null;
@@ -157,6 +165,7 @@ public class InventoryConfig {
         this.inventoryConfigItemMap = new HashMap<>();
         this.messages = new HashMap<>();
         this.configurationSection = null;
+        this.placeholderApiSupport = true;
     }
 
     public Optional<Message> getMessage(String messageId) {
@@ -181,6 +190,10 @@ public class InventoryConfig {
     @Nullable
     public ConfigurationSection getConfigurationSection() {
         return configurationSection;
+    }
+
+    public boolean isPlaceholderApiSupport() {
+        return placeholderApiSupport;
     }
 
 }

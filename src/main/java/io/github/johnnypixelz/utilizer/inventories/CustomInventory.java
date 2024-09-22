@@ -2,6 +2,7 @@ package io.github.johnnypixelz.utilizer.inventories;
 
 import io.github.johnnypixelz.utilizer.config.Message;
 import io.github.johnnypixelz.utilizer.config.Parse;
+import io.github.johnnypixelz.utilizer.depend.Dependencies;
 import io.github.johnnypixelz.utilizer.inventories.config.InventoryConfig;
 import io.github.johnnypixelz.utilizer.inventories.config.InventoryConfigItem;
 import io.github.johnnypixelz.utilizer.inventories.items.ClickableItem;
@@ -10,6 +11,7 @@ import io.github.johnnypixelz.utilizer.inventories.items.SimpleItem;
 import io.github.johnnypixelz.utilizer.inventories.items.SwitchItem;
 import io.github.johnnypixelz.utilizer.inventories.panes.PaginatedPane;
 import io.github.johnnypixelz.utilizer.inventories.slot.Slot;
+import io.github.johnnypixelz.utilizer.itemstack.Items;
 import io.github.johnnypixelz.utilizer.smartinvs.PaneType;
 import io.github.johnnypixelz.utilizer.smartinvs.PremadeItems;
 import io.github.johnnypixelz.utilizer.tasks.Tasks;
@@ -47,6 +49,9 @@ public class CustomInventory {
     private CustomInventory parentInventory;
     private boolean openParentInventoryOnClose;
 
+    private boolean placeholderApiSupport;
+    private Player placeholderApiPlayer;
+
     private boolean updatedTitle;
 
     public CustomInventory() {
@@ -60,6 +65,9 @@ public class CustomInventory {
         this.loaded = false;
         this.refreshInterval = -1;
         this.refreshTask = null;
+
+        this.placeholderApiSupport = false;
+        this.placeholderApiPlayer = null;
 
         this.updatedTitle = false;
     }
@@ -139,6 +147,19 @@ public class CustomInventory {
         this.rootPane = new Pane(inventoryType.getInventoryShape());
         rootPane.getRenderSignaller().listen(integer -> {
             final ItemStack itemStack = rootPane.getTopRenderedItem(integer).orElse(null);
+            if (itemStack == null) {
+                bukkitInventory.setItem(integer, null);
+                return;
+            }
+
+            if (placeholderApiSupport && placeholderApiPlayer != null) {
+                final ItemStack placeholderedItemStack = Dependencies.getPlaceholderAPI()
+                        .map(papi -> Items.map(itemStack, line -> papi.setPlaceholders(placeholderApiPlayer, line)))
+                        .orElse(itemStack);
+                bukkitInventory.setItem(integer, placeholderedItemStack);
+                return;
+            }
+
             bukkitInventory.setItem(integer, itemStack);
         });
     }
@@ -244,6 +265,22 @@ public class CustomInventory {
         // Create a new task if applicable
         ensureRefreshTask();
 
+        return this;
+    }
+
+    public CustomInventory papi() {
+        this.placeholderApiSupport = true;
+        return this;
+    }
+
+    public CustomInventory papi(Player player) {
+        this.placeholderApiSupport = true;
+        this.placeholderApiPlayer = player;
+        return this;
+    }
+
+    public CustomInventory papiPlayer(Player player) {
+        this.placeholderApiPlayer = player;
         return this;
     }
 
