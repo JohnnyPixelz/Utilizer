@@ -6,7 +6,7 @@
 
     <groupId>io.github.johnnypixelz</groupId>
     <artifactId>Utilizer</artifactId>
-    <version>0.19.7</version>
+    <version>0.19.8</version>
     <packaging>jar</packaging>
     <description>Powerful but easy to use library for Bukkit Plugin Development</description>
     <url>https://github.com/JohnnyPixelz/Utilizer</url>
@@ -42,6 +42,12 @@
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
+        </repository>
+
+        <!-- LoneLibs -->
+        <repository>
+            <id>matteodev</id>
+            <url>https://www.matteodev.it/spigot/public/maven/</url>
         </repository>
     </repositories>
 
@@ -118,6 +124,22 @@
             <groupId>com.sk89q.worldedit</groupId>
             <artifactId>worldedit-bukkit</artifactId>
             <version>7.3.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- ItemsAdder API -->
+        <dependency>
+            <groupId>com.github.LoneDev6</groupId>
+            <artifactId>api-itemsadder</artifactId>
+            <version>3.6.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- LoneLibs (Required for ItemsAdder API) -->
+        <dependency>
+            <groupId>dev.lone</groupId>
+            <artifactId>LoneLibs</artifactId>
+            <version>1.0.58</version>
             <scope>provided</scope>
         </dependency>
 
