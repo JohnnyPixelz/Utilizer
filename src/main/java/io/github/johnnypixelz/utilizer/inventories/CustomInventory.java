@@ -2,6 +2,7 @@ package io.github.johnnypixelz.utilizer.inventories;
 
 import io.github.johnnypixelz.utilizer.config.Message;
 import io.github.johnnypixelz.utilizer.config.Parse;
+import io.github.johnnypixelz.utilizer.config.reference.ConfigSectionReference;
 import io.github.johnnypixelz.utilizer.depend.Dependencies;
 import io.github.johnnypixelz.utilizer.inventories.config.InventoryConfig;
 import io.github.johnnypixelz.utilizer.inventories.config.InventoryConfigItem;
@@ -28,6 +29,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -40,6 +42,8 @@ public class CustomInventory {
     // Inventory Options
     private String title;
     private CustomInventoryType inventoryType;
+
+    private ConfigSectionReference inventoryConfigSectionReference;
     private InventoryConfig inventoryConfig;
 
     private boolean loaded;
@@ -60,6 +64,8 @@ public class CustomInventory {
 
         this.title = null;
         this.inventoryType = null;
+
+        this.inventoryConfigSectionReference = null;
         this.inventoryConfig = null;
 
         this.loaded = false;
@@ -202,7 +208,7 @@ public class CustomInventory {
 
             // Update title if it has been changed
             if (inventoryView != null && updatedTitle) {
-                inventoryView.setTitle(title);
+                inventoryView.setTitle(Colors.color(title));
             }
 
             onOpen(player);
@@ -230,13 +236,15 @@ public class CustomInventory {
     }
 
     public CustomInventory title(String title) {
+        if (Objects.equals(this.title, title)) return this;
+
         this.title = title;
 
         // Update title to all viewers
         if (bukkitInventory != null) {
             bukkitInventory.getViewers().forEach(humanEntity -> {
                 try {
-                    humanEntity.getOpenInventory().setTitle(title);
+                    humanEntity.getOpenInventory().setTitle(Colors.color(title));
                 } catch (Exception ignored) {}
             });
         }
@@ -268,8 +276,27 @@ public class CustomInventory {
         return this;
     }
 
+    public CustomInventory refreshConfig() {
+        if (inventoryConfigSectionReference == null) return this;
+
+        final Optional<ConfigurationSection> optionalSection = inventoryConfigSectionReference.getIfExists();
+        if (optionalSection.isEmpty()) return this;
+
+        final ConfigurationSection section = optionalSection.get();
+        this.inventoryConfig = InventoryConfig.parse(section);
+
+        InventoryConfig.load(this, inventoryConfig);
+
+        return this;
+    }
+
     public CustomInventory papi() {
         this.placeholderApiSupport = true;
+        return this;
+    }
+
+    public CustomInventory papi(boolean toggle) {
+        this.placeholderApiSupport = toggle;
         return this;
     }
 
@@ -322,6 +349,7 @@ public class CustomInventory {
     }
 
     protected CustomInventory config(String configFile, String configPath) {
+        this.inventoryConfigSectionReference = new ConfigSectionReference(configFile, configPath);
         this.inventoryConfig = InventoryConfig.parse(configFile, configPath);
         return this;
     }

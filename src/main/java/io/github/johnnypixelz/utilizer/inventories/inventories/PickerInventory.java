@@ -63,7 +63,9 @@ public class PickerInventory<T> extends CustomInventory {
                             event.getWhoClicked().closeInventory();
                         }
 
-                        onPick.accept(t);
+                        if (onPick != null) {
+                            onPick.accept(t);
+                        }
                     });
                 })
                 .pageButtons(previousButtonStack, nextButtonStack, (previousItem, nextItem) -> {

@@ -74,6 +74,13 @@ public class InventoryConfigItem {
             if (slot.isPresent()) return slot;
         }
 
+        if (section.isInt(key)) {
+            final int position = section.getInt(key);
+
+            final Slot slot = Slot.of(position);
+            return Optional.of(slot);
+        }
+
         return Optional.empty();
     }
 

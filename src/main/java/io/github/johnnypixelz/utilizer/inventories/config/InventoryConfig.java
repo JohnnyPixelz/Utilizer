@@ -109,14 +109,8 @@ public class InventoryConfig {
     public static void load(CustomInventory customInventory, InventoryConfig inventoryConfig) {
         customInventory.title(inventoryConfig.title);
         customInventory.type(inventoryConfig.customInventoryType);
-
-        if (inventoryConfig.refresh != null) {
-            customInventory.refresh(inventoryConfig.refresh);
-        }
-
-        if (inventoryConfig.placeholderApiSupport) {
-            customInventory.papi();
-        }
+        customInventory.refresh(inventoryConfig.refresh);
+        customInventory.papi(inventoryConfig.placeholderApiSupport);
     }
 
     public static void draw(CustomInventory customInventory, InventoryConfig inventoryConfig) {
