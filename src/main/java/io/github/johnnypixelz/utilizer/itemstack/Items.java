@@ -3,9 +3,11 @@ package io.github.johnnypixelz.utilizer.itemstack;
 import com.cryptomorin.xseries.XPotion;
 import com.google.common.base.Enums;
 import com.google.common.base.Strings;
+import dev.lone.itemsadder.api.CustomStack;
 import io.github.johnnypixelz.utilizer.amount.Amount;
 import io.github.johnnypixelz.utilizer.cache.Cache;
 import io.github.johnnypixelz.utilizer.config.Parse;
+import io.github.johnnypixelz.utilizer.depend.Dependencies;
 import io.github.johnnypixelz.utilizer.text.Colors;
 import org.bukkit.*;
 import org.bukkit.block.Banner;
@@ -80,10 +82,19 @@ public class Items {
             materialString = "STONE";
         }
 
-        final Material material = Optional.ofNullable(Material.matchMaterial(materialString))
-                .orElse(Material.STONE);
+        final ItemStack stack = Optional.ofNullable(Material.matchMaterial(materialString))
+                .map(ItemStack::new)
+                .or(() -> {
+                    if (!Dependencies.isEnabled("ItemsAdder")) {
+                        return Optional.empty();
+                    }
 
-        final ItemEditor itemEditor = Items.edit(material);
+                    return Optional.ofNullable(CustomStack.getInstance(materialString))
+                            .map(CustomStack::getItemStack);
+                })
+                .orElse(new ItemStack(Material.STONE));
+
+        final ItemEditor itemEditor = Items.edit(stack);
         Optional.ofNullable(section.getString("name"))
                 .or(() -> Optional.ofNullable(section.getString("displayname")))
                 .ifPresent(itemEditor::setDisplayName);
@@ -191,7 +202,8 @@ public class Items {
                 if (patterns != null) {
                     for (String pattern : patterns.getKeys(false)) {
                         PatternType type = PatternType.getByIdentifier(pattern);
-                        if (type == null) type = Enums.getIfPresent(PatternType.class, pattern.toUpperCase(Locale.ENGLISH)).or(PatternType.BASE);
+                        if (type == null)
+                            type = Enums.getIfPresent(PatternType.class, pattern.toUpperCase(Locale.ENGLISH)).or(PatternType.BASE);
                         DyeColor color = Enums.getIfPresent(DyeColor.class, patterns.getString(pattern, "").toUpperCase(Locale.ENGLISH)).or(DyeColor.WHITE);
 
                         banner.addPattern(new Pattern(color, type));
