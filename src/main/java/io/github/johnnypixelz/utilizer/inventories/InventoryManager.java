@@ -143,7 +143,10 @@ public class InventoryManager {
                 return;
 
             CustomInventory inv = inventories.get(player.getUniqueId());
-            inv.close(player);
+
+            if (player.getOpenInventory().getTopInventory() == inv.getBukkitInventory()) {
+                inv.close(player);
+            }
         }
 
         @EventHandler(priority = EventPriority.LOW)
