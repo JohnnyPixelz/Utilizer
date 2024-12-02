@@ -1,10 +1,9 @@
 package io.github.johnnypixelz.utilizer.minigame.module.healthbar;
 
-import com.cryptomorin.xseries.messages.ActionBar;
 import io.github.johnnypixelz.utilizer.Scheduler;
 import io.github.johnnypixelz.utilizer.cooldown.DynamicPlayerCooldown;
 import io.github.johnnypixelz.utilizer.minigame.MinigameModule;
-import io.github.johnnypixelz.utilizer.text.Colors;
+import io.github.johnnypixelz.utilizer.text.ActionBar;
 import io.github.johnnypixelz.utilizer.text.Symbols;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -53,7 +52,7 @@ public class HealthBarModule extends MinigameModule {
 
         getEventManager().getOnMinigameFinish().listen(() -> {
             healthBarTask.cancel();
-            targetMap.keySet().forEach(ActionBar::clearActionBar);
+            targetMap.keySet().forEach(ActionBar::clear);
             targetMap.clear();
         });
 
@@ -64,7 +63,7 @@ public class HealthBarModule extends MinigameModule {
 
     private void showHealthBar(Player player, Player target) {
         final String playerHealthBar = Symbols.getPlayerHealthBar(target);
-        ActionBar.sendActionBar(player, Colors.color(playerHealthBar));
+        ActionBar.coloredActionbar(player, playerHealthBar);
     }
 
     private Optional<Player> getTargetedBy(Player target) {
@@ -77,7 +76,7 @@ public class HealthBarModule extends MinigameModule {
 
     private void clearTarget(Player player) {
         targetMap.remove(player);
-        ActionBar.clearActionBar(player);
+        ActionBar.clear(player);
     }
 
     @EventHandler
@@ -88,7 +87,7 @@ public class HealthBarModule extends MinigameModule {
             final Player killer = target.getKiller();
 
             if (player == killer || deathMessage == null) {
-                ActionBar.clearActionBar(player);
+                ActionBar.clear(player);
                 return;
             }
 
@@ -97,7 +96,7 @@ public class HealthBarModule extends MinigameModule {
                 message = message.replace("%killer%", killer.getName());
             }
 
-            ActionBar.sendActionBar(player, Colors.color(message));
+            ActionBar.coloredActionbar(player, message);
         });
     }
 

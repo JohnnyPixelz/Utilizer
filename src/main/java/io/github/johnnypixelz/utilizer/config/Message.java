@@ -1,7 +1,7 @@
 package io.github.johnnypixelz.utilizer.config;
 
-import com.cryptomorin.xseries.messages.ActionBar;
 import io.github.johnnypixelz.utilizer.serialize.world.Point;
+import io.github.johnnypixelz.utilizer.text.ActionBar;
 import io.github.johnnypixelz.utilizer.text.Colors;
 import io.github.johnnypixelz.utilizer.text.Title;
 import org.bukkit.Bukkit;
@@ -87,7 +87,7 @@ public class Message {
         }
 
         if (actionbar != null) {
-            ActionBar.sendActionBar(player, Colors.color(actionbar));
+            ActionBar.coloredActionbar(player, actionbar);
         }
 
         return this;
