@@ -9,6 +9,8 @@ import io.github.johnnypixelz.utilizer.cache.Cache;
 import io.github.johnnypixelz.utilizer.config.Parse;
 import io.github.johnnypixelz.utilizer.depend.Dependencies;
 import io.github.johnnypixelz.utilizer.text.Colors;
+import io.th0rgal.oraxen.api.OraxenItems;
+import io.th0rgal.oraxen.items.ItemBuilder;
 import org.bukkit.*;
 import org.bukkit.block.Banner;
 import org.bukkit.block.BlockState;
@@ -85,12 +87,20 @@ public class Items {
         final ItemStack stack = Optional.ofNullable(Material.matchMaterial(materialString))
                 .map(ItemStack::new)
                 .or(() -> {
-                    if (!Dependencies.isEnabled("ItemsAdder")) {
-                        return Optional.empty();
+                    if (Dependencies.isEnabled("ItemsAdder")) {
+                        return Optional.ofNullable(CustomStack.getInstance(materialString))
+                                .map(CustomStack::getItemStack);
                     }
 
-                    return Optional.ofNullable(CustomStack.getInstance(materialString))
-                            .map(CustomStack::getItemStack);
+                    return Optional.empty();
+                })
+                .or(() -> {
+                    if (Dependencies.isEnabled("Oraxen")) {
+                        return OraxenItems.getOptionalItemById(materialString)
+                                .map(ItemBuilder::build);
+                    }
+
+                    return Optional.empty();
                 })
                 .orElse(new ItemStack(Material.STONE));
 
@@ -140,7 +150,8 @@ public class Items {
             if (patterns != null) {
                 for (String pattern : patterns.getKeys(false)) {
                     PatternType type = PatternType.getByIdentifier(pattern);
-                    if (type == null) type = Enums.getIfPresent(PatternType.class, pattern.toUpperCase(Locale.ENGLISH)).or(PatternType.BASE);
+                    if (type == null)
+                        type = Enums.getIfPresent(PatternType.class, pattern.toUpperCase(Locale.ENGLISH)).or(PatternType.BASE);
                     DyeColor color = Enums.getIfPresent(DyeColor.class, patterns.getString(pattern, "").toUpperCase(Locale.ENGLISH)).or(DyeColor.WHITE);
 
                     bannerMeta.addPattern(new Pattern(color, type));
