@@ -76,10 +76,10 @@ public class Items {
         }
 
         final String materialString;
-        if (section.isSet("type") && section.isString("type")) {
-            materialString = section.getString("type", "STONE");
-        } else if (section.isSet("material") && section.isString("material")) {
+        if (section.isSet("material") && section.isString("material")) {
             materialString = section.getString("material", "STONE");
+        } else if (section.isSet("type") && section.isString("type")) {
+            materialString = section.getString("type", "STONE");
         } else {
             materialString = "STONE";
         }
