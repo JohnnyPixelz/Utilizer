@@ -1,17 +1,9 @@
 package io.github.johnnypixelz.utilizer.loottable;
 
-import io.github.johnnypixelz.utilizer.depend.Placeholders;
-import io.github.johnnypixelz.utilizer.inventory.Inventories;
-import io.github.johnnypixelz.utilizer.itemstack.Items;
-import io.github.johnnypixelz.utilizer.loottable.entry.CommandEntry;
-import io.github.johnnypixelz.utilizer.loottable.entry.ItemEntry;
 import io.github.johnnypixelz.utilizer.loottable.entry.LootEntry;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -147,63 +139,19 @@ public class LootTable implements LootEntry {
         return chance;
     }
 
-    public List<ItemStack> getDroppedItems() {
-        return roll().stream()
-                .filter(ItemEntry.class::isInstance)
-                .map(ItemEntry.class::cast)
-                .map(ItemEntry::getGeneratedItemStack)
-                .toList();
-    }
-
-    public List<String> getDroppedCommands() {
-        return roll().stream()
-                .filter(CommandEntry.class::isInstance)
-                .map(CommandEntry.class::cast)
-                .map(CommandEntry::getCommand)
-                .toList();
-    }
-
     @Override
     public void giveLoot(Player player) {
-        getDroppedItems().stream()
-                .map(itemStack -> Items.map(itemStack, text -> Placeholders.set(player, text)))
-                .forEach(itemStack -> {
-                    Inventories.giveOrDrop(player, itemStack);
-                });
-
-        getDroppedCommands().stream()
-                .map(command -> Placeholders.set(player, command))
-                .forEach(command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command));
+        roll().forEach(lootEntry -> lootEntry.giveLoot(player));
     }
 
     @Override
     public void dropLootAt(Location location) {
-        World world = location.getWorld();
-        if (world == null) return;
-
-        getDroppedItems()
-                .forEach(itemStack -> {
-                    world.dropItemNaturally(location, itemStack);
-                });
+        roll().forEach(lootEntry -> lootEntry.dropLootAt(location));
     }
 
     @Override
     public void dropLootAt(Player player, Location dropLocation) {
-        World world = dropLocation.getWorld();
-
-        getDroppedItems().stream()
-                .map(itemStack -> Items.map(itemStack, text -> Placeholders.set(player, text)))
-                .forEach(itemStack -> {
-                    if (world == null) {
-                        Inventories.giveOrDrop(player, itemStack);
-                    } else {
-                        world.dropItemNaturally(dropLocation, itemStack);
-                    }
-                });
-
-        getDroppedCommands().stream()
-                .map(command -> Placeholders.set(player, command))
-                .forEach(command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command));
+        roll().forEach(lootEntry -> lootEntry.dropLootAt(player, dropLocation));
     }
 
 }
