@@ -3,7 +3,7 @@ package io.github.johnnypixelz.utilizer.inventories;
 import io.github.johnnypixelz.utilizer.config.Message;
 import io.github.johnnypixelz.utilizer.config.Parse;
 import io.github.johnnypixelz.utilizer.config.reference.ConfigSectionReference;
-import io.github.johnnypixelz.utilizer.depend.Dependencies;
+import io.github.johnnypixelz.utilizer.depend.Placeholders;
 import io.github.johnnypixelz.utilizer.inventories.config.InventoryConfig;
 import io.github.johnnypixelz.utilizer.inventories.config.InventoryConfigItem;
 import io.github.johnnypixelz.utilizer.inventories.items.ClickableItem;
@@ -46,8 +46,9 @@ public class CustomInventory {
     private ConfigSectionReference inventoryConfigSectionReference;
     private InventoryConfig inventoryConfig;
 
-    private boolean loaded;
-    private long refreshInterval;;
+    private boolean hasInventoryLoaded;
+    private long refreshInterval;
+    ;
     private BukkitTask refreshTask;
 
     private CustomInventory parentInventory;
@@ -55,8 +56,6 @@ public class CustomInventory {
 
     private boolean placeholderApiSupport;
     private Player placeholderApiPlayer;
-
-    private boolean updatedTitle;
 
     public CustomInventory() {
         this.bukkitInventory = null;
@@ -68,14 +67,12 @@ public class CustomInventory {
         this.inventoryConfigSectionReference = null;
         this.inventoryConfig = null;
 
-        this.loaded = false;
+        this.hasInventoryLoaded = false;
         this.refreshInterval = -1;
         this.refreshTask = null;
 
         this.placeholderApiSupport = false;
         this.placeholderApiPlayer = null;
-
-        this.updatedTitle = false;
     }
 
     protected void onLoad() {
@@ -159,11 +156,7 @@ public class CustomInventory {
             }
 
             if (placeholderApiSupport && placeholderApiPlayer != null) {
-                final ItemStack placeholderedItemStack = Dependencies.getPlaceholderAPI()
-                        .map(papi -> Items.map(itemStack, line -> papi.setPlaceholders(placeholderApiPlayer, line)))
-                        .orElse(itemStack);
-                bukkitInventory.setItem(integer, placeholderedItemStack);
-                return;
+                Items.map(itemStack, line -> Placeholders.set(placeholderApiPlayer, line));
             }
 
             bukkitInventory.setItem(integer, itemStack);
@@ -181,7 +174,7 @@ public class CustomInventory {
     }
 
     public void open(Player player) {
-        if (!loaded) {
+        if (!hasInventoryLoaded) {
             onLoad();
             if (inventoryConfig != null) {
                 InventoryConfig.load(this, inventoryConfig);
@@ -189,7 +182,7 @@ public class CustomInventory {
 
             init();
 
-            this.loaded = true;
+            this.hasInventoryLoaded = true;
 
             if (inventoryConfig != null) {
                 InventoryConfig.draw(this, inventoryConfig);
@@ -198,6 +191,7 @@ public class CustomInventory {
             onDraw();
         }
 
+        // Closing the player's old custom inventory, if exists
         InventoryManager.getInventory(player).ifPresent(customInventory -> {
             customInventory.close(player);
         });
@@ -206,9 +200,12 @@ public class CustomInventory {
             InventoryManager.setInventory(player, this);
             final InventoryView inventoryView = player.openInventory(bukkitInventory);
 
-            // Update title if it has been changed
-            if (inventoryView != null && updatedTitle) {
-                inventoryView.setTitle(Colors.color(title));
+            if (inventoryView != null) {
+                if (placeholderApiSupport) {
+                    inventoryView.setTitle(Colors.color(Placeholders.set(placeholderApiPlayer, title)));
+                } else {
+                    inventoryView.setTitle(Colors.color(title));
+                }
             }
 
             onOpen(player);
@@ -244,13 +241,14 @@ public class CustomInventory {
         if (bukkitInventory != null) {
             bukkitInventory.getViewers().forEach(humanEntity -> {
                 try {
-                    humanEntity.getOpenInventory().setTitle(Colors.color(title));
-                } catch (Exception ignored) {}
+                    if (placeholderApiSupport) {
+                        humanEntity.getOpenInventory().setTitle(Colors.color(Placeholders.set(placeholderApiPlayer, title)));
+                    } else {
+                        humanEntity.getOpenInventory().setTitle(Colors.color(title));
+                    }
+                } catch (Exception ignored) {
+                }
             });
-        }
-
-        if (loaded) {
-            updatedTitle = true;
         }
 
         return this;
@@ -332,6 +330,13 @@ public class CustomInventory {
                 if (getViewers().isEmpty()) {
                     task.cancel();
                     return;
+                }
+
+                if (placeholderApiSupport && bukkitInventory != null) {
+                    String newTitle = Colors.color(Placeholders.set(placeholderApiPlayer, this.title));
+                    bukkitInventory.getViewers().forEach(humanEntity -> {
+                        humanEntity.getOpenInventory().setTitle(newTitle);
+                    });
                 }
 
                 this.redraw();
