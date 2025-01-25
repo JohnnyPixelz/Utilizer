@@ -6,7 +6,7 @@
 
     <groupId>io.github.johnnypixelz</groupId>
     <artifactId>Utilizer</artifactId>
-    <version>0.19.13</version>
+    <version>0.19.14</version>
     <packaging>jar</packaging>
     <description>Powerful but easy to use library for Bukkit Plugin Development</description>
     <url>https://github.com/JohnnyPixelz/Utilizer</url>
