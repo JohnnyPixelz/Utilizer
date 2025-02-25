@@ -4,6 +4,9 @@ import io.github.johnnypixelz.utilizer.config.Message;
 import io.github.johnnypixelz.utilizer.config.Messages;
 import io.github.johnnypixelz.utilizer.inventories.CustomInventory;
 import io.github.johnnypixelz.utilizer.inventories.InventoryItem;
+import io.github.johnnypixelz.utilizer.inventories.config.conditions.BooleanExpressionCondition;
+import io.github.johnnypixelz.utilizer.inventories.config.conditions.Condition;
+import io.github.johnnypixelz.utilizer.inventories.config.conditions.ConstantCondition;
 import io.github.johnnypixelz.utilizer.inventories.items.ClickableItem;
 import io.github.johnnypixelz.utilizer.inventories.items.SimpleItem;
 import io.github.johnnypixelz.utilizer.inventories.slot.Slot;
@@ -40,9 +43,12 @@ public class InventoryConfigItem {
                 .map(Optional::get)
                 .toList();
 
+        final String displayConditionString = section.getString("display-condition", section.getString("condition"));
+        final Condition displayCondition = displayConditionString != null ? new BooleanExpressionCondition(displayConditionString) : new ConstantCondition(true);
+
         final int priority = section.getInt("priority", 0);
 
-        return new InventoryConfigItem(section, parsedStack, messages, slot, actions, priority);
+        return new InventoryConfigItem(section, parsedStack, messages, slot, actions, displayCondition, priority);
     }
 
     private static Optional<Slot> getSlot(ConfigurationSection section) {
@@ -126,14 +132,17 @@ public class InventoryConfigItem {
     private final Map<String, Message> messages;
     private final Slot slot;
     private final List<Action> actions;
+    private final Condition displayCondition;
+
     int priority;
 
-    private InventoryConfigItem(ConfigurationSection configurationSection, ItemStack itemStack, Map<String, Message> messages, Slot slot, List<Action> actions, int priority) {
+    private InventoryConfigItem(ConfigurationSection configurationSection, ItemStack itemStack, Map<String, Message> messages, Slot slot, List<Action> actions, Condition displayCondition, int priority) {
         this.configurationSection = configurationSection;
         this.itemStack = itemStack;
         this.messages = messages;
         this.slot = slot;
         this.actions = actions;
+        this.displayCondition = displayCondition;
         this.priority = priority;
     }
 
@@ -154,8 +163,14 @@ public class InventoryConfigItem {
         return configurationSection;
     }
 
+    @Nonnull
     public List<Action> getActions() {
         return actions;
+    }
+
+    @Nonnull
+    public Condition getDisplayCondition() {
+        return displayCondition;
     }
 
     public int getPriority() {

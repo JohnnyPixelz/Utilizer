@@ -48,14 +48,14 @@ public class CustomInventory {
 
     private boolean hasInventoryLoaded;
     private long refreshInterval;
-    ;
+
     private BukkitTask refreshTask;
 
     private CustomInventory parentInventory;
     private boolean openParentInventoryOnClose;
 
     private boolean placeholderApiSupport;
-    private Player placeholderApiPlayer;
+    private Player mainViewer;
 
     public CustomInventory() {
         this.bukkitInventory = null;
@@ -71,8 +71,8 @@ public class CustomInventory {
         this.refreshInterval = -1;
         this.refreshTask = null;
 
-        this.placeholderApiSupport = false;
-        this.placeholderApiPlayer = null;
+        this.placeholderApiSupport = true;
+        this.mainViewer = null;
     }
 
     protected void onLoad() {
@@ -106,6 +106,10 @@ public class CustomInventory {
 
     public Pane getRootPane() {
         return rootPane;
+    }
+
+    public Player getMainViewer() {
+        return mainViewer;
     }
 
     public boolean isOpenParentInventoryOnClose() {
@@ -155,8 +159,8 @@ public class CustomInventory {
                 return;
             }
 
-            if (placeholderApiSupport && placeholderApiPlayer != null) {
-                Items.map(itemStack, line -> Placeholders.set(placeholderApiPlayer, line));
+            if (placeholderApiSupport && mainViewer != null) {
+                Items.map(itemStack, line -> Placeholders.set(mainViewer, line));
             }
 
             bukkitInventory.setItem(integer, itemStack);
@@ -174,6 +178,10 @@ public class CustomInventory {
     }
 
     public void open(Player player) {
+        if (this.mainViewer == null) {
+            this.mainViewer = player;
+        }
+
         if (!hasInventoryLoaded) {
             onLoad();
             if (inventoryConfig != null) {
@@ -202,7 +210,7 @@ public class CustomInventory {
 
             if (inventoryView != null) {
                 if (placeholderApiSupport) {
-                    inventoryView.setTitle(Colors.color(Placeholders.set(placeholderApiPlayer, title)));
+                    inventoryView.setTitle(Colors.color(Placeholders.set(mainViewer, title)));
                 } else {
                     inventoryView.setTitle(Colors.color(title));
                 }
@@ -224,6 +232,10 @@ public class CustomInventory {
 
         onClose(player);
 
+        this.mainViewer = getViewers().stream()
+                .findFirst()
+                .orElse(null);
+
         if (this.openParentInventoryOnClose && this.parentInventory != null) {
             Tasks.sync().run(() -> {
                 if (!player.isOnline()) return;
@@ -242,7 +254,7 @@ public class CustomInventory {
             bukkitInventory.getViewers().forEach(humanEntity -> {
                 try {
                     if (placeholderApiSupport) {
-                        humanEntity.getOpenInventory().setTitle(Colors.color(Placeholders.set(placeholderApiPlayer, title)));
+                        humanEntity.getOpenInventory().setTitle(Colors.color(Placeholders.set(mainViewer, title)));
                     } else {
                         humanEntity.getOpenInventory().setTitle(Colors.color(title));
                     }
@@ -288,24 +300,31 @@ public class CustomInventory {
         return this;
     }
 
+    public CustomInventory disablePAPI() {
+        this.placeholderApiSupport = false;
+        return this;
+    }
+
+    @Deprecated(forRemoval = true)
     public CustomInventory papi() {
         this.placeholderApiSupport = true;
         return this;
     }
 
+    @Deprecated(forRemoval = true)
     public CustomInventory papi(boolean toggle) {
         this.placeholderApiSupport = toggle;
         return this;
     }
 
+    @Deprecated(forRemoval = true)
     public CustomInventory papi(Player player) {
         this.placeholderApiSupport = true;
-        this.placeholderApiPlayer = player;
         return this;
     }
 
+    @Deprecated(forRemoval = true)
     public CustomInventory papiPlayer(Player player) {
-        this.placeholderApiPlayer = player;
         return this;
     }
 
@@ -333,7 +352,7 @@ public class CustomInventory {
                 }
 
                 if (placeholderApiSupport && bukkitInventory != null) {
-                    String newTitle = Colors.color(Placeholders.set(placeholderApiPlayer, this.title));
+                    String newTitle = Colors.color(Placeholders.set(mainViewer, this.title));
                     bukkitInventory.getViewers().forEach(humanEntity -> {
                         humanEntity.getOpenInventory().setTitle(newTitle);
                     });

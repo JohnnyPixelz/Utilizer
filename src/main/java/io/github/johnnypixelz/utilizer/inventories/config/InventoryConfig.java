@@ -110,7 +110,10 @@ public class InventoryConfig {
         customInventory.title(inventoryConfig.title);
         customInventory.type(inventoryConfig.customInventoryType);
         customInventory.refresh(inventoryConfig.refresh);
-        customInventory.papi(inventoryConfig.placeholderApiSupport);
+
+        if (!inventoryConfig.placeholderApiSupport) {
+            customInventory.disablePAPI();
+        }
     }
 
     public static void draw(CustomInventory customInventory, InventoryConfig inventoryConfig) {
@@ -122,6 +125,7 @@ public class InventoryConfig {
                         entry.getValue().priority = -1;
                     }
                 })
+                .filter(entry -> entry.getValue().getDisplayCondition().evaluate(customInventory.getMainViewer()))
                 .sorted(Comparator.comparingInt(value -> value.getValue().getPriority()))
                 .forEach(entry -> {
                     final String key = entry.getKey();
