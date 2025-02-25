@@ -134,6 +134,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Expression Evaluation Library -->
+        <dependency>
+            <groupId>com.ezylang</groupId>
+            <artifactId>EvalEx</artifactId>
+            <version>3.4.0</version>
+        </dependency>
+
         <!-- ItemsAdder API -->
         <dependency>
             <groupId>com.github.LoneDev6</groupId>
