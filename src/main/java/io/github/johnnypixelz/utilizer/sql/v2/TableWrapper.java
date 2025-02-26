@@ -23,7 +23,7 @@ public class TableWrapper<T> {
         }
     }
 
-    public List<T> getAllRows() throws Exception {
+    public List<T> selectAll() throws Exception {
         List<T> results = new ArrayList<>();
         Table tableSchema = type.getAnnotation(Table.class);
         String query = "SELECT * FROM " + tableSchema.name();
@@ -70,4 +70,63 @@ public class TableWrapper<T> {
 
         return results;
     }
+
+    public T selectUnique(String column, Object value) throws Exception {
+        Table tableSchema = type.getAnnotation(Table.class);
+        String query = "SELECT * FROM " + tableSchema.name() + " WHERE " + column + " = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setObject(1, value);
+
+            try (ResultSet resultSet = stmt.executeQuery()) {
+                if (resultSet.next()) {
+                    T obj = type.getDeclaredConstructor().newInstance();
+
+                    for (Field field : type.getDeclaredFields()) {
+                        field.setAccessible(true);
+                        Column columnSchema = field.getAnnotation(Column.class);
+                        if (columnSchema == null) continue;
+
+                        if (field.getType() == String.class) {
+                            field.set(obj, resultSet.getString(columnSchema.name()));
+                        } else if (field.getType() == double.class || field.getType() == Double.class) {
+                            field.set(obj, resultSet.getDouble(columnSchema.name()));
+                        } else if (field.getType() == float.class || field.getType() == Float.class) {
+                            field.set(obj, resultSet.getFloat(columnSchema.name()));
+                        } else if (field.getType() == int.class || field.getType() == Integer.class) {
+                            field.set(obj, resultSet.getInt(columnSchema.name()));
+                        } else if (field.getType() == long.class || field.getType() == Long.class) {
+                            field.set(obj, resultSet.getLong(columnSchema.name()));
+                        } else if (field.getType() == boolean.class || field.getType() == Boolean.class) {
+                            field.set(obj, resultSet.getBoolean(columnSchema.name()));
+                        } else if (field.getType() == byte.class || field.getType() == Byte.class) {
+                            field.set(obj, resultSet.getByte(columnSchema.name()));
+                        } else if (field.getType() == UUID.class) {
+                            field.set(obj, UUID.fromString(resultSet.getString(columnSchema.name())));
+                        } else if (field.getType() == Date.class) {
+                            field.set(obj, resultSet.getDate(columnSchema.name()));
+                        } else if (field.getType() == Timestamp.class) {
+                            field.set(obj, resultSet.getTimestamp(columnSchema.name()));
+                        } else {
+                            throw new IllegalArgumentException("Unsupported field type: " + field.getType());
+                        }
+                    }
+
+                    return obj;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public void deleteAll() throws Exception {
+        Table tableSchema = type.getAnnotation(Table.class);
+        String query = "DELETE FROM " + tableSchema.name();
+
+        try (Statement stmt = connection.createStatement()) {
+            stmt.executeUpdate(query);
+        }
+    }
+
 }
