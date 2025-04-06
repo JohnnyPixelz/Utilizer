@@ -8,8 +8,7 @@ import io.github.johnnypixelz.utilizer.itemstack.Items;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -37,7 +36,7 @@ public class PaginatedPane extends Pane {
     public PaginatedPane(InventoryShape inventoryShape) {
         super(inventoryShape);
         this.currentPage = 0;
-        this.inventoryItems = Collections.emptyList();
+        this.inventoryItems = new ArrayList<>();
     }
 
     public <T> PaginatedPane setItems(List<T> items, Function<T, InventoryItem> converter) {
@@ -48,6 +47,38 @@ public class PaginatedPane extends Pane {
         renderCurrentPage();
 
         return this;
+    }
+
+    public PaginatedPane setItems(List<InventoryItem> items) {
+        if (items == null) {
+            this.inventoryItems = new ArrayList<>();
+            return this;
+        }
+
+        inventoryItems = new ArrayList<>(items);
+
+        renderCurrentPage();
+
+        return this;
+    }
+
+    @Override
+    public void addInventoryItem(InventoryItem item) {
+        this.inventoryItems.add(item);
+        super.addInventoryItem(item);
+    }
+
+    @Override
+    public void removeInventoryItem(int rawSlot) {
+        final List<InventoryItem> inventoryItemsForPage = getInventoryItemsForPage(currentPage);
+        this.inventoryItems.remove(inventoryItemsForPage.get(rawSlot));
+        super.removeInventoryItem(rawSlot);
+    }
+
+    @Override
+    public void clear() {
+        this.inventoryItems.clear();
+        super.clear();
     }
 
     public int getCurrentPage() {
@@ -155,7 +186,9 @@ public class PaginatedPane extends Pane {
             throw new IllegalStateException("Attempted to draw page without initializing items. Please do so using PaginatedPane#setItems");
         }
 
-        clear();
+        super.getInventoryItems().forEach((integer, item) -> {
+            super.removeInventoryItem(integer);
+        });
 
         final List<InventoryItem> inventoryItemsForPage = getInventoryItemsForPage(currentPage);
 
