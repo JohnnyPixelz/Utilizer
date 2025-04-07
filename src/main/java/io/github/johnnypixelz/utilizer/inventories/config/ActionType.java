@@ -27,7 +27,7 @@ public enum ActionType {
         final String[] args = arguments.split(" ");
 
         ConfigInventory.from(args[0], args[1])
-                .openInventoryOnClose(actionContext.getInventory())
+                .openParentInventoryOnClose(actionContext.getInventory())
                 .open(actionContext.getPlayer());
     }),
     PERFORM_CONSOLE_COMMAND(List.of("cmd", "command"), 1, actionContext -> {

@@ -116,12 +116,27 @@ public class CustomInventory {
         return openParentInventoryOnClose;
     }
 
+    public void setOpenParentInventoryOnClose(boolean openParentInventoryOnClose) {
+        this.openParentInventoryOnClose = openParentInventoryOnClose;
+    }
+
     public CustomInventory setParentInventory(CustomInventory parentInventory) {
         this.parentInventory = parentInventory;
         return this;
     }
 
+    @Deprecated(forRemoval = true)
     public CustomInventory openInventoryOnClose(CustomInventory parentInventory) {
+        return openParentInventoryOnClose(parentInventory);
+    }
+
+    public CustomInventory openParentInventoryOnClose(CustomInventory parentInventory) {
+        if (parentInventory == null) {
+            this.parentInventory = null;
+            this.openParentInventoryOnClose = false;
+            return this;
+        }
+
         this.parentInventory = parentInventory;
         this.openParentInventoryOnClose = true;
         return this;

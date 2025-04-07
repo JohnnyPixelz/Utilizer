@@ -12,6 +12,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class CustomInventories {
 
@@ -34,8 +35,23 @@ public class CustomInventories {
         }, onPick);
     }
 
+    public static PickerInventory<Player> pickPlayer(Consumer<Player> onPick, Predicate<Player> filter) {
+        return pickPlayer(player -> {
+            return Items.edit(Material.PLAYER_HEAD)
+                    .setDisplayName("&f%name%")
+                    .addLore("&7Left Click to select player")
+                    .map("%name%", player.getName())
+                    .meta(SkullMeta.class, skullMeta -> skullMeta.setOwningPlayer(player))
+                    .getItem();
+        }, onPick, filter);
+    }
+
     public static PickerInventory<Player> pickPlayer(Function<Player, ItemStack> converter, Consumer<Player> onPick) {
         return pick(ImmutableList.copyOf(Bukkit.getOnlinePlayers()), converter, onPick);
+    }
+
+    public static PickerInventory<Player> pickPlayer(Function<Player, ItemStack> converter, Consumer<Player> onPick, Predicate<Player> filter) {
+        return pick(Bukkit.getOnlinePlayers().stream().filter(filter).collect(ImmutableList.toImmutableList()), converter, onPick);
     }
 
 }
