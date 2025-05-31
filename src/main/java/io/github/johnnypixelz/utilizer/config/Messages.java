@@ -1,6 +1,7 @@
 package io.github.johnnypixelz.utilizer.config;
 
 import com.cryptomorin.xseries.XSound;
+import com.cryptomorin.xseries.base.XModule;
 import io.github.johnnypixelz.utilizer.serialize.world.Point;
 import io.github.johnnypixelz.utilizer.text.Colors;
 import org.bukkit.Bukkit;
@@ -154,8 +155,13 @@ public class Messages {
                         break;
                     case "sound":
                         if (!messageSection.isString(key)) break;
+
                         String soundString = messageSection.getString(key);
-                        XSound.matchXSound(soundString).ifPresent(xSound -> message.setSound(xSound.parseSound()));
+                        if (soundString == null || soundString.isEmpty()) break;
+
+                        XSound.of(soundString)
+                                .map(XModule::get)
+                                .ifPresent(message::setSound);
                         break;
                     case "fade-in":
                         if (!messageSection.isInt(key)) break;
