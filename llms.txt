@@ -1,0 +1,1434 @@
+# Utilizer
+
+Utilizer is a powerful and easy-to-use library for Bukkit/Spigot plugin development.
+
+## Project Information
+
+- Group ID: io.github.johnnypixelz
+- Artifact ID: Utilizer
+- Java Version: 17+
+- Repository: https://github.com/JohnnyPixelz/Utilizer
+- Maven Repository: https://repo.tzoni.me/releases
+
+## Installation
+
+### Maven
+```xml
+<repository>
+    <id>tzoni-repo-releases</id>
+    <url>https://repo.tzoni.me/releases</url>
+</repository>
+
+<dependency>
+    <groupId>io.github.johnnypixelz</groupId>
+    <artifactId>Utilizer</artifactId>
+    <version>LATEST</version>
+</dependency>
+```
+
+## Getting Started
+
+### Plugin Setup
+
+Extend `UtilPlugin` instead of `JavaPlugin`:
+
+```java
+public class MyPlugin extends UtilPlugin {
+    @Override
+    public void onEnable() {
+        // Your initialization code
+    }
+}
+```
+
+## Core Modules
+
+### 1. Items
+
+The Items system provides a fluent API for creating and editing ItemStacks without creating clones. All operations modify the underlying ItemStack directly.
+
+```java
+// Create a new item
+ItemStack sword = Items.edit(Material.DIAMOND_SWORD)
+    .setDisplayName("&bLegendary Sword")
+    .setLore("&7A powerful weapon", "&7Forged in dragon fire")
+    .addFlags(ItemFlag.HIDE_ENCHANTS)
+    .glow()
+    .getItem();
+
+// Edit an existing item
+Items.edit(existingItem)
+    .setDisplayName("&eRenamed Item")
+    .setAmount(64)
+    .setGlow(true)
+    .getItem();
+
+// Add lore to existing item
+Items.edit(item)
+    .addLore("&7New lore line", "&7Another line")
+    .getItem();
+
+// Map placeholders in name and lore
+Items.edit(item)
+    .map("%player%", player.getName())
+    .map("%level%", String.valueOf(level))
+    .getItem();
+
+// Get reference to underlying ItemStack (no clones created)
+ItemStack reference = Items.edit(material).getItem();
+```
+
+**Key Methods:**
+- `.setDisplayName(String)` - Set item name (auto-colors with &)
+- `.setLore(String...)` - Set lore lines (replaces existing)
+- `.addLore(String...)` - Add lore lines (appends to existing)
+- `.setAmount(int)` - Set stack amount
+- `.glow()` - Make item glow
+- `.setGlow(boolean)` - Set glow state
+- `.addFlags(ItemFlag...)` - Add item flags
+- `.setFlags(ItemFlag...)` - Set flags (replaces all)
+- `.clearFlags()` - Remove all flags
+- `.map(String, String)` - Replace placeholder in name and lore
+- `.mapName(String, String)` - Replace placeholder in name only
+- `.mapLore(String, String)` - Replace placeholder in lore only
+- `.setCustomModelData(int)` - Set custom model data
+- `.setDurability(int)` - Set item durability/damage
+- `.setType(Material)` - Change item material
+- `.meta(Consumer<ItemMeta>)` - Direct meta access
+- `.pdc(Consumer<PersistentDataContainer>)` - Access persistent data
+- `.getItem()` - Get the ItemStack reference
+
+**Key Features:**
+- No clones - direct modification of ItemStack
+- Chainable methods for clean code
+- Automatic color parsing (& codes and hex)
+- `getItem()` returns reference to the underlying ItemStack
+- Support for conditional methods (e.g., `.setLoreIf(condition, lore)`)
+
+### 2. Tasks
+
+Tasks replace the Bukkit Scheduler API with a cleaner, fluent interface for scheduling synchronous and asynchronous tasks.
+
+```java
+// Synchronous delayed task
+Tasks.sync().delayed(() -> {
+    // Your code here
+}, 20L);  // Delay in ticks (20 ticks = 1 second)
+
+// Asynchronous task
+Tasks.async().run(() -> {
+    // Async code here
+});
+
+// Repeating timer task
+Tasks.sync().timer(() -> {
+    // Repeating code
+}, 20L);  // Runs every 20 ticks
+
+// Delayed timer task
+Tasks.sync().delayedTimer(() -> {
+    // Repeating code with initial delay
+}, 40L, 20L);  // 40 tick delay, then every 20 ticks
+
+// Timed task with iterations
+Tasks.sync().timed(() -> {
+    // Runs exactly 5 times
+}, 20L, 5L);  // Every 20 ticks, 5 iterations
+```
+
+**Key Methods:**
+- `Tasks.sync()` - Get synchronous scheduler (main thread)
+- `Tasks.async()` - Get asynchronous scheduler (separate thread)
+- `.run(Runnable)` - Execute immediately
+- `.delayed(Runnable, ticks)` - Execute after delay
+- `.timer(Runnable, ticks)` - Repeat every X ticks
+- `.delayedTimer(Runnable, delay, period)` - Delay then repeat
+- `.timed(Runnable, period, iterations)` - Repeat with iteration limit
+- `.delayedTimed(Runnable, delay, period, iterations)` - Delay, repeat with limit
+
+### 3. Configs
+
+Simplified configuration management with automatic file watching and reloading.
+
+```java
+// Load config on plugin startup (in onEnable)
+@Override
+public void onEnable() {
+    // Load and watch all configs in resources folder
+    Configs.load("config").watch();
+    Configs.load("messages").watch();
+    Configs.load("data").watch();
+    // Note: Don't watch plugin.yml
+}
+
+// Access config values anywhere
+String value = Configs.get("config").getString("path.to.key");
+int number = Configs.get("config").getInt("some.number");
+List<String> list = Configs.get("config").getStringList("my.list");
+
+// Get with default value
+String msg = Configs.get("messages").getString("welcome", "Default welcome!");
+
+// Save config
+Configs.load("config").save();
+
+// Manual reload
+Configs.load("config").reload();
+```
+
+**Key Features:**
+- `.load("name")` - Load config from resources folder
+- `.watch()` - Auto-reload when file changes (useful for development)
+- `.get("name")` - Retrieve loaded config
+- Standard Bukkit Configuration methods available
+- Automatically handles file creation from resources
+
+### 4. Messages
+
+The Messages system provides a powerful way to send formatted messages to players from config files. Messages automatically parse colors and support multiple formats including chat messages, titles, actionbars, and sounds.
+
+```java
+// Simple message from config
+Messages.cfg("messages", "welcome.message").send(player);
+
+// With placeholder replacement
+Messages.cfg("messages", "kill.message")
+    .map("%player%", target.getName())
+    .map("%killer%", killer.getName())
+    .send(player);
+
+// Send to multiple players
+Messages.cfg("messages", "broadcast").send(playerList);
+
+// Broadcast to all online players
+Messages.cfg("messages", "announcement").broadcast();
+
+// Broadcast with range (only players within radius)
+Point center = Point.of(location);
+Messages.cfg("messages", "area.event")
+    .broadcast(center, 50.0);  // 50 block radius
+
+// Broadcast with range and predicate filter
+Messages.cfg("messages", "team.message")
+    .broadcast(center, 100.0, player -> isOnTeam(player));
+```
+
+**Config Format Options:**
+
+Simple string:
+```yaml
+welcome: "&aWelcome to the server!"
+```
+
+String list:
+```yaml
+rules:
+  - "&6Server Rules:"
+  - "&7- Be respectful"
+  - "&7- No griefing"
+```
+
+Full message section (with all features):
+```yaml
+level-up:
+  message: "&aYou leveled up!"
+  title: "&6Level Up!"
+  subtitle: "&eYou are now level %level%"
+  actionbar: "&a+100 XP"
+  sound: "ENTITY_PLAYER_LEVELUP"
+  fade-in: 10
+  stay: 70
+  fade-out: 20
+```
+
+**Available Keys in Message Section:**
+- `message` - Chat message (string or string list)
+- `title` - Title text
+- `subtitle` - Subtitle text
+- `actionbar` - Action bar text
+- `sound` - Sound to play (Minecraft sound name)
+- `fade-in` - Title fade-in time in ticks (default: 20)
+- `stay` - Title stay time in ticks (default: 50)
+- `fade-out` - Title fade-out time in ticks (default: 30)
+
+**Key Features:**
+- Automatic color parsing (supports `&` codes and hex colors)
+- Auto-detects format (string, list, or section)
+- Chainable `.map()` for placeholder replacement
+- Supports titles, subtitles, actionbars, and sounds
+- Broadcast methods with range support
+- All messages return `Message` object for chaining
+
+**Static Message Methods:**
+```java
+// Send plain text (not from config)
+Messages.send(player, "&aHello!");
+Messages.send(player, messageList);
+
+// Broadcast plain text
+Messages.broadcast("&cServer restarting!");
+Messages.broadcast(messageList);
+
+// Broadcast with range
+Messages.broadcast("Event starting!", point, 100.0);
+Messages.broadcast(messageList, point, 100.0, player -> player.hasPermission("event.notify"));
+```
+
+### 5. Custom Inventories
+
+TODO: Documentation for the Custom Inventories system
+
+### 6. Storage
+
+TODO: Documentation for the Storage system
+
+### 7. Commands
+
+TODO: Documentation for the Commands system
+
+### 8. Chat Input
+
+TODO: Documentation for the Chat Input system
+
+### 9. Amounts
+
+The Amounts system provides a flexible way to represent both static numbers and dynamic ranges. This is particularly useful for configuration files where you want to support both fixed values and random ranges.
+
+```java
+// Static amount - always returns the same value
+Amount staticAmount = Amount.of(5);
+int value = staticAmount.getAmount();  // Always returns 5
+
+// Dynamic amount (range) - returns random value between min and max (inclusive)
+Amount rangeAmount = Amount.range(5, 10);
+int randomValue = rangeAmount.getAmount();  // Returns random number between 5-10
+
+// Parse from string - supports both formats
+Amount parsed1 = Amount.parse("5");        // Static amount of 5
+Amount parsed2 = Amount.parse("5-10");     // Dynamic range 5 to 10
+
+// Using in practice
+Amount rewardAmount = Amount.parse(config.getString("reward.coins"));
+int coins = rewardAmount.getAmount();
+player.giveCoins(coins);
+
+// Config file examples:
+// static-reward: "100"        -> Always gives 100 coins
+// random-reward: "50-150"     -> Gives between 50-150 coins
+```
+
+**Key Features:**
+- `Amount.of(int)` - Create static amount (always same value)
+- `Amount.range(int, int)` - Create dynamic range (random between min-max, inclusive)
+- `Amount.parse(String)` - Parse from string ("5" or "5-10" format)
+- `.getAmount()` - Get the value (static returns fixed, dynamic returns random)
+- Perfect for config-based systems with flexible values
+- Thread-safe random number generation for ranges
+
+**Use Cases:**
+- Reward systems with variable amounts
+- Damage ranges for custom weapons
+- Cooldown variations
+- Spawn quantities
+- Experience gains with randomness
+
+### 10. Parse
+
+The Parse system provides safe parsing utilities for converting strings to various types with Optional support or default values. It includes constraint methods to limit values to ranges and special parsers for Bukkit objects.
+
+```java
+// Parse integers safely with Optional
+Optional<Integer> maybeNumber = Parse.integer("123");
+if (maybeNumber.isPresent()) {
+    int number = maybeNumber.get();
+}
+
+// Parse with default value
+int number = Parse.integer("not a number", 10); // Returns 10
+int valid = Parse.integer("42", 0); // Returns 42
+
+// Parse decimals (doubles)
+Optional<Double> maybeDecimal = Parse.decimal("3.14");
+double value = Parse.decimal("invalid", 1.0); // Returns 1.0
+
+// Parse RGB color from string (format: "r, g, b")
+Color color = Parse.color("255, 128, 64");
+Color defaultColor = Parse.color(null); // Returns Color.BLACK
+Color white = Parse.color("invalid"); // Returns Color.WHITE
+
+// Parse chat color from RGB
+ChatColor chatColor = Parse.chatColor("255, 0, 0"); // Red
+ChatColor black = Parse.chatColor(null); // Returns ChatColor.BLACK
+
+// Constrain values to a range
+int clamped = Parse.constrain(0, 100, 150); // Returns 100
+int inRange = Parse.constrain(0, 100, 50);  // Returns 50
+long clampedLong = Parse.constrain(0L, 1000L, -5L); // Returns 0
+double clampedDouble = Parse.constrain(0.0, 1.0, 1.5); // Returns 1.0
+float clampedFloat = Parse.constrain(0f, 10f, 5f); // Returns 5.0
+
+// Parse string or string list from config (always returns list)
+ConfigurationSection section = config.getConfigurationSection("messages");
+
+// If config has: value: "single message"
+List<String> list1 = Parse.stringOrList(section, "value"); 
+// Returns: ["single message"]
+
+// If config has: 
+// values:
+//   - "line 1"
+//   - "line 2"
+List<String> list2 = Parse.stringOrList(section, "values");
+// Returns: ["line 1", "line 2"]
+```
+
+**Key Features:**
+
+**Safe Parsing:**
+- `Parse.integer(String)` - Returns `Optional<Integer>`
+- `Parse.integer(String, int)` - Returns int with default value
+- `Parse.decimal(String)` - Returns `Optional<Double>`
+- `Parse.decimal(String, double)` - Returns double with default value
+
+**Object Parsing:**
+- `Parse.color(String)` - Parse Bukkit Color from "r, g, b" format
+- `Parse.chatColor(String)` - Parse ChatColor from "r, g, b" format
+- Returns safe defaults (BLACK/WHITE) on invalid input
+
+**Value Constraints:**
+- `Parse.constrain(min, max, value)` - Clamp value to range
+- Overloads for `int`, `long`, `double`, `float`
+- Throws `IllegalArgumentException` if min > max
+
+**Config Utilities:**
+- `Parse.stringOrList(ConfigurationSection, String)` - Always returns `List<String>`
+- Converts single strings to single-element lists
+- Handles both string and string list config entries
+
+**Use Cases:**
+- Safe config value parsing
+- User input validation with defaults
+- RGB color parsing from configs
+- Ensuring values stay within valid ranges
+- Flexible config format (string or list)
+
+### 11. Loot Tables
+
+The Loot Tables system provides a flexible, config-based reward distribution system with support for items, commands, experience, and nested loot tables.
+
+```java
+// Parse loot table from config
+ConfigurationSection lootConfig = Configs.get("config").getConfigurationSection("rewards.loot-table");
+LootTable lootTable = LootTable.parse(lootConfig);
+// OR
+LootTable lootTable = LootTables.parseLootTable(lootConfig);
+
+// Give loot directly to player
+lootTable.giveLoot(player);
+
+// Drop loot at location
+lootTable.dropLootAt(location);
+
+// Drop loot at location with player context (for placeholders)
+lootTable.dropLootAt(player, location);
+
+// Manual rolling (returns list of LootEntry)
+List<LootEntry> rolled = lootTable.roll();
+for (LootEntry entry : rolled) {
+    entry.giveLoot(player);
+}
+```
+
+**Configuration Schema:**
+
+```yaml
+loot-table:
+  mode: INDEPENDENT          # INDEPENDENT or WEIGHTED
+  chance: 1.0                # Chance entire table rolls (0.0-1.0)
+  rolls: 1                   # Number of times to roll
+  entries:                   # Map of loot entries
+    diamonds:
+      type: ITEM             # Entry type: ITEM, COMMAND, EXP, LOOT_TABLE
+      material: DIAMOND
+      amount: "1-3"          # Supports ranges or fixed amounts
+      chance: 0.5            # 50% chance
+      name: "&b&lRare Diamond"
+      glow: true
+    
+    command-reward:
+      type: COMMAND
+      command: "give %player_name% diamond 5"
+      chance: 0.3
+    
+    experience:
+      type: EXP              # Also accepts XP
+      amount: "30-50"        # Random 30-50 XP
+      chance: 0.8
+    
+    nested-table:
+      type: LOOT_TABLE       # Nested loot tables
+      mode: WEIGHTED
+      chance: 0.2
+      entries:
+        rare-item:
+          type: ITEM
+          material: NETHERITE_INGOT
+          chance: 1.0
+```
+
+**Complete Example Config:**
+
+```yaml
+vote-rewards:
+  mode: INDEPENDENT
+  rolls: 2                   # Roll twice
+  entries:
+    diamonds:
+      type: ITEM
+      material: DIAMOND
+      chance: 0.5            # 50% chance per roll
+      amount: 1
+    
+    trident:
+      type: ITEM
+      material: TRIDENT
+      name: "&6&lLEGENDARY TRIDENT"
+      chance: 0.01           # 1% chance
+      amount: 1
+    
+    vote-key:
+      type: ITEM
+      name: "&a&lVOTE KEY"
+      glow: true
+      material: TRIPWIRE_HOOK
+      chance: 0.007
+      amount: 1
+    
+    mythic-key:
+      type: ITEM
+      name: "&b&lMYTHICAL KEY"
+      glow: true
+      material: TRIPWIRE_HOOK
+      chance: 0.005
+      amount: 1
+    
+    nova-voucher:
+      type: ITEM
+      name: "&6&lNOVA VOUCHER &7&o(( RIGHT-CLICK ))"
+      glow: true
+      material: DIAMOND_HELMET
+      chance: 0.003
+      amount: 1
+    
+    xp:
+      type: EXP
+      amount: "30-50"        # Random 30-50 XP
+      chance: 1.0            # Always give XP
+```
+
+**Loot Table Modes:**
+
+1. **INDEPENDENT Mode:**
+   - Each entry rolls independently based on its chance
+   - Multiple entries can be selected in a single roll
+   - Example: 50% for diamonds + 80% for XP = both can drop
+
+2. **WEIGHTED Mode:**
+   - Exactly one entry is selected based on weighted probabilities
+   - Chance values act as weights (not percentages)
+   - Example: chance 1.0 vs 9.0 = 10% vs 90% selection rate
+
+**Entry Types:**
+
+1. **ITEM Entry:**
+   - Spawns ItemStack rewards
+   - Supports all properties from `Items.parse()`: material, amount, name, lore, glow, custom-model-data, enchantments, etc.
+   - Amount supports ranges: `"1-3"` or fixed: `"5"`
+   - PlaceholderAPI support in name/lore when using `giveLoot(player)` or `dropLootAt(player, location)`
+
+2. **COMMAND Entry:**
+   - Executes console command
+   - Supports PlaceholderAPI: `%player_name%`, `%player_uuid%`, etc.
+   - Command runs as console (has all permissions)
+
+3. **EXP/XP Entry:**
+   - Gives experience to player or spawns XP orb
+   - Amount supports ranges: `"30-50"` or fixed: `"100"`
+   - `giveLoot()` adds XP to player directly
+   - `dropLootAt()` spawns experience orb at location
+
+4. **LOOT_TABLE Entry:**
+   - Nested loot tables for complex reward structures
+   - Can have different mode than parent
+   - Useful for tiered reward systems
+
+**Key Methods:**
+
+*Parsing:*
+- `LootTable.parse(ConfigurationSection)` - Parse loot table from config
+- `LootTables.parseLootTable(ConfigurationSection)` - Alternative parsing method
+
+*Execution:*
+- `.giveLoot(Player)` - Give loot directly to player (items to inventory, XP to player, commands executed)
+- `.dropLootAt(Location)` - Drop loot at location (items/XP orbs spawn at location)
+- `.dropLootAt(Player, Location)` - Drop loot with player context for placeholders
+- `.roll()` - Manually roll for loot, returns `List<LootEntry>`
+
+*Properties:*
+- `.getLootTableMode()` - Get mode (INDEPENDENT or WEIGHTED)
+- `.getNestedLootEntries()` - Get list of entries
+- `.getRolls()` - Get number of rolls
+- `.getChance()` - Get chance this table rolls
+
+**Registering Custom Entry Types:**
+
+```java
+// Register custom loot entry resolver
+LootTables.registerLootEntryResolver("CUSTOM", section -> {
+    // Parse your custom entry from config
+    String customValue = section.getString("custom-property");
+    double chance = section.getDouble("chance", 1.0);
+    return new MyCustomLootEntry(customValue, chance);
+});
+
+// Then use in config:
+// my-loot:
+//   entries:
+//     custom-entry:
+//       type: CUSTOM
+//       custom-property: "value"
+//       chance: 0.5
+```
+
+**Common Use Cases:**
+- Vote reward systems
+- Crate/chest rewards
+- Quest completion rewards
+- Kill drop tables
+- Random event rewards
+- Tiered loot systems
+- Gacha/loot box mechanics
+
+**Best Practices:**
+- Use INDEPENDENT mode for multiple possible rewards
+- Use WEIGHTED mode when you want exactly one reward
+- Combine modes with nested loot tables for complex systems
+- Use `rolls` parameter to give multiple rewards from same table
+- Keep chance values between 0.0-1.0 for INDEPENDENT mode
+- In WEIGHTED mode, chance values are relative weights (can be any positive number)
+- Use Amount ranges (`"1-5"`) for variety in rewards
+- Store loot tables in separate config files for organization
+
+### 12. Custom Blocks
+
+TODO: Documentation for the Custom Blocks system
+
+### 13. SQL
+
+TODO: Documentation for the SQL system
+
+### 13. Plugin Hooks
+
+The Plugin Hooks system (Dependencies class) provides easy integration with popular Bukkit plugins like PlaceholderAPI, Vault, and WorldEdit.
+
+#### PlaceholderAPI Integration
+
+Use `Dependencies.getPlaceholderAPI()` to check if PlaceholderAPI is installed and register your custom placeholders.
+
+```java
+@Override
+public void onEnable() {
+    // Register PlaceholderAPI placeholders if available
+    Dependencies.getPlaceholderAPI().ifPresent(api -> {
+        // Simple placeholder: %yourplugin_status%
+        api.registerPlaceholder("status", player -> {
+            boolean enabled = getPlayerData(player).isEnabled();
+            return enabled ? "Enabled" : "Disabled";
+        });
+
+        // Parameterized placeholder: %yourplugin_info_<param>%
+        api.registerPlaceholder("info", (player, params) -> {
+            if (params.isEmpty()) return "No parameter";
+            String type = params.get(0);
+            return getInfo(player, type);
+        });
+
+        // Relational placeholder: %rel_yourplugin_caninteract%
+        api.registerRelationalPlaceholder("caninteract", (player1, player2) -> {
+            return canInteract(player1, player2) ? "Yes" : "No";
+        });
+
+        // System placeholder: %yourplugin_total_players%
+        api.registerSystemPlaceholder("total_players", () -> {
+            return String.valueOf(getOnlineCount());
+        });
+    });
+}
+
+// Use placeholders in your code
+String parsed = Placeholders.set(player, "&aHello %player_name%!");
+player.sendMessage(parsed);
+```
+
+#### Checking for Other Plugins
+
+```java
+// Check if a plugin is loaded
+if (Dependencies.isLoaded("Vault")) {
+    // Plugin is loaded
+}
+
+// Check if a plugin is enabled
+if (Dependencies.isEnabled("WorldEdit")) {
+    // Plugin is enabled and ready to use
+}
+
+// Get Vault wrapper
+Dependencies.getVault()
+    .ifPresent(vault -> {
+        // Use Vault economy, permissions, etc.
+    });
+
+// Get WorldEdit wrapper
+Dependencies.getWorldEdit()
+    .ifPresent(worldEdit -> {
+        // Use WorldEdit API
+    });
+```
+
+**PlaceholderAPI Methods:**
+- `.registerPlaceholder(String, PlaceholderCallback)` - Register simple placeholder
+- `.registerParameterizedPlaceholder(String, ParameterizedPlaceholderCallback)` - With arguments
+- `.registerRelationalPlaceholder(String, RelationalPlaceholderCallback)` - Between two players
+- `.registerParameterizedRelationalPlaceholder(String, ParameterizedRelationalPlaceholderCallback)` - Relational with args
+- `.registerSystemPlaceholder(String, SystemPlaceholderCallback)` - No player context
+- `.setPlaceholders(Player, String)` - Parse placeholders in text
+- `.setPlaceholders(Player, List<String>)` - Parse placeholders in list
+- `.resetRegisteredPlaceholders()` - Clear all registered placeholders
+
+**Dependencies Methods:**
+- `Dependencies.getPlaceholderAPI()` - Returns `Optional<PlaceholderAPIWrapper>`
+- `Dependencies.getVault()` - Returns `Optional<VaultWrapper>`
+- `Dependencies.getWorldEdit()` - Returns `Optional<WorldEditWrapper>`
+- `Dependencies.isLoaded(String)` - Check if plugin is loaded
+- `Dependencies.isEnabled(String)` - Check if plugin is enabled
+
+**Best Practices:**
+- Always check if the dependency is present using `.ifPresent()` or `.isEnabled()`
+- Register placeholders in `onEnable()` after loading configs
+- Use config values for placeholder outputs for easy customization
+- Store placeholder values in config for server owners to customize
+
+**Example Config for Placeholders:**
+```yaml
+placeholders:
+  ispvpmode:
+    enabled: "true"
+    disabled: "false"
+  pvpmode:
+    enabled: "&c&lPVP ON"
+    disabled: "&a&lPVP OFF"
+```
+
+### 14. Serialization & Deserialization
+
+TODO: Documentation for the Serialization & Deserialization system
+
+### 15. Random
+
+TODO: Documentation for the Random utilities
+
+### 16. Minigames
+
+TODO: Documentation for the Minigames framework
+
+### 17. Level Systems
+
+TODO: Documentation for the Level Systems
+
+### 18. Event Emitters
+
+TODO: Documentation for the Event Emitters system
+
+### 19. Cooldowns
+
+The Cooldown system provides an easy way to manage time-based restrictions on objects. Behind the scenes, it's a thread-safe map that tracks when cooldowns expire.
+
+#### Basic Cooldown
+
+```java
+// Create a cooldown for UUIDs (players)
+Cooldown<UUID> abilityCooldown = new Cooldown<>();
+
+// Set a cooldown (in milliseconds)
+abilityCooldown.set(player.getUniqueId(), 5000L); // 5 seconds
+
+// Check if on cooldown
+if (abilityCooldown.isOnCooldown(player.getUniqueId())) {
+    long expiryTime = abilityCooldown.getCooldown(player.getUniqueId());
+    long remaining = expiryTime - System.currentTimeMillis();
+    player.sendMessage("Wait " + (remaining / 1000) + " more seconds!");
+    return;
+}
+
+// Add time to existing cooldown
+abilityCooldown.add(player.getUniqueId(), 2000L); // Add 2 more seconds
+
+// Remove from cooldown manually
+abilityCooldown.remove(player.getUniqueId());
+
+// Can use any object type
+Cooldown<String> commandCooldown = new Cooldown<>();
+Cooldown<Location> locationCooldown = new Cooldown<>();
+```
+
+#### DynamicCooldown
+
+DynamicCooldown extends Cooldown with automatic cleanup and callback support. It runs a background task that automatically removes expired cooldowns and executes callbacks.
+
+```java
+// Create dynamic cooldown
+DynamicCooldown<UUID> rewardCooldown = new DynamicCooldown<>();
+
+// Set callback for when cooldown expires (runs on main thread)
+rewardCooldown.setOnDone(uuid -> {
+    Player player = Bukkit.getPlayer(uuid);
+    if (player != null) {
+        player.sendMessage("Your cooldown has expired!");
+    }
+});
+
+// Set async callback (runs asynchronously)
+rewardCooldown.setOnDoneAsync(uuid -> {
+    // Async operations when cooldown expires
+    // Don't access Bukkit API here!
+});
+
+// Set cooldown
+rewardCooldown.set(player.getUniqueId(), 60000L); // 1 minute
+
+// Remove without triggering callback
+rewardCooldown.removeWithoutExecuting(player.getUniqueId());
+
+// Clean up when done (stops background task)
+rewardCooldown.terminate();
+```
+
+#### DynamicPlayerCooldown
+
+DynamicPlayerCooldown extends DynamicCooldown specifically for Players. It automatically cleans up cooldowns when players leave the server.
+
+```java
+// Automatically removes player cooldowns on disconnect
+DynamicPlayerCooldown playerCooldown = new DynamicPlayerCooldown();
+
+playerCooldown.setOnDone(player -> {
+    player.sendMessage("Cooldown finished!");
+});
+
+playerCooldown.set(player, 30000L); // 30 seconds
+
+// Player disconnects? Cooldown is automatically removed (without triggering callback)
+```
+
+**Note:** `DynamicPlayerCooldown` is less commonly used. Most use cases prefer `Cooldown` or `DynamicCooldown` for manual state management.
+
+**Key Features:**
+- **Cooldown**: Simple map-based cooldown tracking
+  - `.set(object, ms)` - Set cooldown for object (milliseconds)
+  - `.add(object, ms)` - Add time to existing cooldown
+  - `.remove(object)` - Remove from cooldown
+  - `.isOnCooldown(object)` - Check if still on cooldown
+  - `.getCooldown(object)` - Get expiry timestamp
+
+- **DynamicCooldown**: Auto-cleanup with callbacks
+  - All Cooldown methods
+  - `.setOnDone(Consumer)` - Callback when cooldown expires (sync)
+  - `.setOnDoneAsync(Consumer)` - Async callback
+  - `.removeWithoutExecuting(object)` - Remove without callback
+  - `.terminate()` - Stop background task
+
+- **DynamicPlayerCooldown**: Player-specific with auto-cleanup on disconnect
+  - All DynamicCooldown features
+  - Automatically removes cooldowns when players quit
+
+**Common Use Cases:**
+- Ability cooldowns
+- Command rate limiting
+- Teleport delays
+- Chat spam prevention
+- Reward claim restrictions
+
+### 20. Logging
+
+Simple logging utility that wraps the plugin logger for easy access throughout your code.
+
+```java
+// Info level logging
+Logs.info("Plugin initialized successfully");
+Logs.info("Player " + player.getName() + " joined the game");
+
+// Warning level logging
+Logs.warn("Configuration file is using deprecated format");
+Logs.warn("Player attempted invalid action");
+
+// Severe/Error level logging
+Logs.severe("Failed to connect to database!");
+Logs.severe("Critical error in game loop");
+```
+
+### 21. Random Utilities
+
+#### ProbabilityList - Weighted Random Selection
+
+The `ProbabilityList` class allows you to select random items based on weighted probabilities. Items with higher probability values have a greater chance of being selected.
+
+```java
+// Create a probability list
+ProbabilityList<String> lootTable = new ProbabilityList<>();
+
+// Add items with probabilities (weights)
+lootTable.add("Common Item", 50.0);    // 50% chance
+lootTable.add("Uncommon Item", 30.0);  // 30% chance
+lootTable.add("Rare Item", 15.0);      // 15% chance
+lootTable.add("Legendary Item", 5.0);  // 5% chance
+
+// Get random item based on weights
+String randomLoot = lootTable.random();
+
+// Get random item and remove it from the list
+String prize = lootTable.randomPop();
+
+// Practical example: Reward system
+ProbabilityList<ItemStack> rewards = new ProbabilityList<>();
+rewards.add(Items.edit(Material.DIAMOND).setAmount(1).getItem(), 10.0);
+rewards.add(Items.edit(Material.IRON_INGOT).setAmount(5).getItem(), 30.0);
+rewards.add(Items.edit(Material.GOLD_INGOT).setAmount(3).getItem(), 60.0);
+
+ItemStack reward = rewards.random();
+player.getInventory().addItem(reward);
+
+// Use with different types
+ProbabilityList<Integer> amounts = new ProbabilityList<>();
+amounts.add(100, 1.0);   // 10% chance for 100
+amounts.add(50, 4.0);    // 40% chance for 50
+amounts.add(10, 5.0);    // 50% chance for 10
+
+int randomAmount = amounts.random();
+```
+
+**How Probabilities Work:**
+- Probabilities are relative weights, not percentages
+- Total weight = sum of all probabilities
+- Item chance = (item probability / total weight) × 100%
+- Example: weights of 1, 4, 5 = 10%, 40%, 50%
+
+**Key Methods:**
+- `.add(object, probability)` - Add item with weight
+- `.remove(pair)` - Remove specific probability pair
+- `.random()` - Get random item based on weights
+- `.randomPop()` - Get random item and remove from list
+- `.getPairs()` - Get all probability pairs
+
+**Common Use Cases:**
+- Loot tables and drop systems
+- Random reward selection
+- Randomized event outcomes
+- Gacha/lottery mechanics
+- Enemy spawn weights
+
+### 22. Number Formatting
+
+The `Numbers` class provides utilities for formatting numbers into human-readable strings with various formats.
+
+```java
+// Format with commas
+long amount = 1234567890L;
+String formatted = Numbers.toFormatted(amount);
+// Returns: "1,234,567,890"
+
+// Rounded format with suffixes
+long bigNumber = 1_500_000L;
+String rounded = Numbers.toRoundedFormatted(bigNumber);
+// Returns: "1.5M"
+
+long thousand = 5_000L;
+String shortForm = Numbers.toRoundedFormatted(thousand);
+// Returns: "5k"
+
+// More examples of rounded formatting
+Numbers.toRoundedFormatted(999L);          // "999"
+Numbers.toRoundedFormatted(1_000L);        // "1k"
+Numbers.toRoundedFormatted(5_500L);        // "5.5k"
+Numbers.toRoundedFormatted(10_000L);       // "10k"
+Numbers.toRoundedFormatted(1_000_000L);    // "1M"
+Numbers.toRoundedFormatted(2_500_000L);    // "2.5M"
+Numbers.toRoundedFormatted(1_000_000_000L); // "1B"
+
+// Convert to Roman numerals
+String roman = Numbers.toRoman(42);
+// Returns: "XLII"
+
+Numbers.toRoman(1);    // "I"
+Numbers.toRoman(4);    // "IV"
+Numbers.toRoman(9);    // "IX"
+Numbers.toRoman(58);   // "LVIII"
+Numbers.toRoman(1994); // "MCMXCIV"
+
+// Practical usage examples
+player.sendMessage("Balance: " + Numbers.toFormatted(playerBalance));
+player.sendMessage("Coins: " + Numbers.toRoundedFormatted(coins));
+item.setDisplayName("Level " + Numbers.toRoman(enchantLevel));
+```
+
+**Available Suffixes (toRoundedFormatted):**
+- k (thousand) - 1,000
+- M (million) - 1,000,000
+- B (billion) - 1,000,000,000
+- T (trillion) - 1,000,000,000,000
+- q (quadrillion) - 1,000,000,000,000,000
+- Q (quintillion) - 1,000,000,000,000,000,000
+
+**Key Methods:**
+- `Numbers.toFormatted(long)` - Format with commas (e.g., "1,234,567")
+- `Numbers.toRoundedFormatted(long)` - Round with suffixes (e.g., "1.5M")
+- `Numbers.toRoman(int)` - Convert to Roman numerals (e.g., "XLII")
+
+**Key Features:**
+- Works with negative numbers (toFormatted and toRoundedFormatted)
+- Decimal precision for rounded format (shows one decimal when < 100)
+- Locale-aware formatting (uses US format with commas)
+- Handles edge cases like Long.MIN_VALUE
+
+**Common Use Cases:**
+- Economy/currency displays
+- Scoreboard statistics
+- Leaderboards with large numbers
+- Item stack amounts
+- Level displays (Roman numerals)
+- Enchantment levels (Roman numerals)
+
+### 23. Color Formatting
+
+The `Colors` class provides color parsing utilities that support both legacy `&` color codes and modern hex colors.
+
+```java
+// Parse colors with & codes
+String colored = Colors.color("&aGreen text &bwith &ccyan and red");
+
+// Parse hex colors
+String hexColored = Colors.color("&#FF5733This is custom orange");
+String mixed = Colors.color("&aBold and &#00FF00custom green");
+
+// Create ChatColor from RGB values
+ChatColor customColor = Colors.rgb(255, 87, 51);
+player.sendMessage(customColor + "Custom colored message");
+
+// Practical examples
+player.sendMessage(Colors.color("&6&lWelcome &r&#FFD700to the server!"));
+item.setDisplayName(Colors.color("&#FF0000L&#FF3300e&#FF6600g&#FF9900e&#FFCC00n&#FFFF00d&#CCFF00a&#99FF00r&#66FF00y"));
+
+// Always use Colors.color() for parsing text
+String message = Colors.color(config.getString("message"));
+player.sendMessage(message);
+```
+
+**Key Methods:**
+- `Colors.color(String)` - Parse both `&` codes and hex colors (`&#RRGGBB`)
+- `Colors.rgb(int, int, int)` - Create ChatColor from RGB values (0-255)
+
+**Supported Formats:**
+- Legacy codes: `&a`, `&b`, `&c`, `&l` (bold), `&o` (italic), etc.
+- Hex colors: `&#RRGGBB` (e.g., `&#FF5733`, `&#00FF00`)
+- Mixed: Combine both in the same string
+
+**Key Features:**
+- Automatic parsing of both legacy and modern color formats
+- Thread-safe pattern matching for hex colors
+- Returns colored string ready for display
+- Works with all Minecraft text components
+
+**Common Use Cases:**
+- Parsing messages from config files
+- Coloring item names and lore
+- Custom scoreboard text
+- Chat message formatting
+- Signs and holograms
+- Book content
+
+**Best Practice:**
+- **ALWAYS use `Colors.color()` for parsing text** - All text that contains color codes should be passed through this method
+- Apply before sending messages or setting display names
+- Store uncolored text in configs, parse when displaying
+
+**Key Features:**
+- Static methods for easy access anywhere
+- Automatically uses the plugin's logger (via Provider)
+- Three log levels: `info()`, `warn()`, `severe()`
+- No need to pass plugin instance around
+
+## Best Practices
+
+1. **Always extend UtilPlugin**: This provides access to manager registration and lifecycle hooks.
+
+2. **Use config.yml and messages.yml pattern**: Always separate settings from messages. Use `config.yml` for plugin settings and `messages.yml` for all player-facing messages. Load both on startup with `.watch()`.
+
+3. **Use the Messages system for all player communication**: Never hardcode messages in your code. Always use `Messages.cfg("messages", "path")` to pull from messages.yml for consistency and easy translation.
+
+4. **Load configs on startup**: Call `Configs.load("configname").watch()` in your `onEnable()` method for all configs (except plugin.yml).
+
+5. **Use Items.edit() for ItemStacks**: No clones are created - all modifications are direct. Use `getItem()` to get the reference.
+
+6. **Use Tasks for scheduling**: Replace Bukkit Scheduler with `Tasks.sync().delayed()`, `Tasks.sync().timer()`, etc. Methods accept Runnable directly.
+
+7. **Use Logs for logging**: Use `Logs.info()`, `Logs.warn()`, and `Logs.severe()` instead of accessing the plugin logger directly.
+
+## Common Patterns
+
+### Plugin Main Class
+```java
+public class MyPlugin extends UtilPlugin {
+    
+    @Override
+    public void onEnable() {
+        Provider.register(this);
+        
+        // ALWAYS load config.yml for settings and messages.yml for messages
+        Configs.load("config").watch();
+        Configs.load("messages").watch();
+        
+        // Load any additional data configs
+        Configs.load("data").watch();
+        
+        // Register managers
+        registerManager(new MyManager());
+        
+        // Register commands
+        // TODO: Add command registration example
+        
+        // Register PlaceholderAPI placeholders
+        registerPlaceholders();
+        
+        Logs.info("Plugin enabled!");
+    }
+    
+    private void registerPlaceholders() {
+        Dependencies.getPlaceholderAPI()
+            .ifPresent(api -> {
+                api.registerPlaceholder("example", player -> {
+                    return Configs.get("config")
+                        .getString("placeholders.example", "default");
+                });
+            });
+    }
+    
+    @Override
+    public void onDisable() {
+        Logs.info("Plugin disabled!");
+    }
+}
+```
+
+### Config Structure Best Practice
+
+**config.yml** - Plugin settings only:
+```yaml
+# Settings
+max-players: 10
+enable-pvp: true
+cooldown-seconds: 30
+reward-amount: "100-500"  # Uses Amount system
+
+# Database settings
+database:
+  host: "localhost"
+  port: 3306
+  name: "mydb"
+```
+
+**messages.yml** - All player-facing messages:
+```yaml
+# Simple messages
+welcome: "&aWelcome to the server!"
+no-permission: "&cYou don't have permission!"
+
+# Messages with placeholders
+player-join: "&e%player% &7has joined the game!"
+
+# Complex messages with titles, sounds, etc.
+level-up:
+  message: "&aYou leveled up to level %level%!"
+  title: "&6&lLEVEL UP!"
+  subtitle: "&eYou are now level %level%"
+  actionbar: "&a+%xp% XP"
+  sound: "ENTITY_PLAYER_LEVELUP"
+  fade-in: 10
+  stay: 70
+  fade-out: 20
+```
+
+### Using Configs and Messages Together
+```java
+public class GameManager {
+    
+    public void startGame(Player player) {
+        // Get settings from config.yml
+        int maxPlayers = Configs.get("config").getInt("max-players");
+        Amount rewardAmount = Amount.parse(Configs.get("config").getString("reward-amount"));
+        
+        // Send messages from messages.yml
+        Messages.cfg("messages", "game.start")
+            .map("%player%", player.getName())
+            .map("%max%", String.valueOf(maxPlayers))
+            .send(player);
+        
+        // Give reward
+        int coins = rewardAmount.getAmount();
+        Messages.cfg("messages", "reward.received")
+            .map("%amount%", String.valueOf(coins))
+            .send(player);
+    }
+    
+    public void handleNoPermission(Player player) {
+        // NEVER hardcode messages - always use messages.yml
+        Messages.cfg("messages", "no-permission").send(player);
+    }
+}
+```
+
+### Using Items System
+```java
+// Create a custom item
+ItemStack customSword = Items.edit(Material.DIAMOND_SWORD)
+    .setDisplayName("&c&lFlame Blade")
+    .setLore(
+        "&7A sword forged in fire",
+        "&7",
+        "&eDamage: &c+12",
+        "&eSpeed: &a+5%"
+    )
+    .addFlags(ItemFlag.HIDE_ENCHANTS)
+    .glow()
+    .setCustomModelData(1001)
+    .getItem();
+
+// Edit existing item
+Items.edit(player.getInventory().getItemInMainHand())
+    .setDisplayName("&aRenamed!")
+    .setAmount(32)
+    .addLore("&7Added lore line")
+    .getItem();
+
+// Use placeholders
+Items.edit(rewardItem)
+    .map("%player%", player.getName())
+    .map("%amount%", "1000")
+    .getItem();
+```
+
+### Using Tasks System
+```java
+// Delayed task
+Tasks.sync().delayed(() -> {
+    player.sendMessage("1 second has passed!");
+}, 20L);  // Wait 1 second
+
+// Repeating timer
+Tasks.sync().timer(() -> {
+    // This runs every second
+    Bukkit.broadcastMessage("Tick!");
+}, 20L);  // Every second
+
+// Async task for heavy operations
+Tasks.async().run(() -> {
+    // Expensive calculation or I/O
+    // Don't access Bukkit API here!
+});
+
+// Delayed timer (delay first, then repeat)
+Tasks.sync().delayedTimer(() -> {
+    player.sendMessage("Repeating message!");
+}, 100L, 20L);  // Wait 5 seconds, then every 1 second
+
+// Limited iterations
+Tasks.sync().timed(() -> {
+    player.sendMessage("This will show 3 times");
+}, 20L, 3L);  // Every second, 3 times total
+```
+
+### Using Configs System
+```java
+// In onEnable - load all configs
+Configs.load("config").watch();
+Configs.load("messages").watch();
+
+// Anywhere in your code - get config values
+int maxPlayers = Configs.get("config").getInt("game.max-players");
+String welcomeMsg = Configs.get("messages").getString("welcome");
+List<String> rewards = Configs.get("config").getStringList("rewards.items");
+
+// With defaults
+double multiplier = Configs.get("config").getDouble("multiplier", 1.5);
+```
+
+### Using Messages System
+```java
+// Simple message from config
+Messages.cfg("messages", "welcome").send(player);
+
+// Message with placeholders
+Messages.cfg("messages", "player.death")
+    .map("%player%", player.getName())
+    .map("%location%", location.toString())
+    .send(player);
+
+// Broadcast to everyone
+Messages.cfg("messages", "server.restart").broadcast();
+
+// Broadcast in range (50 blocks)
+Point center = Point.of(event.getLocation());
+Messages.cfg("messages", "area.event")
+    .broadcast(center, 50.0);
+
+// Complex message with title, sound, actionbar (from config)
+Messages.cfg("messages", "achievements.unlock")
+    .map("%achievement%", "Dragon Slayer")
+    .map("%reward%", "1000 coins")
+    .send(player);
+// Config would have: message, title, subtitle, actionbar, sound, fade-in, stay, fade-out
+```
+
+## Package Structure
+
+- `amount/` - Amounts system
+- `command/` - Commands system
+- `config/` - Configs system (Configs class)
+- `cooldown/` - Cooldowns system
+- `event/` - Event Emitters system
+- `input/` - Chat Input system
+- `inventory/` - Custom Inventories system
+- `itemstack/` - Items system (Items class)
+- `minigame/` - Minigames framework
+- `plugin/` - Core plugin classes (UtilPlugin, Provider)
+- `random/` - Random utilities
+- `serialize/` - Serialization & Deserialization
+- `sql/` - SQL system
+- `tasks/` - Tasks system (Tasks class)
+- `text/` - Messages and text utilities
+
+## Quick Reference
+
+### Items
+- `Items.edit(Material)` - Create new item
+- `Items.edit(ItemStack)` - Edit existing item
+- `.setDisplayName(String)` - Set display name (auto-colors)
+- `.setLore(String...)` - Set lore lines (replaces existing)
+- `.addLore(String...)` - Add lore lines (appends)
+- `.setAmount(int)` - Set stack amount
+- `.glow()` - Make item glow
+- `.setGlow(boolean)` - Set glow state
+- `.addFlags(ItemFlag...)` - Add item flags
+- `.clearFlags()` - Remove all flags
+- `.map(String, String)` - Replace placeholder in name/lore
+- `.setCustomModelData(int)` - Set custom model data
+- `.setDurability(int)` - Set durability
+- `.meta(Consumer<ItemMeta>)` - Access ItemMeta
+- `.getItem()` - Get ItemStack reference
+
+### Tasks
+- `Tasks.sync()` - Get synchronous scheduler
+- `Tasks.async()` - Get asynchronous scheduler
+- `.run(Runnable)` - Execute immediately
+- `.delayed(Runnable, long)` - Execute after delay
+- `.timer(Runnable, long)` - Repeat every X ticks
+- `.delayedTimer(Runnable, long, long)` - Delay then repeat
+- `.timed(Runnable, long, long)` - Repeat with iteration limit
+- `.delayedTimed(Runnable, long, long, long)` - Delay, repeat with limit
+
+### Configs
+- `Configs.load(String)` - Load config file
+- `.watch()` - Enable auto-reload
+- `.save()` - Save config
+- `.reload()` - Reload config
+- `Configs.get(String)` - Get loaded config
+- `.getString(String)` - Get string value
+- `.getInt(String)` - Get integer value
+
+### Messages
+- `Messages.cfg(String, String)` - Get message from config
+- `Messages.cfg(String)` - Get from "config" file (default)
+- `.send(CommandSender)` - Send to player/console
+- `.send(List)` - Send to multiple recipients
+- `.broadcast()` - Send to all online players
+- `.broadcast(Point, double)` - Broadcast in radius
+- `.broadcast(Point, double, Predicate)` - Broadcast in radius with filter
+- `.map(String, String)` - Replace placeholder
+- `Messages.send(CommandSender, String)` - Send plain text
+- `Messages.broadcast(String)` - Broadcast plain text
+
+### Logs
+- `Logs.info(String)` - Log info level message
+- `Logs.warn(String)` - Log warning level message
+- `Logs.severe(String)` - Log severe/error level message
+
+### Amounts
+- `Amount.of(int)` - Create static amount
+- `Amount.range(int, int)` - Create dynamic range (min-max inclusive)
+- `Amount.parse(String)` - Parse from string ("5" or "5-10")
+- `.getAmount()` - Get value (static=fixed, dynamic=random)
+
+### Parse
+- `Parse.integer(String)` - Parse to Optional<Integer>
+- `Parse.integer(String, int)` - Parse with default value
+- `Parse.decimal(String)` - Parse to Optional<Double>
+- `Parse.decimal(String, double)` - Parse with default value
+- `Parse.color(String)` - Parse Bukkit Color from "r, g, b"
+- `Parse.chatColor(String)` - Parse ChatColor from "r, g, b"
+- `Parse.constrain(min, max, value)` - Clamp value to range (int/long/double/float)
+- `Parse.stringOrList(section, path)` - Get List<String> from string or list
+
+### Cooldowns
+- `new Cooldown<T>()` - Create basic cooldown
+- `new DynamicCooldown<T>()` - Cooldown with auto-cleanup and callbacks
+- `new DynamicPlayerCooldown()` - Player cooldown (auto-removes on quit)
+- `.set(T, long)` - Set cooldown in milliseconds
+- `.add(T, long)` - Add time to existing cooldown
+- `.remove(T)` - Remove from cooldown
+- `.isOnCooldown(T)` - Check if on cooldown
+- `.getCooldown(T)` - Get expiry timestamp
+- `.setOnDone(Consumer<T>)` - Callback when expires (sync)
+- `.setOnDoneAsync(Consumer<T>)` - Async callback when expires
+- `.removeWithoutExecuting(T)` - Remove without triggering callback
+- `.terminate()` - Stop background task (DynamicCooldown)
+
+### Dependencies (Plugin Hooks)
+- `Dependencies.getPlaceholderAPI()` - Get PlaceholderAPI wrapper (Optional)
+- `Dependencies.getVault()` - Get Vault wrapper (Optional)
+- `Dependencies.getWorldEdit()` - Get WorldEdit wrapper (Optional)
+- `Dependencies.isLoaded(String)` - Check if plugin is loaded
+- `Dependencies.isEnabled(String)` - Check if plugin is enabled
+- PlaceholderAPIWrapper:
+  - `.registerPlaceholder(String, PlaceholderCallback)` - Register placeholder
+  - `.registerParameterizedPlaceholder(String, ParameterizedPlaceholderCallback)` - With args
+  - `.registerRelationalPlaceholder(String, RelationalPlaceholderCallback)` - Between players
+  - `.registerSystemPlaceholder(String, SystemPlaceholderCallback)` - No player context
+  - `.setPlaceholders(Player, String)` - Parse placeholders in text
+
+### Number Formatting
+- `Numbers.toFormatted(long)` - Format with commas (e.g., "1,234,567")
+- `Numbers.toRoundedFormatted(long)` - Round with suffixes (e.g., "1.5M", "5k")
+- `Numbers.toRoman(int)` - Convert to Roman numerals (e.g., "XLII")
+
+### Color Formatting
+- `Colors.color(String)` - Parse `&` codes and hex colors (`&#RRGGBB`)
+- `Colors.rgb(int, int, int)` - Create ChatColor from RGB values (0-255)
+
+### Random Utilities
+- `ProbabilityList<T>` - Weighted random selection
+  - `.add(object, probability)` - Add item with weight
+  - `.random()` - Get random item based on weights
+  - `.randomPop()` - Get and remove random item
+
+## Support
+
+For issues, questions, or contributions, visit: https://github.com/JohnnyPixelz/Utilizer
