@@ -30,7 +30,7 @@ Utilizer is a powerful and easy-to-use library for Bukkit/Spigot plugin developm
 
 ### Plugin Setup
 
-Extend `UtilPlugin` instead of `JavaPlugin`:
+Extend `io.github.johnnypixelz.utilizer.plugin.UtilPlugin` instead of `JavaPlugin`:
 
 ```java
 public class MyPlugin extends UtilPlugin {
@@ -43,7 +43,7 @@ public class MyPlugin extends UtilPlugin {
 
 ## Core Modules
 
-### 1. Items
+### 1. Items (io.github.johnnypixelz.utilizer.itemstack.Items)
 
 The Items system provides a fluent API for creating and editing ItemStacks without creating clones. All operations modify the underlying ItemStack directly.
 
@@ -105,7 +105,7 @@ ItemStack reference = Items.edit(material).getItem();
 - `getItem()` returns reference to the underlying ItemStack
 - Support for conditional methods (e.g., `.setLoreIf(condition, lore)`)
 
-### 2. Tasks
+### 2. Tasks (io.github.johnnypixelz.utilizer.tasks.Tasks)
 
 Tasks replace the Bukkit Scheduler API with a cleaner, fluent interface for scheduling synchronous and asynchronous tasks.
 
@@ -146,7 +146,7 @@ Tasks.sync().timed(() -> {
 - `.timed(Runnable, period, iterations)` - Repeat with iteration limit
 - `.delayedTimed(Runnable, delay, period, iterations)` - Delay, repeat with limit
 
-### 3. Configs
+### 3. Configs (io.github.johnnypixelz.utilizer.config.Configs)
 
 Simplified configuration management with automatic file watching and reloading.
 
@@ -183,7 +183,7 @@ Configs.load("config").reload();
 - Standard Bukkit Configuration methods available
 - Automatically handles file creation from resources
 
-### 4. Messages
+### 4. Messages (io.github.johnnypixelz.utilizer.text.Messages)
 
 The Messages system provides a powerful way to send formatted messages to players from config files. Messages automatically parse colors and support multiple formats including chat messages, titles, actionbars, and sounds.
 
@@ -290,7 +290,7 @@ TODO: Documentation for the Commands system
 
 TODO: Documentation for the Chat Input system
 
-### 9. Amounts
+### 9. Amounts (io.github.johnnypixelz.utilizer.amount.Amount)
 
 The Amounts system provides a flexible way to represent both static numbers and dynamic ranges. This is particularly useful for configuration files where you want to support both fixed values and random ranges.
 
@@ -332,7 +332,7 @@ player.giveCoins(coins);
 - Spawn quantities
 - Experience gains with randomness
 
-### 10. Parse
+### 10. Parse (io.github.johnnypixelz.utilizer.config.Parse)
 
 The Parse system provides safe parsing utilities for converting strings to various types with Optional support or default values. It includes constraint methods to limit values to ranges and special parsers for Bukkit objects.
 
@@ -412,7 +412,7 @@ List<String> list2 = Parse.stringOrList(section, "values");
 - Ensuring values stay within valid ranges
 - Flexible config format (string or list)
 
-### 11. Loot Tables
+### 11. Loot Tables (io.github.johnnypixelz.utilizer.loottable.LootTable)
 
 The Loot Tables system provides a flexible, config-based reward distribution system with support for items, commands, experience, and nested loot tables.
 
@@ -627,9 +627,9 @@ TODO: Documentation for the Custom Blocks system
 
 TODO: Documentation for the SQL system
 
-### 13. Plugin Hooks
+### 13. Plugin Hooks (io.github.johnnypixelz.utilizer.depend.Dependencies)
 
-The Plugin Hooks system (Dependencies class) provides easy integration with popular Bukkit plugins like PlaceholderAPI, Vault, and WorldEdit.
+The Plugin Hooks system (io.github.johnnypixelz.utilizer.depend.Dependencies class) provides easy integration with popular Bukkit plugins like PlaceholderAPI, Vault, and WorldEdit.
 
 #### PlaceholderAPI Integration
 
@@ -666,7 +666,7 @@ public void onEnable() {
 }
 
 // Use placeholders in your code
-String parsed = Placeholders.set(player, "&aHello %player_name%!");
+String parsed = io.github.johnnypixelz.utilizer.depend.Placeholders.set(player, "&aHello %player_name%!");
 player.sendMessage(parsed);
 ```
 
@@ -750,7 +750,7 @@ TODO: Documentation for the Level Systems
 
 TODO: Documentation for the Event Emitters system
 
-### 19. Cooldowns
+### 19. Cooldowns (io.github.johnnypixelz.utilizer.cooldown.Cooldown)
 
 The Cooldown system provides an easy way to manage time-based restrictions on objects. Behind the scenes, it's a thread-safe map that tracks when cooldowns expire.
 
@@ -784,7 +784,7 @@ Cooldown<Location> locationCooldown = new Cooldown<>();
 
 #### DynamicCooldown
 
-DynamicCooldown extends Cooldown with automatic cleanup and callback support. It runs a background task that automatically removes expired cooldowns and executes callbacks.
+io.github.johnnypixelz.utilizer.cooldown.DynamicCooldown extends io.github.johnnypixelz.utilizer.cooldown.Cooldown with automatic cleanup and callback support. It runs a background task that automatically removes expired cooldowns and executes callbacks.
 
 ```java
 // Create dynamic cooldown
@@ -816,7 +816,7 @@ rewardCooldown.terminate();
 
 #### DynamicPlayerCooldown
 
-DynamicPlayerCooldown extends DynamicCooldown specifically for Players. It automatically cleans up cooldowns when players leave the server.
+io.github.johnnypixelz.utilizer.cooldown.DynamicPlayerCooldown extends io.github.johnnypixelz.utilizer.cooldown.DynamicCooldown specifically for Players. It automatically cleans up cooldowns when players leave the server.
 
 ```java
 // Automatically removes player cooldowns on disconnect
@@ -859,7 +859,7 @@ playerCooldown.set(player, 30000L); // 30 seconds
 - Chat spam prevention
 - Reward claim restrictions
 
-### 20. Logging
+### 20. Logging (io.github.johnnypixelz.utilizer.plugin.Logs)
 
 Simple logging utility that wraps the plugin logger for easy access throughout your code.
 
@@ -877,11 +877,11 @@ Logs.severe("Failed to connect to database!");
 Logs.severe("Critical error in game loop");
 ```
 
-### 21. Random Utilities
+### 21. Random Utilities (io.github.johnnypixelz.utilizer.random.ProbabilityList)
 
 #### ProbabilityList - Weighted Random Selection
 
-The `ProbabilityList` class allows you to select random items based on weighted probabilities. Items with higher probability values have a greater chance of being selected.
+The `io.github.johnnypixelz.utilizer.random.ProbabilityList` class allows you to select random items based on weighted probabilities. Items with higher probability values have a greater chance of being selected.
 
 ```java
 // Create a probability list
@@ -937,9 +937,9 @@ int randomAmount = amounts.random();
 - Gacha/lottery mechanics
 - Enemy spawn weights
 
-### 22. Number Formatting
+### 22. Number Formatting (io.github.johnnypixelz.utilizer.text.Numbers)
 
-The `Numbers` class provides utilities for formatting numbers into human-readable strings with various formats.
+The `io.github.johnnypixelz.utilizer.text.Numbers` class provides utilities for formatting numbers into human-readable strings with various formats.
 
 ```java
 // Format with commas
@@ -1008,9 +1008,9 @@ item.setDisplayName("Level " + Numbers.toRoman(enchantLevel));
 - Level displays (Roman numerals)
 - Enchantment levels (Roman numerals)
 
-### 23. Color Formatting
+### 23. Color Formatting (io.github.johnnypixelz.utilizer.text.Colors)
 
-The `Colors` class provides color parsing utilities that support both legacy `&` color codes and modern hex colors.
+The `io.github.johnnypixelz.utilizer.text.Colors` class provides color parsing utilities that support both legacy `&` color codes and modern hex colors.
 
 ```java
 // Parse colors with & codes
@@ -1069,19 +1069,19 @@ player.sendMessage(message);
 
 ## Best Practices
 
-1. **Always extend UtilPlugin**: This provides access to manager registration and lifecycle hooks.
+1. **Always extend io.github.johnnypixelz.utilizer.plugin.UtilPlugin**: This provides access to manager registration and lifecycle hooks.
 
 2. **Use config.yml and messages.yml pattern**: Always separate settings from messages. Use `config.yml` for plugin settings and `messages.yml` for all player-facing messages. Load both on startup with `.watch()`.
 
-3. **Use the Messages system for all player communication**: Never hardcode messages in your code. Always use `Messages.cfg("messages", "path")` to pull from messages.yml for consistency and easy translation.
+3. **Use the io.github.johnnypixelz.utilizer.text.Messages system for all player communication**: Never hardcode messages in your code. Always use `Messages.cfg("messages", "path")` to pull from messages.yml for consistency and easy translation.
 
 4. **Load configs on startup**: Call `Configs.load("configname").watch()` in your `onEnable()` method for all configs (except plugin.yml).
 
-5. **Use Items.edit() for ItemStacks**: No clones are created - all modifications are direct. Use `getItem()` to get the reference.
+5. **Use io.github.johnnypixelz.utilizer.itemstack.Items.edit() for ItemStacks**: No clones are created - all modifications are direct. Use `getItem()` to get the reference.
 
-6. **Use Tasks for scheduling**: Replace Bukkit Scheduler with `Tasks.sync().delayed()`, `Tasks.sync().timer()`, etc. Methods accept Runnable directly.
+6. **Use io.github.johnnypixelz.utilizer.tasks.Tasks for scheduling**: Replace Bukkit Scheduler with `Tasks.sync().delayed()`, `Tasks.sync().timer()`, etc. Methods accept Runnable directly.
 
-7. **Use Logs for logging**: Use `Logs.info()`, `Logs.warn()`, and `Logs.severe()` instead of accessing the plugin logger directly.
+7. **Use io.github.johnnypixelz.utilizer.plugin.Logs for logging**: Use `Logs.info()`, `Logs.warn()`, and `Logs.severe()` instead of accessing the plugin logger directly.
 
 ## Common Patterns
 
@@ -1091,8 +1091,6 @@ public class MyPlugin extends UtilPlugin {
     
     @Override
     public void onEnable() {
-        Provider.register(this);
-        
         // ALWAYS load config.yml for settings and messages.yml for messages
         Configs.load("config").watch();
         Configs.load("messages").watch();
