@@ -11,6 +11,59 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * LootTable Configuration Schema:
+ *
+ * loot-table:
+ *   mode: INDEPENDENT          # Required. INDEPENDENT (each entry rolls independently) or WEIGHTED (pick one based on weights)
+ *   chance: 1.0                # Optional. Chance this entire loot table rolls (0.0-1.0). Default: 1.0
+ *   rolls: 1                   # Optional. Number of times to roll this loot table. Default: 1
+ *   entries:                   # Required. Map of loot entries
+ *     entry-name:
+ *       type: ITEM             # Required. Entry type: ITEM, COMMAND, EXP/XP, or LOOT_TABLE (nested)
+ *       chance: 0.5            # Optional. Chance this entry is selected (0.0-1.0). Default: 1.0
+ *
+ *       # For type: ITEM
+ *       material: DIAMOND      # Required for ITEM. Material type
+ *       amount: "1-3"          # Optional. Amount (supports ranges like "1-3" or fixed "5"). Default: "1"
+ *       name: "&aCustom Name"  # Optional. Display name (supports color codes)
+ *       lore:                  # Optional. Lore lines
+ *         - "&7Line 1"
+ *         - "&7Line 2"
+ *       glow: true             # Optional. Make item glow. Default: false
+ *       custom-model-data: 1   # Optional. Custom model data value
+ *       # ... other ItemStack properties supported by Items.parse()
+ *
+ *       # For type: COMMAND
+ *       command: "give %player_name% diamond 1"  # Required for COMMAND. Console command to execute
+ *
+ *       # For type: EXP or XP
+ *       amount: "30-50"        # Required for EXP. Experience amount (supports ranges)
+ *
+ *       # For type: LOOT_TABLE (nested loot tables)
+ *       mode: INDEPENDENT      # Nested loot table follows same schema
+ *       entries:
+ *         # ... nested entries
+ *
+ * Modes:
+ *   - INDEPENDENT: Each entry in the loot table rolls independently based on its chance
+ *   - WEIGHTED: One entry is selected based on weighted probabilities (chance values act as weights)
+ *
+ * Example:
+ *   my-loot:
+ *     mode: INDEPENDENT
+ *     rolls: 2
+ *     entries:
+ *       diamonds:
+ *         type: ITEM
+ *         material: DIAMOND
+ *         amount: "1-3"
+ *         chance: 0.5
+ *       experience:
+ *         type: EXP
+ *         amount: "30-50"
+ *         chance: 0.8
+ */
 public class LootTable implements LootEntry {
 
     public static LootTable parse(@Nullable ConfigurationSection section) {
