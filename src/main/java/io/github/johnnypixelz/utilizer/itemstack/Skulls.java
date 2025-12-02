@@ -7,6 +7,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.profile.PlayerProfile;
+import org.bukkit.profile.PlayerTextures;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
@@ -103,7 +105,19 @@ public class Skulls {
             throw new IllegalArgumentException("Skull must be of type PLAYER_HEAD");
         }
 
-        mutateItemMeta(meta, base64);
+        // Try modern API first (1.20.5+)
+        try {
+            String textureUrl = extractUrlFromBase64(base64);
+            PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
+            PlayerTextures textures = profile.getTextures();
+            textures.setSkin(new URI(textureUrl).toURL());
+            profile.setTextures(textures);
+            meta.setOwnerProfile(profile);
+        } catch (Exception | NoClassDefFoundError modernApiException) {
+            // Fallback to legacy reflection-based approach
+            mutateItemMeta(meta, base64);
+        }
+        
         skull.setItemMeta(meta);
 
         return skull;
@@ -121,6 +135,19 @@ public class Skulls {
 
         String toEncode = "{\"textures\":{\"SKIN\":{\"url\":\"" + actualUrl + "\"}}}";
         return Base64.getEncoder().encodeToString(toEncode.getBytes());
+    }
+
+    @Nonnull
+    private static String extractUrlFromBase64(@Nonnull String base64) {
+        try {
+            String decoded = new String(Base64.getDecoder().decode(base64));
+            // The decoded JSON format is: {"textures":{"SKIN":{"url":"http://..."}}}
+            int urlStart = decoded.indexOf("\"url\":\"") + 7;
+            int urlEnd = decoded.indexOf("\"", urlStart);
+            return decoded.substring(urlStart, urlEnd);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid base64 texture data", e);
+        }
     }
 
     private static void mutateItemMeta(@Nonnull SkullMeta meta, @Nonnull String b64) {
