@@ -141,6 +141,18 @@
             <version>3.4.0</version>
         </dependency>
 
+        <!-- Adventure API (MiniMessage) -->
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-minimessage</artifactId>
+            <version>4.17.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-serializer-legacy</artifactId>
+            <version>4.17.0</version>
+        </dependency>
+
         <!-- ItemsAdder API -->
         <dependency>
             <groupId>com.github.LoneDev6</groupId>
@@ -271,6 +283,10 @@
                                 <relocation>
                                     <pattern>com.google.gson</pattern>
                                     <shadedPattern>io.github.johnnypixelz.utilizer.shade.gson</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>net.kyori</pattern>
+                                    <shadedPattern>io.github.johnnypixelz.utilizer.shade.kyori</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>
