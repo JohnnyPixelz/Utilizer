@@ -1,5 +1,6 @@
 package io.github.johnnypixelz.utilizer.command.internal;
 
+import io.github.johnnypixelz.utilizer.command.annotations.GenerateHelp;
 import io.github.johnnypixelz.utilizer.command.permissions.CommandPermission;
 import io.github.johnnypixelz.utilizer.command.permissions.CommandPermissionMessage;
 
@@ -22,6 +23,7 @@ public final class CommandBuilder {
     private CommandDefinition parent;
     private boolean isPrivate;
     private String completionSpec;
+    private GenerateHelp generateHelp;
 
     private CommandBuilder() {
     }
@@ -169,6 +171,17 @@ public final class CommandBuilder {
         return this;
     }
 
+    /**
+     * Sets the help generation configuration.
+     *
+     * @param generateHelp the @GenerateHelp annotation, or null to disable
+     * @return this builder
+     */
+    public CommandBuilder generateHelp(GenerateHelp generateHelp) {
+        this.generateHelp = generateHelp;
+        return this;
+    }
+
     // Getters for CommandDefinition constructor
 
     List<String> getLabels() {
@@ -209,6 +222,10 @@ public final class CommandBuilder {
 
     String getCompletionSpec() {
         return completionSpec;
+    }
+
+    GenerateHelp getGenerateHelp() {
+        return generateHelp;
     }
 
     /**

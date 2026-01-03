@@ -2,6 +2,7 @@ package io.github.johnnypixelz.utilizer.command.internal;
 
 import io.github.johnnypixelz.utilizer.command.CommandMessage;
 import io.github.johnnypixelz.utilizer.command.CommandMessageManager;
+import io.github.johnnypixelz.utilizer.command.annotations.GenerateHelp;
 import io.github.johnnypixelz.utilizer.command.permissions.CommandPermission;
 import io.github.johnnypixelz.utilizer.command.permissions.CommandPermissionMessage;
 import org.bukkit.command.CommandSender;
@@ -28,6 +29,7 @@ public final class CommandDefinition {
     private final SyntaxGenerator syntax;
     private final boolean isPrivate;
     private final String completionSpec;
+    private final GenerateHelp generateHelp;
 
     CommandDefinition(CommandBuilder builder) {
         this.labels = Collections.unmodifiableList(new ArrayList<>(builder.getLabels()));
@@ -41,6 +43,7 @@ public final class CommandDefinition {
         this.syntax = SyntaxGenerator.forCommand(this);
         this.isPrivate = builder.isPrivate();
         this.completionSpec = builder.getCompletionSpec();
+        this.generateHelp = builder.getGenerateHelp();
     }
 
     /**
@@ -125,6 +128,13 @@ public final class CommandDefinition {
      */
     public String getCompletionSpec() {
         return completionSpec;
+    }
+
+    /**
+     * @return the @GenerateHelp annotation if present, or null
+     */
+    public GenerateHelp getGenerateHelp() {
+        return generateHelp;
     }
 
     /**

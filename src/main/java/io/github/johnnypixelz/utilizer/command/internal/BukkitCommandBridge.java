@@ -76,13 +76,18 @@ public final class BukkitCommandBridge extends Command implements PluginIdentifi
             // If this is the last argument being typed
             if (arguments.isEmpty()) {
                 // First try subcommand completion
-                List<String> subcommandCompletions = current.getSubcommands().stream()
+                List<String> subcommandCompletions = new ArrayList<>(current.getSubcommands().stream()
                         .filter(sub -> sub.isPermitted(sender))
                         .filter(sub -> !sub.isPrivate())  // Filter out @Private commands
                         .map(CommandDefinition::getLabels)
                         .flatMap(List::stream)
                         .filter(label -> label.toLowerCase().startsWith(argument.toLowerCase()))
-                        .toList();
+                        .toList());
+
+                // Add "help" if @GenerateHelp is enabled
+                if (current.getGenerateHelp() != null && "help".startsWith(argument.toLowerCase())) {
+                    subcommandCompletions.add("help");
+                }
 
                 if (!subcommandCompletions.isEmpty()) {
                     return subcommandCompletions;
@@ -106,12 +111,17 @@ public final class BukkitCommandBridge extends Command implements PluginIdentifi
         }
 
         // If no arguments at all, return all subcommand labels
-        List<String> completions = current.getSubcommands().stream()
+        List<String> completions = new ArrayList<>(current.getSubcommands().stream()
                 .filter(sub -> sub.isPermitted(sender))
                 .filter(sub -> !sub.isPrivate())  // Filter out @Private commands
                 .map(CommandDefinition::getLabels)
                 .flatMap(List::stream)
-                .toList();
+                .toList());
+
+        // Add "help" if @GenerateHelp is enabled
+        if (current.getGenerateHelp() != null) {
+            completions.add("help");
+        }
 
         if (!completions.isEmpty()) {
             return completions;

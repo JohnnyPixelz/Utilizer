@@ -57,6 +57,12 @@ public final class AnnotationParser {
         // Parse @Private and @CommandCompletion
         parseCompletionAndPrivate(builder, clazz);
 
+        // Parse @GenerateHelp
+        GenerateHelp generateHelp = clazz.getAnnotation(GenerateHelp.class);
+        if (generateHelp != null) {
+            builder.generateHelp(generateHelp);
+        }
+
         // Parse methods
         parseMethods(builder, instance, clazz);
 

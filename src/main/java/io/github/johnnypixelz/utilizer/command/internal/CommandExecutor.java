@@ -64,12 +64,26 @@ public final class CommandExecutor {
         // Get the method to execute
         CommandMethodDefinition method = targetCommand.getDefaultMethod();
 
-        // If no default method, check for unknown handler or suggest similar subcommands
+        // Check if this is a "help" subcommand request
+        if (!remainingArgs.isEmpty() && remainingArgs.get(0).equalsIgnoreCase("help")) {
+            if (targetCommand.getGenerateHelp() != null) {
+                HelpGenerator.sendHelp(targetCommand, sender);
+                return;
+            }
+        }
+
+        // If no default method, check for unknown handler, help, or suggest similar subcommands
         if (method == null) {
             // Try to find unknown handler in the target command or its parents
             CommandMethodDefinition unknownMethod = findUnknownHandler(targetCommand);
             if (unknownMethod != null) {
                 executeUnknownHandler(unknownMethod, sender, remainingArgs);
+                return;
+            }
+
+            // If @GenerateHelp is enabled and no args, show help
+            if (targetCommand.getGenerateHelp() != null && remainingArgs.isEmpty()) {
+                HelpGenerator.sendHelp(targetCommand, sender);
                 return;
             }
 
