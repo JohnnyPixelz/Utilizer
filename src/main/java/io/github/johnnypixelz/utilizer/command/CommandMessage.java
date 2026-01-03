@@ -5,7 +5,8 @@ import io.github.johnnypixelz.utilizer.config.Message;
 public enum CommandMessage {
     NO_PERMISSION(new Message().setMessage("&cYou do not have permission to execute this command.")),
     NOT_ENOUGH_ARGUMENTS(new Message().setMessage("&cNot enough arguments.")),
-    INTERNAL_ERROR(new Message().setMessage("&cThere was an internal error. Please contact the administrators."));
+    INTERNAL_ERROR(new Message().setMessage("&cThere was an internal error. Please contact the administrators.")),
+    ON_COOLDOWN(new Message().setMessage("&cYou must wait %time% seconds before using this command again."));
 
     private final Message message;
 

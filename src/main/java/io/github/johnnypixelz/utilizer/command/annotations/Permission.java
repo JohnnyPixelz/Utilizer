@@ -14,9 +14,3 @@ public @interface Permission {
 
     String messagePath() default "";
 }
-
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.METHOD})
-@interface Permissions {
-    Permission[] value();
-}
