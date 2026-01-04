@@ -16,6 +16,10 @@ public class Colors {
             .build();
 
     public static String color(String text) {
+        // Convert legacy § codes to & codes before MiniMessage parsing
+        // This prevents MiniMessage from throwing errors when placeholders contain legacy colors
+        text = text.replace('§', '&');
+
         // Process MiniMessage tags: <green>, </green>, <#FFFFFF>, <bold>, etc.
         var component = MINI_MESSAGE.deserialize(text);
         text = LEGACY_SERIALIZER.serialize(component);
