@@ -8,6 +8,7 @@ import io.github.johnnypixelz.utilizer.amount.Amount;
 import io.github.johnnypixelz.utilizer.cache.Cache;
 import io.github.johnnypixelz.utilizer.config.Parse;
 import io.github.johnnypixelz.utilizer.depend.Dependencies;
+import io.github.johnnypixelz.utilizer.gson.GsonProvider;
 import io.github.johnnypixelz.utilizer.text.Colors;
 import io.th0rgal.oraxen.api.OraxenItems;
 import io.th0rgal.oraxen.items.ItemBuilder;
@@ -679,6 +680,18 @@ public class Items {
 
     public static ItemEditor edit(@Nonnull ConfigurationSection section) {
         return new ItemEditor(parse(section));
+    }
+
+    @Nonnull
+    public static String toJson(@Nonnull ItemStack itemStack) {
+        Objects.requireNonNull(itemStack, "ItemStack cannot be null");
+        return GsonProvider.standard().toJson(itemStack);
+    }
+
+    @Nullable
+    public static ItemStack fromJson(@Nonnull String json) {
+        Objects.requireNonNull(json, "JSON string cannot be null");
+        return GsonProvider.standard().fromJson(json, ItemStack.class);
     }
 
 }

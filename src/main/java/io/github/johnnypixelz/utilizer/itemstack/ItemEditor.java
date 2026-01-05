@@ -14,6 +14,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -192,6 +193,33 @@ public class ItemEditor {
         removeFlags(ItemFlag.HIDE_ENCHANTS);
 
         return this;
+    }
+
+    public ItemEditor enchant(@Nonnull Enchantment enchantment, int level) {
+        Objects.requireNonNull(enchantment, "Enchantment cannot be null");
+        stack.addUnsafeEnchantment(enchantment, level);
+        return this;
+    }
+
+    public ItemEditor enchant(@Nonnull Map<Enchantment, Integer> enchantments) {
+        Objects.requireNonNull(enchantments, "Enchantments map cannot be null");
+        enchantments.forEach((enchantment, level) -> stack.addUnsafeEnchantment(enchantment, level));
+        return this;
+    }
+
+    public ItemEditor removeEnchantment(@Nonnull Enchantment enchantment) {
+        Objects.requireNonNull(enchantment, "Enchantment cannot be null");
+        stack.removeEnchantment(enchantment);
+        return this;
+    }
+
+    public ItemEditor clearEnchantments() {
+        stack.getEnchantments().keySet().forEach(stack::removeEnchantment);
+        return this;
+    }
+
+    public ItemEditor unbreakable(boolean unbreakable) {
+        return meta(itemMeta -> itemMeta.setUnbreakable(unbreakable));
     }
 
     public ItemEditor setAmount(int amount) {
