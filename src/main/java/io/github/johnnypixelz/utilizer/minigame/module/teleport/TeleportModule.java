@@ -6,7 +6,7 @@ import io.github.johnnypixelz.utilizer.minigame.arena.FFAArena;
 import io.github.johnnypixelz.utilizer.minigame.arena.TeamedArena;
 import io.github.johnnypixelz.utilizer.minigame.module.teams.Team;
 import io.github.johnnypixelz.utilizer.minigame.module.teams.TeamsModule;
-import io.github.johnnypixelz.utilizer.random.ProbabilityList;
+import java.util.Collections;
 import io.github.johnnypixelz.utilizer.serialize.world.Position;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
@@ -58,10 +58,12 @@ public class TeleportModule extends MinigameModule {
 
     private void registerArenaHandlers() {
         registerArenaHandler(FFAArena.class, ffaArena -> {
-            ProbabilityList<Position> list = new ProbabilityList<>();
-            ffaArena.getSpawnPositions().forEach(position -> list.add(position, 1));
-
-            getCurrentPlayers().forEach(player -> player.teleport(list.randomPop().toLocation()));
+            List<Position> positions = new ArrayList<>(ffaArena.getSpawnPositions());
+            Collections.shuffle(positions);
+            List<Player> players = new ArrayList<>(getCurrentPlayers());
+            for (int i = 0; i < players.size(); i++) {
+                players.get(i).teleport(positions.get(i).toLocation());
+            }
         });
 
         registerArenaHandler(TeamedArena.class, teamedArena -> {
