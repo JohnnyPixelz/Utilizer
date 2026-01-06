@@ -274,21 +274,282 @@ Messages.broadcast("Event starting!", point, 100.0);
 Messages.broadcast(messageList, point, 100.0, player -> player.hasPermission("event.notify"));
 ```
 
-### 5. Custom Inventories
+### 5. Custom Inventories (io.github.johnnypixelz.utilizer.inventories.CustomInventory)
 
-TODO: Documentation for the Custom Inventories system
+The Custom Inventories system provides a fluent API for creating interactive GUI menus.
 
-### 6. Storage
+```java
+// Basic inventory
+CustomInventory inventory = new CustomInventory()
+    .title("&6My Menu")
+    .type(CustomInventoryType.CHEST_3_ROWS);
 
-TODO: Documentation for the Storage system
+// Add items using the root pane
+inventory.getRootPane().setInventoryItem(0, ClickableItem.of(
+    Items.edit(Material.DIAMOND).setDisplayName("&bClick me").getItem(),
+    event -> event.getWhoClicked().sendMessage("Clicked!")
+));
 
-### 7. Commands
+// Open for player
+inventory.open(player);
 
-TODO: Documentation for the Commands system
+// Extend for custom menus
+public class ShopMenu extends CustomInventory {
+    public ShopMenu() {
+        title("&6Shop");
+        type(CustomInventoryType.CHEST_6_ROWS);
+    }
 
-### 8. Chat Input
+    @Override
+    protected void onDraw() {
+        getRootPane().setInventoryItem(0, ClickableItem.of(
+            Items.edit(Material.DIAMOND).getItem(),
+            event -> buyItem((Player) event.getWhoClicked())
+        ));
+    }
 
-TODO: Documentation for the Chat Input system
+    @Override
+    protected void onOpen(Player player) {
+        player.sendMessage("Welcome to the shop!");
+    }
+}
+```
+
+**CustomInventory Methods:**
+- `.title(String)` - Set inventory title (supports colors)
+- `.type(CustomInventoryType)` - Set inventory type/size
+- `.open(Player)` - Open inventory for player
+- `.close(Player)` - Close inventory for player
+- `.refresh(Long)` - Set auto-refresh interval in ticks
+- `.disablePAPI()` - Disable PlaceholderAPI support
+- `.openParentInventoryOnClose(CustomInventory)` - Open another inventory on close
+
+**Lifecycle Methods (override these):**
+- `onLoad()` - Called once when inventory is first created
+- `onDraw()` - Called to draw items (after load, on refresh)
+- `onOpen(Player)` - Called when player opens inventory
+- `onClose(Player)` - Called when player closes inventory
+
+**Item Types:**
+- `ClickableItem.of(ItemStack, Consumer<InventoryClickEvent>)` - Clickable item
+- `SimpleItem.of(ItemStack)` - Non-interactive display item
+- `CloseItem.of(ItemStack)` - Closes inventory on click
+- `SwitchItem.of(ItemStack, CustomInventory)` - Opens another inventory
+
+**Pane Methods:**
+- `.setInventoryItem(int slot, InventoryItem)` - Set item at slot
+- `.setInventoryItem(int row, int col, InventoryItem)` - Set by row/column
+- `.setInventoryItem(Slot, InventoryItem)` - Set using Slot object
+- `.fill(Supplier<InventoryItem>)` - Fill empty slots
+
+### 6. Storage (io.github.johnnypixelz.utilizer.file.storage.Storage)
+
+The Storage system provides type-safe JSON file persistence for single objects, lists, and maps.
+
+```java
+// Single object storage
+FileStorageHandler<PlayerData> handler = Storage.type(PlayerData.class)
+    .json("playerdata", GsonProvider.standard());
+
+// Load data
+Optional<PlayerData> data = handler.load();
+PlayerData data = handler.load(() -> new PlayerData()); // with default
+
+// Save data
+handler.save(playerData);
+handler.saveAndBackup(playerData); // creates timestamped backup
+
+// List storage
+FileStorageHandler<List<String>> listHandler = Storage.list(String.class)
+    .json("whitelist", GsonProvider.standard());
+
+// Map storage
+FileStorageHandler<Map<UUID, PlayerData>> mapHandler = Storage.map(UUID.class, PlayerData.class)
+    .json("players", GsonProvider.prettyPrinting());
+
+// Container pattern (auto-loads, tracks changes)
+FileStorageContainer<PlayerData> container = handler.container(() -> new PlayerData());
+PlayerData data = container.get();
+container.save();
+```
+
+**Storage Factory:**
+- `Storage.type(Class<T>)` - Single object storage builder
+- `Storage.list(Class<T>)` - List storage builder
+- `Storage.map(Class<K>, Class<V>)` - Map storage builder
+
+**Storage Handler Methods:**
+- `.json(fileName, Gson)` - Create JSON file handler
+- `.load()` - Returns `Optional<T>`
+- `.load(Supplier<T>)` - Load or create default
+- `.save(T)` - Save data to file
+- `.saveAndBackup(T)` - Save with timestamped backup
+- `.container(Supplier<T>)` - Create managed container
+
+**GsonProvider:**
+- `GsonProvider.standard()` - Basic Gson instance
+- `GsonProvider.prettyPrinting()` - Pretty-printed output
+- `GsonProvider.builder()` - Custom GsonBuilder
+
+### 7. Commands (io.github.johnnypixelz.utilizer.command.Command)
+
+The Commands system provides an annotation-based approach to creating Bukkit commands with automatic argument parsing, permission handling, and subcommand support.
+
+```java
+// Basic command
+@Label("mycommand|mc|mycmd")  // Aliases separated by |
+@Description("My custom command")
+@Permission("myplugin.command")
+public class MyCommand extends Command {
+
+    @Default  // Default method when no subcommand matches
+    public void defaultCommand(Player player) {
+        player.sendMessage("Hello!");
+    }
+
+    @Subcommand("give")
+    @Permission("myplugin.give")
+    public void giveSubcommand(Player player, int amount) {
+        // /mycommand give 10
+        player.sendMessage("Giving " + amount + " items");
+    }
+
+    @Subcommand("info")
+    public void infoSubcommand(Player player, Player target) {
+        // /mycommand info <player>
+        player.sendMessage("Info about " + target.getName());
+    }
+}
+
+// Register in onEnable
+@Override
+public void onEnable() {
+    CommandManager.registerCommands(MyCommand.class);
+}
+```
+
+**Annotations:**
+- `@Label("name|alias1|alias2")` - Command name with aliases (on class or method)
+- `@Subcommand("name")` - Subcommand name (on method or nested class)
+- `@Default` - Method to call when no subcommand matches
+- `@Description("text")` - Command description
+- `@Permission("node")` - Required permission (repeatable)
+- `@ConfigPermission(config="config", path="permissions.cmd")` - Permission from config
+- `@PermissionMessage("&cNo permission!")` - Literal no-permission message
+- `@PermissionConfigMessage(config="messages", path="no-perm")` - Message from config
+
+**Method Parameters:**
+- First parameter can be `CommandSender`, `Player`, or `ConsoleCommandSender`
+- Remaining parameters are parsed from command arguments
+- If last parameter is `String`, it joins all remaining arguments
+
+**Built-in Argument Types:**
+- Primitives: `short`, `int`, `long`, `float`, `double`, `boolean`, `char`
+- Wrappers: `Short`, `Integer`, `Long`, `Float`, `Double`, `Boolean`, `Character`
+- Text: `String`, `String[]`
+- Bukkit: `Player`, `OfflinePlayer`, any `Enum`
+- Quoted strings: `"argument with spaces"` becomes single argument
+
+**Nested Subcommands (class-based):**
+```java
+@Label("shop")
+public class ShopCommand extends Command {
+
+    @Subcommand("buy")
+    class BuySubcommand extends Command {
+        @Default
+        public void buy(Player player, String item, int amount) {
+            // /shop buy diamond 5
+        }
+
+        @Subcommand("all")
+        public void buyAll(Player player, String item) {
+            // /shop buy all diamond
+        }
+    }
+}
+```
+
+**Custom Argument Resolvers:**
+```java
+// Register custom type resolver
+CommandArgumentResolverManager.registerResolver(MyType.class, context -> {
+    String arg = context.getArgument();
+    CommandSender sender = context.getSender();
+    // Parse and return MyType
+    return MyType.parse(arg);
+});
+
+// Then use in commands
+@Subcommand("custom")
+public void customCommand(Player player, MyType myArg) {
+    // myArg is automatically parsed
+}
+```
+
+**Key Methods:**
+- `CommandManager.registerCommands(Class<? extends Command>...)` - Register command classes
+- `CommandArgumentResolverManager.registerResolver(Class<T>, Resolver)` - Add custom type
+
+### 8. Chat Input (io.github.johnnypixelz.utilizer.input.ChatInput)
+
+The ChatInput system provides a fluent API for capturing player chat input with type-safe parsing, validation, and timeout support.
+
+```java
+// Basic string input
+ChatInput.of(player)
+    .onMessage(message -> player.sendMessage("You typed: " + message))
+    .onCancel(() -> player.sendMessage("Cancelled"))
+    .cancelWord("cancel")
+    .sync();
+
+// Typed input with parsing
+ChatInput.of(player)
+    .parseAsInt("&cPlease enter a valid number")
+    .onMessage(number -> player.sendMessage("You entered: " + number))
+    .retryOnInvalid()
+    .sync();
+
+// With validation and range
+ChatInput.of(player)
+    .parseAsInt("&cEnter a number between 1-100", 1, 100)
+    .onMessage(amount -> giveCoins(player, amount))
+    .timeout(30, TimeUnit.SECONDS)
+    .onCancel(() -> player.sendMessage("Timed out"))
+    .sync();
+
+// Enum validation
+ChatInput.of(player)
+    .validateEnum("&cChoose: yes, no, maybe", "yes", "no", "maybe")
+    .onMessage(choice -> handleChoice(player, choice))
+    .sync();
+
+// Custom parsing
+ChatInput.of(player)
+    .parseAs("&cInvalid player name", Bukkit::getPlayer)
+    .onMessage(target -> teleport(player, target))
+    .sync();
+```
+
+**Key Methods:**
+- `ChatInput.of(Player)` - Create new input for player
+- `.onMessage(Consumer<T>)` - Handler for valid input
+- `.onCancel(Runnable)` - Handler for cancel/timeout/quit
+- `.cancelWord(String)` - Word to type to cancel (default: none)
+- `.timeout(long, TimeUnit)` - Auto-cancel after duration
+- `.retryOnInvalid()` - Keep listening on invalid input
+- `.sync()` / `.async()` - Start listening (sync runs handlers on main thread)
+
+**Parsing Methods:**
+- `.parseAsInt(errorMsg)` - Parse as integer
+- `.parseAsInt(errorMsg, min, max)` - Integer with range
+- `.parseAsLong(errorMsg)` - Parse as long
+- `.parseAsDouble(errorMsg)` - Parse as double
+- `.parseAs(errorMsg, Function<String, T>)` - Custom parser
+
+**Validation Methods:**
+- `.validate(errorMsg, Predicate<String>)` - Custom validation
+- `.validateEnum(errorMsg, String...)` - Must match one of options
 
 ### 9. Amounts (io.github.johnnypixelz.utilizer.amount.Amount)
 
@@ -619,17 +880,184 @@ LootTables.registerLootEntryResolver("CUSTOM", section -> {
 - Use Amount ranges (`"1-5"`) for variety in rewards
 - Store loot tables in separate config files for organization
 
-### 12. Custom Blocks
+### 12. Custom Blocks (io.github.johnnypixelz.utilizer.features.customblocks.CustomBlocks)
 
-TODO: Documentation for the Custom Blocks system
+The Custom Blocks system allows creating blocks with custom behavior, persistent data, and item integration.
 
-### 13. SQL
+```java
+// Define a custom block class
+public class PowerBlock extends CustomBlock {
+    public PowerBlock(BlockPosition position) {
+        super(position);
+    }
 
-TODO: Documentation for the SQL system
+    @Override
+    public void onTick() {
+        // Called every tick (configurable interval)
+    }
 
-### 13. Plugin Hooks (io.github.johnnypixelz.utilizer.depend.Dependencies)
+    @Override
+    public void onRegister() {
+        // Called when block is placed/created
+    }
 
-The Plugin Hooks system (io.github.johnnypixelz.utilizer.depend.Dependencies class) provides easy integration with popular Bukkit plugins like PlaceholderAPI, Vault, and WorldEdit.
+    @Override
+    public void onUnregister() {
+        // Called when block is broken/removed
+    }
+
+    @Override
+    public void onLoad() {
+        // Called when loaded from storage
+    }
+
+    @Override
+    public void onUnload() {
+        // Called on server shutdown
+    }
+}
+
+// Create and initialize the manager
+CustomBlockManager<PowerBlock> manager = CustomBlocks.create(PowerBlock.class)
+    .storage("powerblocks.json")
+    .build()
+    .init();
+
+// Block with item representation
+CustomBlockManager<MyBlock> manager = CustomBlocks.create(MyBlock.class)
+    .storage("myblocks.json")
+    .item("my_block", block -> Items.edit(Material.DIAMOND_BLOCK)
+        .setDisplayName("&bPower Block")
+        .getItem())
+    .build()
+    .init();
+
+// Block with persistent data
+public class DataBlock extends CustomBlock implements BlockDataHolder<MyData> {
+    private MyData data;
+
+    public DataBlock(BlockPosition position) {
+        super(position);
+    }
+
+    @Override
+    public MyData getData() { return data; }
+
+    @Override
+    public void setData(MyData data) { this.data = data; }
+}
+
+CustomBlockManager<DataBlock> manager = CustomBlocks.create(DataBlock.class)
+    .storage("datablocks.json")
+    .data(MyData.class)
+    .build()
+    .init();
+
+// Register block at position
+manager.register(new PowerBlock(BlockPosition.of(block)));
+
+// Get block at position
+Optional<PowerBlock> block = manager.get(blockPosition);
+
+// Unregister (remove) block
+manager.unregister(blockPosition);
+```
+
+**Builder Methods:**
+- `.storage(String fileName)` - JSON storage file name
+- `.item(String id, Function<CB, ItemStack>)` - Item representation
+- `.data(Class<D>)` - Enable persistent data (requires BlockDataHolder)
+- `.build()` - Create manager
+- `.init()` - Initialize and start ticking
+
+**Lifecycle Methods (override in CustomBlock):**
+- `onTick()` - Called each tick
+- `onRegister()` - When placed/created
+- `onUnregister()` - When broken/removed
+- `onLoad()` - When loaded from storage
+- `onUnload()` - On server shutdown
+
+### 13. SQL (io.github.johnnypixelz.utilizer.sql.SQL)
+
+The SQL system provides connection pooling (HikariCP) and simple query execution for MySQL, MariaDB, and PostgreSQL.
+
+```java
+// Create credentials from config
+DatabaseCredentials credentials = DatabaseCredentials.fromConfig(
+    Configs.get("config").getConfigurationSection("database"),
+    new MysqlDriver(),      // Supported drivers
+    new MariaDBDriver(),
+    new PostgresqlDriver()
+);
+
+// Or create manually
+DatabaseCredentials credentials = DatabaseCredentials.of(
+    "localhost",            // address
+    3306,                   // port
+    "minecraft",            // database
+    "root",                 // username
+    "password",             // password
+    new MysqlDriver()       // driver
+);
+
+// Create SQL client
+SQLClient client = SQL.newClient(credentials);
+
+// Execute statement (no return)
+client.execute("CREATE TABLE IF NOT EXISTS players (uuid VARCHAR(36) PRIMARY KEY, coins INT)");
+
+// Execute with prepared statement
+client.execute("INSERT INTO players (uuid, coins) VALUES (?, ?)", ps -> {
+    ps.setString(1, player.getUniqueId().toString());
+    ps.setInt(2, 100);
+});
+
+// Execute async (runs on separate thread)
+client.executeAsync("UPDATE players SET coins = coins + 10 WHERE uuid = ?", ps -> {
+    ps.setString(1, uuid.toString());
+});
+
+// Query with result
+Optional<Integer> coins = client.executeQuery(
+    "SELECT coins FROM players WHERE uuid = ?",
+    ps -> ps.setString(1, uuid.toString()),
+    rs -> rs.next() ? rs.getInt("coins") : null
+);
+
+// Close client when done (in onDisable)
+client.close();
+```
+
+**Config Format:**
+```yaml
+database:
+  mode: mysql           # mysql, mariadb, or postgresql
+  address: localhost
+  port: 3306
+  database: minecraft
+  username: root
+  password: password
+  properties:           # Optional HikariCP properties
+    useSSL: false
+```
+
+**Key Methods:**
+- `SQL.newClient(DatabaseCredentials)` - Create connection pool
+- `.execute(String)` - Execute SQL statement
+- `.execute(String, PreparedStatementHandler)` - Execute with parameters
+- `.executeAsync(String)` - Execute asynchronously
+- `.executeQuery(String, PreparedStatementHandler, ResultSetHandler)` - Query with result
+- `.getConnection()` - Get raw JDBC connection
+- `.close()` - Close connection pool
+
+**Drivers:**
+- `MysqlDriver` - MySQL
+- `MariaDBDriver` - MariaDB
+- `PostgresqlDriver` - PostgreSQL
+
+### 14. Plugin Hooks (io.github.johnnypixelz.utilizer.depend.Dependencies)
+
+The Plugin Hooks system (io.github.johnnypixelz.utilizer.depend.Dependencies class) provides easy integration with popular Bukkit plugins like PlaceholderAPI and Vault.
 
 #### PlaceholderAPI Integration
 
@@ -679,7 +1107,7 @@ if (Dependencies.isLoaded("Vault")) {
 }
 
 // Check if a plugin is enabled
-if (Dependencies.isEnabled("WorldEdit")) {
+if (Dependencies.isEnabled("Vault")) {
     // Plugin is enabled and ready to use
 }
 
@@ -687,12 +1115,6 @@ if (Dependencies.isEnabled("WorldEdit")) {
 Dependencies.getVault()
     .ifPresent(vault -> {
         // Use Vault economy, permissions, etc.
-    });
-
-// Get WorldEdit wrapper
-Dependencies.getWorldEdit()
-    .ifPresent(worldEdit -> {
-        // Use WorldEdit API
     });
 ```
 
@@ -709,7 +1131,6 @@ Dependencies.getWorldEdit()
 **Dependencies Methods:**
 - `Dependencies.getPlaceholderAPI()` - Returns `Optional<PlaceholderAPIWrapper>`
 - `Dependencies.getVault()` - Returns `Optional<VaultWrapper>`
-- `Dependencies.getWorldEdit()` - Returns `Optional<WorldEditWrapper>`
 - `Dependencies.isLoaded(String)` - Check if plugin is loaded
 - `Dependencies.isEnabled(String)` - Check if plugin is enabled
 
@@ -730,25 +1151,231 @@ placeholders:
     disabled: "&a&lPVP OFF"
 ```
 
-### 14. Serialization & Deserialization
+### 15. Serialization (io.github.johnnypixelz.utilizer.serialize.world)
 
-TODO: Documentation for the Serialization & Deserialization system
+The Serialization package provides immutable, JSON-serializable location objects that are safer to store and pass around than Bukkit's mutable Location.
 
-### 15. Random
+```java
+// Point - immutable location (x, y, z, world)
+Point point = Point.of(100.5, 64.0, -200.5, "world");
+Point fromLoc = Point.of(location);
+Point fromBlock = Point.of(block);
 
-TODO: Documentation for the Random utilities
+// Convert back to Bukkit Location
+Location loc = point.toLocation();
 
-### 16. Minigames
+// Operations (all return new Point, original unchanged)
+Point moved = point.add(10, 0, -5);
+Point relative = point.getRelative(BlockFace.UP);
+Point centered = point.center();        // Center of block
+Point floorCenter = point.horizontalCenter();
 
-TODO: Documentation for the Minigames framework
+// Distance calculations
+double dist = point.distance(otherPoint);
 
-### 17. Level Systems
+// BlockPosition - integer coordinates (for block operations)
+BlockPosition blockPos = point.floor();
+BlockPosition pos = BlockPosition.of(100, 64, -200, "world");
 
-TODO: Documentation for the Level Systems
+// Position - point with direction (yaw/pitch)
+Position position = Position.of(location);
+Position withDir = point.withDirection(Direction.of(90f, 0f));
+Location fullLoc = position.toLocation();  // Includes yaw/pitch
 
-### 18. Event Emitters
+// Direction - yaw and pitch
+Direction dir = Direction.from(location);
+Direction dir = Direction.of(45f, -30f);  // yaw, pitch
 
-TODO: Documentation for the Event Emitters system
+// Region - 3D box between two points
+Region region = Region.of(point1, point2);
+Region region = point1.regionWith(point2);
+
+boolean inside = region.inRegion(player.getLocation());
+boolean inside = region.inRegion(100, 64, -200);
+
+Point min = region.getMin();
+Point max = region.getMax();
+double width = region.getWidth();
+
+// JSON serialization (for storage)
+JsonObject json = point.serialize();
+Point restored = Point.deserialize(jsonElement);
+```
+
+**Classes:**
+- `Point` - Immutable x, y, z, world (double coordinates)
+- `BlockPosition` - Immutable block x, y, z, world (int coordinates)
+- `Position` - Point + Direction (includes yaw/pitch)
+- `Direction` - Yaw and pitch
+- `Region` - 3D box between two Points
+- `ChunkPosition` - Chunk x, z, world
+- `CircularRegion` - Circular area (center + radius)
+
+**Key Features:**
+- Immutable - safe to store and pass around
+- JSON serializable via `GsonSerializable` interface
+- Cached Bukkit Location for performance
+- Distance calculations
+- Relative operations (add, subtract, getRelative)
+
+### 16. Minigames (io.github.johnnypixelz.utilizer.minigame.Minigame)
+
+The Minigames framework provides a structured approach to creating minigames with arenas, modules, and lifecycle events.
+
+```java
+// Create arena class
+public class MyArena extends Arena {
+    private final Point spawnPoint;
+
+    public MyArena(String name, Point spawnPoint) {
+        super(name);
+        this.spawnPoint = spawnPoint;
+    }
+
+    public Point getSpawnPoint() {
+        return spawnPoint;
+    }
+}
+
+// Create minigame class
+public class MyMinigame extends Minigame<MyArena> {
+
+    public MyMinigame(MyArena arena) {
+        super(arena);
+
+        // Set player limit
+        maximumPlayerLimit = 8;
+
+        // Register modules
+        registerModules(
+            new TeleportModule(this),
+            new GamemodeModule(this, GameMode.SURVIVAL),
+            new InvincibilityModule(this),
+            new SnapshotModule(this)  // Saves/restores player inventory
+        );
+
+        // Listen to lifecycle events
+        getEventManager().getOnMinigameStart().listen(() -> {
+            getPlayerObjects().forEach(p -> p.sendMessage("Game started!"));
+        });
+
+        getEventManager().getOnMinigameFinish().listen(() -> {
+            getPlayerObjects().forEach(p -> p.sendMessage("Game over!"));
+        });
+    }
+}
+
+// Usage
+MyArena arena = new MyArena("arena1", Point.of(0, 64, 0, "world"));
+MyMinigame game = new MyMinigame(arena);
+
+game.join(player1);
+game.join(player2);
+game.start();
+
+// When game ends
+game.finish();  // Triggers cleanup after delay
+```
+
+**Game States:**
+- `WAITING` - Accepting players
+- `STARTED` - Game in progress
+- `FINISHED` - Game ended, cleanup pending
+- `CLEANED_UP` - Fully cleaned up
+
+**Built-in Modules:**
+- `TeleportModule` - Teleport players to spawn
+- `GamemodeModule` - Set gamemode during game
+- `InvincibilityModule` - Prevent damage
+- `SnapshotModule` - Save/restore player state
+- `SaturationModule` - Keep players fed
+- `SpectateModule` - Spectator mode on death
+- `TeamsModule` - Team management
+- `FreezeModule` - Freeze players
+- `WarmUpModule` - Pre-game warmup
+- `DeathModule` - Handle player deaths
+- `BroadcastModule` - Message broadcasting
+
+**Event Manager (getEventManager()):**
+- `.getOnPlayerJoin()` - Player joins
+- `.getOnPlayerRemove()` - Player removed
+- `.getOnPlayerDisconnect()` - Player disconnects
+- `.getOnMinigameStart()` - Game starts
+- `.getOnMinigameFinish()` - Game finishes
+- `.getOnMinigameCleanup()` - Cleanup phase
+
+**Arena Types:**
+- `Arena` - Base arena class
+- `FFAArena` - Free-for-all arena
+- `TeamedArena` - Team-based arena
+
+### 18. Event Emitters (io.github.johnnypixelz.utilizer.event)
+
+The Event Emitters system provides a simple pub/sub pattern for custom events with priority support.
+
+```java
+// Stateless emitter - no data passed
+StatelessEventEmitter onGameStart = new StatelessEventEmitter();
+
+// Listen for event
+onGameStart.listen(() -> {
+    Bukkit.broadcastMessage("Game started!");
+});
+
+// Listen with priority
+onGameStart.listen(() -> {
+    // Runs first
+}, EventPriority.HIGHEST);
+
+// Emit the event
+onGameStart.emit();
+
+// Stateful emitter - passes data to listeners
+StatefulEventEmitter<Player> onPlayerJoin = new StatefulEventEmitter<>();
+
+onPlayerJoin.listen(player -> {
+    player.sendMessage("Welcome!");
+});
+
+onPlayerJoin.emit(player);
+
+// BiStateful emitter - passes two values
+BiStatefulEventEmitter<Player, Integer> onScoreChange = new BiStatefulEventEmitter<>();
+
+onScoreChange.listen((player, score) -> {
+    player.sendMessage("Score: " + score);
+});
+
+onScoreChange.emit(player, 100);
+
+// Store listener reference to unregister later
+StatefulEventListener<Player> listener = onPlayerJoin.listen(p -> {
+    p.sendMessage("Hello!");
+});
+
+// Unregister listener
+onPlayerJoin.unregister(listener);
+// Or via listener itself
+listener.unregister();
+```
+
+**Emitter Types:**
+- `StatelessEventEmitter` - No data, just triggers listeners
+- `StatefulEventEmitter<T>` - Passes single value to listeners
+- `BiStatefulEventEmitter<T1, T2>` - Passes two values to listeners
+
+**Key Methods:**
+- `.listen(Consumer/Runnable)` - Register listener, returns listener reference
+- `.listen(Consumer/Runnable, EventPriority)` - Register with priority
+- `.emit()` / `.emit(T)` / `.emit(T1, T2)` - Fire event to all listeners
+- `.unregister(Listener)` - Remove specific listener
+- `.getListeners()` - Get all registered listeners
+
+**Common Use Cases:**
+- Custom game events (start, end, phase change)
+- State change notifications
+- Decoupling components
+- Plugin API hooks
 
 ### 19. Cooldowns (io.github.johnnypixelz.utilizer.cooldown.Cooldown)
 
@@ -877,65 +1504,41 @@ Logs.severe("Failed to connect to database!");
 Logs.severe("Critical error in game loop");
 ```
 
-### 21. Random Utilities (io.github.johnnypixelz.utilizer.random.ProbabilityList)
+### 21. Random Utilities (io.github.johnnypixelz.utilizer.random.Randoms)
 
-#### ProbabilityList - Weighted Random Selection
-
-The `io.github.johnnypixelz.utilizer.random.ProbabilityList` class allows you to select random items based on weighted probabilities. Items with higher probability values have a greater chance of being selected.
+The `Randoms` class provides static utility methods for random selection operations.
 
 ```java
-// Create a probability list
-ProbabilityList<String> lootTable = new ProbabilityList<>();
+// Pick random element from collection
+String item = Randoms.pick(itemList);
+Material mat = Randoms.pick(Material.DIAMOND, Material.GOLD_INGOT, Material.IRON_INGOT);
 
-// Add items with probabilities (weights)
-lootTable.add("Common Item", 50.0);    // 50% chance
-lootTable.add("Uncommon Item", 30.0);  // 30% chance
-lootTable.add("Rare Item", 15.0);      // 15% chance
-lootTable.add("Legendary Item", 5.0);  // 5% chance
+// Weighted random selection
+List<Weighted<String>> weightedItems = List.of(
+    Weighted.of("Common", 50.0),
+    Weighted.of("Rare", 10.0),
+    Weighted.of("Legendary", 1.0)
+);
+String selected = Randoms.weighted(weightedItems);
 
-// Get random item based on weights
-String randomLoot = lootTable.random();
-
-// Get random item and remove it from the list
-String prize = lootTable.randomPop();
-
-// Practical example: Reward system
-ProbabilityList<ItemStack> rewards = new ProbabilityList<>();
-rewards.add(Items.edit(Material.DIAMOND).setAmount(1).getItem(), 10.0);
-rewards.add(Items.edit(Material.IRON_INGOT).setAmount(5).getItem(), 30.0);
-rewards.add(Items.edit(Material.GOLD_INGOT).setAmount(3).getItem(), 60.0);
-
-ItemStack reward = rewards.random();
-player.getInventory().addItem(reward);
-
-// Use with different types
-ProbabilityList<Integer> amounts = new ProbabilityList<>();
-amounts.add(100, 1.0);   // 10% chance for 100
-amounts.add(50, 4.0);    // 40% chance for 50
-amounts.add(10, 5.0);    // 50% chance for 10
-
-int randomAmount = amounts.random();
+// Chance checks
+if (Randoms.chance(0.5)) { /* 50% chance */ }
+if (Randoms.percent(25)) { /* 25% chance */ }
 ```
 
-**How Probabilities Work:**
-- Probabilities are relative weights, not percentages
-- Total weight = sum of all probabilities
-- Item chance = (item probability / total weight) × 100%
-- Example: weights of 1, 4, 5 = 10%, 40%, 50%
-
 **Key Methods:**
-- `.add(object, probability)` - Add item with weight
-- `.remove(pair)` - Remove specific probability pair
-- `.random()` - Get random item based on weights
-- `.randomPop()` - Get random item and remove from list
-- `.getPairs()` - Get all probability pairs
+- `Randoms.pick(List<T>)` - Random element from list
+- `Randoms.pick(T...)` - Random element from varargs
+- `Randoms.weighted(Collection<Weighted<T>>)` - Weighted random selection
+- `Randoms.chance(double)` - Returns true with probability 0.0-1.0
+- `Randoms.percent(double)` - Returns true with percentage 0-100
 
-**Common Use Cases:**
-- Loot tables and drop systems
-- Random reward selection
-- Randomized event outcomes
-- Gacha/lottery mechanics
-- Enemy spawn weights
+**Weighted Class:**
+```java
+Weighted<String> item = Weighted.of("value", 10.0);
+item.getValue();  // "value"
+item.getWeight(); // 10.0
+```
 
 ### 22. Number Formatting (io.github.johnnypixelz.utilizer.text.Numbers)
 
@@ -1102,7 +1705,7 @@ public class MyPlugin extends UtilPlugin {
         registerManager(new MyManager());
         
         // Register commands
-        // TODO: Add command registration example
+        CommandManager.registerCommands(MyCommand.class);
         
         // Register PlaceholderAPI placeholders
         registerPlaceholders();
@@ -1402,7 +2005,6 @@ Messages.cfg("messages", "achievements.unlock")
 ### Dependencies (Plugin Hooks)
 - `Dependencies.getPlaceholderAPI()` - Get PlaceholderAPI wrapper (Optional)
 - `Dependencies.getVault()` - Get Vault wrapper (Optional)
-- `Dependencies.getWorldEdit()` - Get WorldEdit wrapper (Optional)
 - `Dependencies.isLoaded(String)` - Check if plugin is loaded
 - `Dependencies.isEnabled(String)` - Check if plugin is enabled
 - PlaceholderAPIWrapper:
@@ -1422,10 +2024,12 @@ Messages.cfg("messages", "achievements.unlock")
 - `Colors.rgb(int, int, int)` - Create ChatColor from RGB values (0-255)
 
 ### Random Utilities
-- `ProbabilityList<T>` - Weighted random selection
-  - `.add(object, probability)` - Add item with weight
-  - `.random()` - Get random item based on weights
-  - `.randomPop()` - Get and remove random item
+- `Randoms.pick(List<T>)` - Random element from list
+- `Randoms.pick(T...)` - Random element from varargs
+- `Randoms.weighted(Collection<Weighted<T>>)` - Weighted random selection
+- `Randoms.chance(double)` - Returns true with probability 0.0-1.0
+- `Randoms.percent(double)` - Returns true with percentage 0-100
+- `Weighted.of(T, double)` - Create weighted item
 
 ## Support
 
