@@ -123,11 +123,6 @@ public class CustomInventory {
         return this;
     }
 
-    @Deprecated(forRemoval = true)
-    public CustomInventory openInventoryOnClose(CustomInventory parentInventory) {
-        return openParentInventoryOnClose(parentInventory);
-    }
-
     public CustomInventory openParentInventoryOnClose(CustomInventory parentInventory) {
         if (parentInventory == null) {
             this.parentInventory = null;
@@ -315,29 +310,6 @@ public class CustomInventory {
 
     public CustomInventory disablePAPI() {
         this.placeholderApiSupport = false;
-        return this;
-    }
-
-    @Deprecated(forRemoval = true)
-    public CustomInventory papi() {
-        this.placeholderApiSupport = true;
-        return this;
-    }
-
-    @Deprecated(forRemoval = true)
-    public CustomInventory papi(boolean toggle) {
-        this.placeholderApiSupport = toggle;
-        return this;
-    }
-
-    @Deprecated(forRemoval = true)
-    public CustomInventory papi(Player player) {
-        this.placeholderApiSupport = true;
-        return this;
-    }
-
-    @Deprecated(forRemoval = true)
-    public CustomInventory papiPlayer(Player player) {
         return this;
     }
 
