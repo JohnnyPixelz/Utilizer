@@ -8,6 +8,7 @@ import io.github.johnnypixelz.utilizer.amount.Amount;
 import io.github.johnnypixelz.utilizer.cache.Cache;
 import io.github.johnnypixelz.utilizer.config.Parse;
 import io.github.johnnypixelz.utilizer.depend.Dependencies;
+import io.github.johnnypixelz.utilizer.version.Versions;
 import io.github.johnnypixelz.utilizer.gson.GsonProvider;
 import io.github.johnnypixelz.utilizer.text.Colors;
 import io.th0rgal.oraxen.api.OraxenItems;
@@ -145,18 +146,15 @@ public class Items {
                 Skulls.mutateSkull(itemEditor.getItem(), skull);
             }
         } else if (meta instanceof BannerMeta bannerMeta) {
-            // TODO needs work
-            ConfigurationSection patterns = section.getConfigurationSection("patterns");
+            List<Map<?, ?>> patternList = section.getMapList("patterns");
+            for (Map<?, ?> patternMap : patternList) {
+                String typeStr = String.valueOf(patternMap.get("type")).toUpperCase(Locale.ENGLISH);
+                String colorStr = String.valueOf(patternMap.get("color")).toUpperCase(Locale.ENGLISH);
 
-            if (patterns != null) {
-                for (String pattern : patterns.getKeys(false)) {
-                    PatternType type = PatternType.getByIdentifier(pattern);
-                    if (type == null)
-                        type = Enums.getIfPresent(PatternType.class, pattern.toUpperCase(Locale.ENGLISH)).or(PatternType.BASE);
-                    DyeColor color = Enums.getIfPresent(DyeColor.class, patterns.getString(pattern, "").toUpperCase(Locale.ENGLISH)).or(DyeColor.WHITE);
+                PatternType type = Enums.getIfPresent(PatternType.class, typeStr).or(PatternType.BASE);
+                DyeColor color = Enums.getIfPresent(DyeColor.class, colorStr).or(DyeColor.WHITE);
 
-                    bannerMeta.addPattern(new Pattern(color, type));
-                }
+                bannerMeta.addPattern(new Pattern(color, type));
             }
         } else if (meta instanceof LeatherArmorMeta leatherArmorMeta) {
             final String colorString = section.getString("color");
@@ -165,21 +163,27 @@ public class Items {
                 leatherArmorMeta.setColor(color);
             }
         } else if (meta instanceof PotionMeta potionMeta) {
-            // TODO needs work
             for (String effects : section.getStringList("effects")) {
                 XPotion.Effect effect = XPotion.parseEffect(effects);
                 if (effect == null) continue;
-                if (effect.hasChance()) potionMeta.addCustomEffect(effect.getEffect(), true);
+                potionMeta.addCustomEffect(effect.getEffect(), true);
             }
 
             String baseEffect = section.getString("base-effect");
             if (!Strings.isNullOrEmpty(baseEffect)) {
-                List<String> split = Arrays.asList(baseEffect.split(","));
-                PotionType type = Enums.getIfPresent(PotionType.class, split.get(0).trim().toUpperCase(Locale.ENGLISH)).or(PotionType.UNCRAFTABLE);
-                boolean extended = split.size() != 1 && Boolean.parseBoolean(split.get(1).trim());
-                boolean upgraded = split.size() > 2 && Boolean.parseBoolean(split.get(2).trim());
-                PotionData potionData = new PotionData(type, extended, upgraded);
-                potionMeta.setBasePotionData(potionData);
+                String potionTypeStr = baseEffect.split(",")[0].trim().toUpperCase(Locale.ENGLISH);
+                PotionType type = Enums.getIfPresent(PotionType.class, potionTypeStr).orNull();
+
+                if (type != null) {
+                    if (Versions.isAtLeast(1, 20, 2)) {
+                        potionMeta.setBasePotionType(type);
+                    } else {
+                        List<String> split = Arrays.asList(baseEffect.split(","));
+                        boolean extended = split.size() > 1 && Boolean.parseBoolean(split.get(1).trim());
+                        boolean upgraded = split.size() > 2 && Boolean.parseBoolean(split.get(2).trim());
+                        potionMeta.setBasePotionData(new PotionData(type, extended, upgraded));
+                    }
+                }
             }
 
             if (section.contains("color")) {
