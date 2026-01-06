@@ -1,6 +1,6 @@
 package io.github.johnnypixelz.utilizer.minigame.module;
 
-import io.github.johnnypixelz.utilizer.Scheduler;
+import io.github.johnnypixelz.utilizer.tasks.Tasks;
 import io.github.johnnypixelz.utilizer.event.StatefulEventEmitter;
 import io.github.johnnypixelz.utilizer.exp.Exp;
 import io.github.johnnypixelz.utilizer.itemstack.Items;
@@ -178,7 +178,7 @@ public class DeathModule extends MinigameModule {
         }
 
         if (respawnDelay > 0) {
-            Scheduler.syncDelayed(() -> respawn(player), respawnDelay * 20L);
+            Tasks.sync().delayed(() -> respawn(player), respawnDelay * 20L);
         }
     }
 

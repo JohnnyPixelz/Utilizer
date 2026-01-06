@@ -1,6 +1,6 @@
 package io.github.johnnypixelz.utilizer.minigame.module;
 
-import io.github.johnnypixelz.utilizer.Scheduler;
+import io.github.johnnypixelz.utilizer.tasks.Tasks;
 import io.github.johnnypixelz.utilizer.event.StatefulEventEmitter;
 import io.github.johnnypixelz.utilizer.event.StatelessEventEmitter;
 import io.github.johnnypixelz.utilizer.minigame.MinigameModule;
@@ -65,11 +65,11 @@ public class FreezeModule extends MinigameModule {
         setActive(true);
 
         AtomicInteger timeLeft = new AtomicInteger(duration);
-        countdownTask = Scheduler.syncTimed(() -> {
+        countdownTask = Tasks.sync().timed(() -> {
             onFreezeTick.emit(timeLeft.getAndDecrement());
         }, 20, duration);
 
-        finishTask = Scheduler.syncDelayed(() -> {
+        finishTask = Tasks.sync().delayed(() -> {
             setActive(false);
             onFreezeEnd.emit();
         }, duration * 20L);

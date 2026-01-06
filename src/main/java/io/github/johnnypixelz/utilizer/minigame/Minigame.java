@@ -1,6 +1,6 @@
 package io.github.johnnypixelz.utilizer.minigame;
 
-import io.github.johnnypixelz.utilizer.Scheduler;
+import io.github.johnnypixelz.utilizer.tasks.Tasks;
 import io.github.johnnypixelz.utilizer.minigame.arena.Arena;
 import io.github.johnnypixelz.utilizer.plugin.Provider;
 import org.bukkit.Bukkit;
@@ -124,7 +124,7 @@ public abstract class Minigame<ExtendedArena extends Arena> implements Listener 
         state = GameState.FINISHED;
         eventManager.getOnMinigameFinish().emit();
 
-        Scheduler.syncDelayed(this::cleanUp, postGameCleanUpThreshold * 20L);
+        Tasks.sync().delayed(this::cleanUp, postGameCleanUpThreshold * 20L);
     }
 
     private void cleanUp() {

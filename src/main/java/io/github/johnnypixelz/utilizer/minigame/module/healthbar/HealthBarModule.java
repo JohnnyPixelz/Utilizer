@@ -1,6 +1,6 @@
 package io.github.johnnypixelz.utilizer.minigame.module.healthbar;
 
-import io.github.johnnypixelz.utilizer.Scheduler;
+import io.github.johnnypixelz.utilizer.tasks.Tasks;
 import io.github.johnnypixelz.utilizer.cooldown.DynamicPlayerCooldown;
 import io.github.johnnypixelz.utilizer.minigame.MinigameModule;
 import io.github.johnnypixelz.utilizer.text.ActionBar;
@@ -46,7 +46,7 @@ public class HealthBarModule extends MinigameModule {
     protected void init() {
         healthBar.setOnDone(targetMap::remove);
 
-        BukkitTask healthBarTask = Scheduler.syncTimer(() -> {
+        BukkitTask healthBarTask = Tasks.sync().timer(() -> {
             targetMap.forEach(this::showHealthBar);
         }, 3);
 

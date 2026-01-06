@@ -2,7 +2,7 @@ package io.github.johnnypixelz.utilizer.minigame.arena;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.github.johnnypixelz.utilizer.Scheduler;
+import io.github.johnnypixelz.utilizer.tasks.Tasks;
 import io.github.johnnypixelz.utilizer.file.adapters.InterfaceAdapter;
 import io.github.johnnypixelz.utilizer.file.storage.Storage;
 import io.github.johnnypixelz.utilizer.file.storage.container.file.FileStorageContainer;
@@ -57,7 +57,7 @@ public class ArenaManager<T extends Arena> {
     }
 
     public BukkitTask setupAutosave(long seconds) {
-        return Scheduler.syncTimer(this::save, seconds * 20L);
+        return Tasks.sync().timer(this::save, seconds * 20L);
     }
 
     public void save() {

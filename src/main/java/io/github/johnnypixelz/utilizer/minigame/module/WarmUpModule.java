@@ -1,6 +1,6 @@
 package io.github.johnnypixelz.utilizer.minigame.module;
 
-import io.github.johnnypixelz.utilizer.Scheduler;
+import io.github.johnnypixelz.utilizer.tasks.Tasks;
 import io.github.johnnypixelz.utilizer.event.StatefulEventEmitter;
 import io.github.johnnypixelz.utilizer.event.StatelessEventEmitter;
 import io.github.johnnypixelz.utilizer.minigame.MinigameModule;
@@ -40,7 +40,7 @@ public class WarmUpModule extends MinigameModule {
         onWarmUpStart.emit(warmUpDuration);
 
         AtomicInteger timeRemaining = new AtomicInteger(warmUpDuration);
-        warmUpTask = Scheduler.syncTimed(() -> {
+        warmUpTask = Tasks.sync().timed(() -> {
             if (getCurrentPlayerAmount() < warmUpPlayerThreshold) {
                 warmUpTask.cancel();
                 warmUpTask = null;
