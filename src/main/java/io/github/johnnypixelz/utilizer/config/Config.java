@@ -5,6 +5,7 @@ import io.github.johnnypixelz.utilizer.file.FileWatcher;
 import io.github.johnnypixelz.utilizer.plugin.Provider;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,14 +13,14 @@ import java.util.function.Consumer;
 
 public class Config {
     private final File file;
-    private final UtilConfiguration config;
+    private final YamlConfiguration config;
     private FileWatcher fileWatcher;
     private final StatefulEventEmitter<File> onSave;
     private final StatefulEventEmitter<Configuration> onReload;
 
     public Config(File file) {
         this.file = file;
-        this.config = UtilConfiguration.loadConfiguration(file);
+        this.config = YamlConfiguration.loadConfiguration(file);
         this.onReload = new StatefulEventEmitter<>();
         this.onSave = new StatefulEventEmitter<>();
     }
@@ -84,7 +85,7 @@ public class Config {
         return file;
     }
 
-    public UtilConfiguration getConfig() {
+    public YamlConfiguration getConfig() {
         return config;
     }
 }

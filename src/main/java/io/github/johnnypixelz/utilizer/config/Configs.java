@@ -2,6 +2,7 @@ package io.github.johnnypixelz.utilizer.config;
 
 import io.github.johnnypixelz.utilizer.plugin.Provider;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -19,7 +20,7 @@ public class Configs {
     }
 
     @Nonnull
-    public static UtilConfiguration get(@Nonnull String config) {
+    public static YamlConfiguration get(@Nonnull String config) {
         return load(config).getConfig();
     }
 

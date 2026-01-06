@@ -1,7 +1,7 @@
 package io.github.johnnypixelz.utilizer.command.permissions;
 
 import io.github.johnnypixelz.utilizer.config.Configs;
-import io.github.johnnypixelz.utilizer.config.UtilConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -20,7 +20,7 @@ public class CommandConfigPermission implements CommandPermission {
     @Override
     @Nullable
     public String getPermission() {
-        final UtilConfiguration configuration = Configs.get(config);
+        final YamlConfiguration configuration = Configs.get(config);
         final boolean isString = configuration.isString(path);
         if (!isString) return null;
 
