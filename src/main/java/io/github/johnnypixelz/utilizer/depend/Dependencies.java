@@ -2,7 +2,6 @@ package io.github.johnnypixelz.utilizer.depend;
 
 import io.github.johnnypixelz.utilizer.depend.dependencies.VaultWrapper;
 import io.github.johnnypixelz.utilizer.depend.dependencies.placeholderapi.PlaceholderAPIWrapper;
-import io.github.johnnypixelz.utilizer.depend.dependencies.worldedit.WorldEditWrapper;
 import org.bukkit.Bukkit;
 
 import java.util.Optional;
@@ -22,14 +21,6 @@ public class Dependencies {
     public static Optional<VaultWrapper> getVault() {
         if (isEnabled("Vault")) {
             return Optional.of(new VaultWrapper());
-        }
-
-        return Optional.empty();
-    }
-
-    public static Optional<WorldEditWrapper> getWorldEdit() {
-        if (isEnabled("WorldEdit")) {
-            return Optional.of(new WorldEditWrapper());
         }
 
         return Optional.empty();
