@@ -120,12 +120,6 @@
             <version>2.10.1</version>
         </dependency>
 
-        <dependency>
-            <groupId>me.tzoni</groupId>
-            <artifactId>SmartInvs</artifactId>
-            <version>2.0</version>
-        </dependency>
-
         <!-- BELOW ARE DEPENDENCIES UNUSED BY UTILIZER -->
         <dependency>
             <groupId>me.clip</groupId>
@@ -319,10 +313,6 @@
                                 <relocation>
                                     <pattern>com.cryptomorin.xseries</pattern>
                                     <shadedPattern>io.github.johnnypixelz.utilizer.shade.xseries</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>fr.minuskube.inv</pattern>
-                                    <shadedPattern>io.github.johnnypixelz.utilizer.shade.smartinvs</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.zaxxer.hikari</pattern>

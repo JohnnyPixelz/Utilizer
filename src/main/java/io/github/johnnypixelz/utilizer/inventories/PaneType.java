@@ -1,4 +1,4 @@
-package io.github.johnnypixelz.utilizer.smartinvs;
+package io.github.johnnypixelz.utilizer.inventories;
 
 import com.cryptomorin.xseries.XMaterial;
 
@@ -19,7 +19,6 @@ public enum PaneType {
     GREEN(XMaterial.GREEN_STAINED_GLASS_PANE),
     RED(XMaterial.RED_STAINED_GLASS_PANE),
     BLACK(XMaterial.BLACK_STAINED_GLASS_PANE);
-
 
     private final XMaterial material;
 

@@ -13,8 +13,6 @@ import io.github.johnnypixelz.utilizer.inventories.items.SwitchItem;
 import io.github.johnnypixelz.utilizer.inventories.panes.PaginatedPane;
 import io.github.johnnypixelz.utilizer.inventories.slot.Slot;
 import io.github.johnnypixelz.utilizer.itemstack.Items;
-import io.github.johnnypixelz.utilizer.smartinvs.PaneType;
-import io.github.johnnypixelz.utilizer.smartinvs.PremadeItems;
 import io.github.johnnypixelz.utilizer.tasks.Tasks;
 import io.github.johnnypixelz.utilizer.text.Colors;
 import org.bukkit.Bukkit;

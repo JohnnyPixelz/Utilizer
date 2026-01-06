@@ -1,4 +1,4 @@
-package io.github.johnnypixelz.utilizer.smartinvs;
+package io.github.johnnypixelz.utilizer.inventories;
 
 import io.github.johnnypixelz.utilizer.itemstack.Items;
 import org.bukkit.inventory.ItemStack;
