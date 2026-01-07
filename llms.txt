@@ -1733,11 +1733,263 @@ player.sendMessage(message);
 - Apply before sending messages or setting display names
 - Store uncolored text in configs, parse when displaying
 
+### 24. Scoreboards (io.github.johnnypixelz.utilizer.scoreboard.Scoreboards)
+
+The Scoreboards API provides flicker-free sidebar scoreboards with per-player placeholder support and auto-updates.
+
+```java
+// Create a scoreboard with fluent builder
+Scoreboard scoreboard = Scoreboards.create("&6&lMY SERVER")
+    .line(0, "&7Welcome, &e%player_name%")
+    .line(1, "")
+    .line(2, "&7Balance: &a$%vault_eco_balance%")
+    .line(3, "&7Online: &e%server_online%")
+    .line(4, "")
+    .line(5, "&ewww.example.com")
+    .autoUpdate(20L);  // Refresh placeholders every second
+
+// Show to player
+scoreboard.show(player);
+
+// Update placeholders for specific player
+Scoreboards.update(player);
+
+// Update all viewers
+scoreboard.updateAll();
+
+// Dynamic line updates
+scoreboard.line(2, "&7Balance: &a$" + newBalance);
+
+// Query
+if (Scoreboards.isShowing(player)) {
+    Scoreboard current = Scoreboards.getFor(player);
+}
+
+// Hide from player
+Scoreboards.hide(player);
+
+// Cleanup
+scoreboard.destroy();
+
+// Plugin shutdown
+Scoreboards.shutdown();
+```
+
+**Key Methods:**
+- `Scoreboards.create(String title)` - Create new scoreboard
+- `Scoreboards.show(Player, Scoreboard)` - Show scoreboard to player
+- `Scoreboards.hide(Player)` - Hide scoreboard from player
+- `Scoreboards.update(Player)` - Update placeholders for player
+- `Scoreboards.getFor(Player)` - Get player's current scoreboard
+- `Scoreboards.isShowing(Player)` - Check if player has a scoreboard
+- `Scoreboards.shutdown()` - Shutdown service
+
+**Scoreboard Builder:**
+- `.title(String)` - Set title (supports colors/placeholders)
+- `.line(int index, String text)` - Set line at index (0-14, 0 = top)
+- `.lines(String...)` - Set multiple lines at once
+- `.lines(List<String>)` - Set lines from list
+- `.removeLine(int index)` - Remove specific line
+- `.clearLines()` - Remove all lines
+- `.autoUpdate(long ticks)` - Enable auto-refresh
+- `.stopAutoUpdate()` - Disable auto-refresh
+
 **Key Features:**
-- Static methods for easy access anywhere
-- Automatically uses the plugin's logger (via Provider)
-- Three log levels: `info()`, `warn()`, `severe()`
-- No need to pass plugin instance around
+- Flicker-free updates using team prefix/suffix technique
+- Per-player placeholder resolution (PlaceholderAPI + built-in)
+- Maximum 15 lines (Minecraft limitation)
+- Auto-update for live placeholder refreshing
+- One scoreboard per player (showing new hides old)
+
+### 25. Bossbars (io.github.johnnypixelz.utilizer.bossbar.Bossbars)
+
+The Bossbars API provides a fluent interface for creating boss bars with per-player placeholder support, auto-updates, and full customization.
+
+```java
+// Simple bossbar
+Bossbar bar = Bossbars.create("&c&lBOSS FIGHT")
+    .color(BarColor.RED)
+    .style(BarStyle.SEGMENTED_10)
+    .progress(1.0);
+
+bar.show(player);
+
+// With placeholders and auto-update
+Bossbar levelBar = Bossbars.create("&eLevel: &f%player_level% &7| &eXP: &f%player_exp%")
+    .color(BarColor.YELLOW)
+    .style(BarStyle.SOLID)
+    .progress(0.75)
+    .autoUpdate(20L);  // Update every second
+
+levelBar.show(player);
+
+// Progress animation (e.g., ability cooldown)
+Bossbar cooldown = Bossbars.create("&bAbility Cooldown")
+    .color(BarColor.BLUE)
+    .progress(0.0);
+
+cooldown.show(player);
+cooldown.progress(0.5);  // Update progress
+cooldown.progress(1.0);
+
+// With flags (darken sky, fog, boss music)
+Bossbar bossBar = Bossbars.create("&4&lDRAGON")
+    .color(BarColor.PURPLE)
+    .flags(BarFlag.DARKEN_SKY, BarFlag.CREATE_FOG)
+    .progress(0.8);
+
+// Multiple bossbars per player
+Bossbar quest = Bossbars.create("&aQuest: Kill 10 zombies &7[5/10]")
+    .color(BarColor.GREEN)
+    .progress(0.5);
+
+Bossbar event = Bossbars.create("&dDouble XP Event!")
+    .color(BarColor.PINK);
+
+quest.show(player);
+event.show(player);  // Both visible simultaneously
+
+// Query player's bossbars
+List<Bossbar> bars = Bossbars.getFor(player);
+
+// Cleanup
+bar.hide(player);
+bar.destroy();
+
+// Hide all from player
+Bossbars.hideAll(player);
+
+// Plugin shutdown
+Bossbars.shutdown();
+```
+
+**Key Methods:**
+- `Bossbars.create(String title)` - Create new bossbar
+- `Bossbars.create(String, BarColor)` - Create with color
+- `Bossbars.create(String, BarColor, BarStyle)` - Create with color and style
+- `Bossbars.show(Player, Bossbar)` - Show to player
+- `Bossbars.hide(Player, Bossbar)` - Hide specific bossbar
+- `Bossbars.hideAll(Player)` - Hide all bossbars from player
+- `Bossbars.getFor(Player)` - Get player's bossbars
+- `Bossbars.isShowing(Player)` - Check if player has any bossbars
+- `Bossbars.shutdown()` - Shutdown service
+
+**Bossbar Builder:**
+- `.title(String)` - Set title (supports colors/placeholders)
+- `.progress(double)` - Set progress (0.0 to 1.0)
+- `.color(BarColor)` - Set bar color (PINK, BLUE, RED, GREEN, YELLOW, PURPLE, WHITE)
+- `.style(BarStyle)` - Set style (SOLID, SEGMENTED_6, SEGMENTED_10, SEGMENTED_12, SEGMENTED_20)
+- `.addFlag(BarFlag)` - Add flag (DARKEN_SKY, PLAY_BOSS_MUSIC, CREATE_FOG)
+- `.removeFlag(BarFlag)` - Remove flag
+- `.flags(BarFlag...)` - Set flags (replaces existing)
+- `.autoUpdate(long ticks)` - Enable auto-refresh
+- `.stopAutoUpdate()` - Disable auto-refresh
+
+**Key Features:**
+- Per-player title resolution for placeholders
+- Multiple bossbars per player (recommended max: 5-6 for UI space)
+- Auto-update for live placeholder refreshing
+- All Bukkit BarColor, BarStyle, and BarFlag options
+- Automatic cleanup on player quit
+
+### 26. Currencies (io.github.johnnypixelz.utilizer.currency.Currencies)
+
+The Currencies API provides a unified interface to interact with multiple economy plugins through a single API.
+
+```java
+// Get currency by ID
+Optional<Currency> vault = Currencies.get("vault");
+vault.ifPresent(c -> c.deposit(player, 100));
+
+// CoinsEngine multi-currency (format: "coinsengine:<currency>")
+Optional<Currency> gems = Currencies.get("coinsengine:gems");
+gems.ifPresent(c -> c.withdraw(player, 50));
+
+// Convenience methods with TransactionResult
+TransactionResult result = Currencies.withdraw("vault", player, 100);
+if (result.success()) {
+    player.sendMessage("Withdrew $100! New balance: $" + result.balanceAfter());
+} else {
+    switch (result.reason()) {
+        case INSUFFICIENT_FUNDS -> player.sendMessage("Not enough money!");
+        case CURRENCY_UNAVAILABLE -> player.sendMessage("Economy not available!");
+        case NEGATIVE_AMOUNT -> player.sendMessage("Invalid amount!");
+        default -> player.sendMessage("Transaction failed!");
+    }
+}
+
+// Other convenience methods
+double balance = Currencies.getBalance("vault", player);
+boolean canAfford = Currencies.has("playerpoints", player, 500);
+Currencies.deposit("tokenenchant", player, 100);
+Currencies.setBalance("vault", player, 1000);
+
+// List all available currencies
+for (Currency currency : Currencies.getAvailable()) {
+    System.out.println(currency.getId() + ": " + currency.getBalance(player));
+}
+
+// Register custom currency
+Currencies.register(new Currency() {
+    @Override public String getId() { return "myplugin:tokens"; }
+    @Override public String getName() { return "Tokens"; }
+    @Override public boolean isAvailable() { return true; }
+    @Override public double getBalance(OfflinePlayer player) { return getTokens(player); }
+    @Override public boolean has(OfflinePlayer player, double amount) { return getBalance(player) >= amount; }
+    @Override public TransactionResult withdraw(OfflinePlayer player, double amount) { /* ... */ }
+    @Override public TransactionResult deposit(OfflinePlayer player, double amount) { /* ... */ }
+    @Override public TransactionResult setBalance(OfflinePlayer player, double amount) { /* ... */ }
+});
+
+// Unregister currency
+Currencies.unregister("myplugin:tokens");
+```
+
+**Supported Economy Plugins:**
+- **Vault** - Any Vault-compatible economy (`vault`)
+- **PlayerPoints** - Points system (`playerpoints`)
+- **CoinsEngine** - Multi-currency support (`coinsengine:<currency>`)
+- **TokenEnchant** - Token system (`tokenenchant`)
+
+**Key Methods:**
+- `Currencies.get(String id)` - Get currency by ID (Optional)
+- `Currencies.getAll()` - Get all registered currencies
+- `Currencies.getAvailable()` - Get only available currencies
+- `Currencies.exists(String id)` - Check if currency exists
+- `Currencies.register(Currency)` - Register custom currency
+- `Currencies.unregister(String id)` - Unregister currency
+
+**Convenience Methods:**
+- `Currencies.getBalance(String id, OfflinePlayer)` - Get balance
+- `Currencies.has(String id, OfflinePlayer, double)` - Check if has amount
+- `Currencies.withdraw(String id, OfflinePlayer, double)` - Withdraw (returns TransactionResult)
+- `Currencies.deposit(String id, OfflinePlayer, double)` - Deposit (returns TransactionResult)
+- `Currencies.setBalance(String id, OfflinePlayer, double)` - Set balance (returns TransactionResult)
+
+**TransactionResult:**
+```java
+TransactionResult result = Currencies.withdraw("vault", player, 100);
+result.success();       // boolean - was transaction successful?
+result.reason();        // Reason enum - why it failed (if failed)
+result.balanceBefore(); // double - balance before transaction
+result.balanceAfter();  // double - balance after transaction
+result.amountChanged(); // double - actual amount changed
+```
+
+**TransactionResult.Reason enum:**
+- `SUCCESS` - Transaction completed successfully
+- `INSUFFICIENT_FUNDS` - Not enough balance
+- `CURRENCY_UNAVAILABLE` - Currency/plugin not available
+- `NEGATIVE_AMOUNT` - Attempted negative transaction
+- `PROVIDER_ERROR` - Economy plugin error
+- `MAX_BALANCE_EXCEEDED` - Would exceed max balance
+
+**Key Features:**
+- Unified API for multiple economy plugins
+- TransactionResult with detailed failure reasons
+- Auto-detection of available economy plugins
+- Custom currency registration
+- String-based currency IDs for flexibility
 
 ## Best Practices
 
@@ -1974,9 +2226,11 @@ Messages.cfg("messages", "achievements.unlock")
 ## Package Structure
 
 - `amount/` - Amounts system
+- `bossbar/` - Bossbars system (Bossbars class)
 - `command/` - Commands system
 - `config/` - Configs system (Configs class)
 - `cooldown/` - Cooldowns system
+- `currency/` - Currencies system (Currencies class)
 - `event/` - Event Emitters system
 - `input/` - Chat Input system
 - `inventory/` - Custom Inventories system
@@ -1984,6 +2238,7 @@ Messages.cfg("messages", "achievements.unlock")
 - `minigame/` - Minigames framework
 - `plugin/` - Core plugin classes (UtilPlugin, Provider)
 - `random/` - Random utilities
+- `scoreboard/` - Scoreboards system (Scoreboards class)
 - `serialize/` - Serialization & Deserialization
 - `sql/` - SQL system
 - `tasks/` - Tasks system (Tasks class)
@@ -2117,6 +2372,54 @@ Messages.cfg("messages", "achievements.unlock")
 - `Randoms.chance(double)` - Returns true with probability 0.0-1.0
 - `Randoms.percent(double)` - Returns true with percentage 0-100
 - `Weighted.of(T, double)` - Create weighted item
+
+### Scoreboards
+- `Scoreboards.create(String)` - Create new scoreboard
+- `Scoreboards.show(Player, Scoreboard)` - Show to player
+- `Scoreboards.hide(Player)` - Hide from player
+- `Scoreboards.update(Player)` - Update placeholders
+- `Scoreboards.getFor(Player)` - Get player's scoreboard
+- `Scoreboards.isShowing(Player)` - Check if showing
+- `Scoreboards.shutdown()` - Shutdown service
+- `.title(String)` - Set title
+- `.line(int, String)` - Set line at index (0-14)
+- `.lines(String...)` - Set multiple lines
+- `.removeLine(int)` - Remove line
+- `.clearLines()` - Clear all lines
+- `.autoUpdate(long)` - Enable auto-refresh
+- `.stopAutoUpdate()` - Stop auto-refresh
+
+### Bossbars
+- `Bossbars.create(String)` - Create new bossbar
+- `Bossbars.create(String, BarColor)` - Create with color
+- `Bossbars.create(String, BarColor, BarStyle)` - Create with color and style
+- `Bossbars.show(Player, Bossbar)` - Show to player
+- `Bossbars.hide(Player, Bossbar)` - Hide specific bossbar
+- `Bossbars.hideAll(Player)` - Hide all from player
+- `Bossbars.getFor(Player)` - Get player's bossbars
+- `Bossbars.shutdown()` - Shutdown service
+- `.title(String)` - Set title
+- `.progress(double)` - Set progress (0.0-1.0)
+- `.color(BarColor)` - Set color
+- `.style(BarStyle)` - Set style
+- `.addFlag(BarFlag)` - Add flag
+- `.flags(BarFlag...)` - Set flags
+- `.autoUpdate(long)` - Enable auto-refresh
+
+### Currencies
+- `Currencies.get(String)` - Get currency by ID (Optional)
+- `Currencies.getAll()` - Get all currencies
+- `Currencies.getAvailable()` - Get available currencies
+- `Currencies.exists(String)` - Check if exists
+- `Currencies.register(Currency)` - Register custom currency
+- `Currencies.unregister(String)` - Unregister currency
+- `Currencies.getBalance(String, OfflinePlayer)` - Get balance
+- `Currencies.has(String, OfflinePlayer, double)` - Check has amount
+- `Currencies.withdraw(String, OfflinePlayer, double)` - Withdraw (TransactionResult)
+- `Currencies.deposit(String, OfflinePlayer, double)` - Deposit (TransactionResult)
+- `Currencies.setBalance(String, OfflinePlayer, double)` - Set balance (TransactionResult)
+- Currency IDs: `vault`, `playerpoints`, `coinsengine:<name>`, `tokenenchant`
+- TransactionResult: `.success()`, `.reason()`, `.balanceBefore()`, `.balanceAfter()`
 
 ## Support
 
