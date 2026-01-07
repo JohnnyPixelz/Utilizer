@@ -3,8 +3,8 @@ package io.github.johnnypixelz.utilizer.config.reference;
 import io.github.johnnypixelz.utilizer.config.Configs;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public abstract class ConfigReference {
@@ -47,22 +47,22 @@ public abstract class ConfigReference {
     protected String file; // Config file path, e.g. "config", "messages"
     protected String path; // Config path, e.g. "gui.help", "messages.on-join"
 
-    protected ConfigReference(@Nonnull String file, @Nonnull String path) {
+    protected ConfigReference(@NotNull String file, @NotNull String path) {
         this.file = file;
         this.path = path;
     }
 
-    @Nonnull
+    @NotNull
     public String getFile() {
         return file;
     }
 
-    @Nonnull
+    @NotNull
     public String getPath() {
         return path;
     }
 
-    @Nonnull
+    @NotNull
     public YamlConfiguration getConfig() {
         return Configs.get(file);
     }

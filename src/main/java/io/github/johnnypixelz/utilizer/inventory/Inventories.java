@@ -8,8 +8,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -38,8 +38,8 @@ public class Inventories {
      * @param items  the items to give.
      * @return the items that did not fit.
      */
-    @Nonnull
-    public static List<ItemStack> give(@Nonnull Player player, @Nullable ItemStack... items) {
+    @NotNull
+    public static List<ItemStack> give(@NotNull Player player, @Nullable ItemStack... items) {
         return give(player, true, items);
     }
 
@@ -51,8 +51,8 @@ public class Inventories {
      * @param split  same as {@link #addItems(Inventory, boolean, ItemStack...)}
      * @return the items that did not fit.
      */
-    @Nonnull
-    public static List<ItemStack> give(@Nonnull Player player, boolean split, @Nullable ItemStack... items) {
+    @NotNull
+    public static List<ItemStack> give(@NotNull Player player, boolean split, @Nullable ItemStack... items) {
         if (items == null || items.length == 0) return new ArrayList<>();
 
         return addItems(player.getInventory(), split, items);
@@ -65,8 +65,8 @@ public class Inventories {
      * @param items  the items to give.
      * @return the items that did not fit and were dropped.
      */
-    @Nonnull
-    public static List<ItemStack> giveOrDrop(@Nonnull Player player, @Nullable ItemStack... items) {
+    @NotNull
+    public static List<ItemStack> giveOrDrop(@NotNull Player player, @Nullable ItemStack... items) {
         return giveOrDrop(player, true, items);
     }
 
@@ -78,8 +78,8 @@ public class Inventories {
      * @param split  same as {@link #addItems(Inventory, boolean, ItemStack...)}
      * @return the items that did not fit and were dropped.
      */
-    @Nonnull
-    public static List<ItemStack> giveOrDrop(@Nonnull Player player, boolean split, @Nullable ItemStack... items) {
+    @NotNull
+    public static List<ItemStack> giveOrDrop(@NotNull Player player, boolean split, @Nullable ItemStack... items) {
         if (items == null || items.length == 0) return new ArrayList<>();
         List<ItemStack> leftOvers = addItems(player.getInventory(), split, items);
         World world = player.getWorld();
@@ -89,7 +89,7 @@ public class Inventories {
         return leftOvers;
     }
 
-    public static List<ItemStack> addItems(@Nonnull Inventory inventory, boolean split, @Nonnull ItemStack... items) {
+    public static List<ItemStack> addItems(@NotNull Inventory inventory, boolean split, @NotNull ItemStack... items) {
         return addItems(inventory, split, null, items);
     }
 
@@ -105,8 +105,8 @@ public class Inventories {
      * @param items           the items to add.
      * @return items that didn't fit in the inventory.
      */
-    @Nonnull
-    public static List<ItemStack> addItems(@Nonnull Inventory inventory, boolean split, @Nullable Predicate<Integer> modifiableSlots, @Nonnull ItemStack... items) {
+    @NotNull
+    public static List<ItemStack> addItems(@NotNull Inventory inventory, boolean split, @Nullable Predicate<Integer> modifiableSlots, @NotNull ItemStack... items) {
         Objects.requireNonNull(inventory, "Cannot add items to null inventory");
         Objects.requireNonNull(items, "Cannot add null items to inventory");
 
@@ -174,7 +174,7 @@ public class Inventories {
         return leftOvers;
     }
 
-    public static int firstPartial(@Nonnull Inventory inventory, @Nullable ItemStack item, int beginIndex) {
+    public static int firstPartial(@NotNull Inventory inventory, @Nullable ItemStack item, int beginIndex) {
         return firstPartial(inventory, item, beginIndex, null);
     }
 
@@ -190,7 +190,7 @@ public class Inventories {
      * @return the first matched item slot, otherwise -1
      * @throws IndexOutOfBoundsException if the beginning index is less than 0 or greater than the inventory storage size.
      */
-    public static int firstPartial(@Nonnull Inventory inventory, @Nullable ItemStack item, int beginIndex, @Nullable Predicate<Integer> modifiableSlots) {
+    public static int firstPartial(@NotNull Inventory inventory, @Nullable ItemStack item, int beginIndex, @Nullable Predicate<Integer> modifiableSlots) {
         if (item != null) {
             ItemStack[] items = inventory.getStorageContents();
             int invSize = items.length;
@@ -207,7 +207,7 @@ public class Inventories {
         return -1;
     }
 
-    public static List<ItemStack> stack(@Nonnull Collection<ItemStack> items) {
+    public static List<ItemStack> stack(@NotNull Collection<ItemStack> items) {
         return stack(items, ItemStack::isSimilar);
     }
 
@@ -223,8 +223,8 @@ public class Inventories {
      * @param items the items to stack.
      * @return stacked up items.
      */
-    @Nonnull
-    public static List<ItemStack> stack(@Nonnull Collection<ItemStack> items, @Nonnull BiPredicate<ItemStack, ItemStack> similarity) {
+    @NotNull
+    public static List<ItemStack> stack(@NotNull Collection<ItemStack> items, @NotNull BiPredicate<ItemStack, ItemStack> similarity) {
         Objects.requireNonNull(items, "Cannot stack null items");
         Objects.requireNonNull(similarity, "Similarity check cannot be null");
         List<ItemStack> stacked = new ArrayList<>(items.size());
@@ -246,11 +246,11 @@ public class Inventories {
         return stacked;
     }
 
-    public static int firstEmpty(@Nonnull Inventory inventory) {
+    public static int firstEmpty(@NotNull Inventory inventory) {
         return firstEmpty(inventory, 0, null);
     }
 
-    public static int firstEmpty(@Nonnull Inventory inventory, int beginIndex) {
+    public static int firstEmpty(@NotNull Inventory inventory, int beginIndex) {
         return firstEmpty(inventory, beginIndex, null);
     }
 
@@ -265,7 +265,7 @@ public class Inventories {
      * @return first empty item slot, otherwise -1
      * @throws IndexOutOfBoundsException if the beginning index is less than 0 or greater than the inventory storage size.
      */
-    public static int firstEmpty(@Nonnull Inventory inventory, int beginIndex, @Nullable Predicate<Integer> modifiableSlots) {
+    public static int firstEmpty(@NotNull Inventory inventory, int beginIndex, @Nullable Predicate<Integer> modifiableSlots) {
         ItemStack[] items = inventory.getStorageContents();
         int invSize = items.length;
         if (beginIndex < 0 || beginIndex >= invSize)
@@ -288,7 +288,7 @@ public class Inventories {
      * @see #firstEmpty(Inventory, int)
      * @see #firstPartial(Inventory, ItemStack, int)
      */
-    public static int firstPartialOrEmpty(@Nonnull Inventory inventory, @Nullable ItemStack item, int beginIndex) {
+    public static int firstPartialOrEmpty(@NotNull Inventory inventory, @Nullable ItemStack item, int beginIndex) {
         if (item != null) {
             ItemStack[] items = inventory.getStorageContents();
             int len = items.length;

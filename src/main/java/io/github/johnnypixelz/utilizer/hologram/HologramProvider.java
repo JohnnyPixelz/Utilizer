@@ -2,7 +2,7 @@ package io.github.johnnypixelz.utilizer.hologram;
 
 import org.bukkit.Location;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 /**

@@ -10,7 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -47,8 +47,8 @@ public class Message {
         this.titleSettings = message.titleSettings == null ? null : new TitleSettings(message.titleSettings);
     }
 
-    @Nonnull
-    public Message send(@Nonnull CommandSender commandSender) {
+    @NotNull
+    public Message send(@NotNull CommandSender commandSender) {
         if (message != null) {
             commandSender.sendMessage(Colors.color(message));
         }
@@ -93,8 +93,8 @@ public class Message {
         return this;
     }
 
-    @Nonnull
-    public Message send(@Nonnull List<? extends CommandSender> commandSenders) {
+    @NotNull
+    public Message send(@NotNull List<? extends CommandSender> commandSenders) {
         for (CommandSender commandSender : commandSenders) {
             send(commandSender);
         }
@@ -102,7 +102,7 @@ public class Message {
         return this;
     }
 
-    @Nonnull
+    @NotNull
     public Message broadcast() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             send(player);
@@ -111,7 +111,7 @@ public class Message {
         return this;
     }
 
-    @Nonnull
+    @NotNull
     public Message broadcast(Point point, double radius) {
         for (Player player : Bukkit.getOnlinePlayers()) {
             final Point playerPoint = Point.of(player.getLocation());
@@ -126,7 +126,7 @@ public class Message {
         return this;
     }
 
-    @Nonnull
+    @NotNull
     public Message broadcast(Point point, double radius, Predicate<Player> predicate) {
         for (Player player : Bukkit.getOnlinePlayers()) {
             final Point playerPoint = Point.of(player.getLocation());
@@ -142,13 +142,13 @@ public class Message {
         return this;
     }
 
-    @Nonnull
-    public Message map(@Nonnull String target, @Nonnull String replacement) {
+    @NotNull
+    public Message map(@NotNull String target, @NotNull String replacement) {
         return map(line -> line.replace(target, replacement));
     }
 
-    @Nonnull
-    public Message map(@Nonnull Function<String, String> mapper) {
+    @NotNull
+    public Message map(@NotNull Function<String, String> mapper) {
         if (message != null) {
             message = mapper.apply(message);
         }
@@ -174,8 +174,8 @@ public class Message {
         return this;
     }
 
-    @Nonnull
-    public Message map(@Nonnull String target, @Nonnull List<String> replacement) {
+    @NotNull
+    public Message map(@NotNull String target, @NotNull List<String> replacement) {
         if (messageList != null) {
             messageList = messageList.stream()
                     .flatMap(placeholderLine -> {

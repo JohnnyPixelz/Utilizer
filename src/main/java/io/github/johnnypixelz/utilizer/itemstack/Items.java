@@ -33,8 +33,8 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -54,7 +54,7 @@ public class Items {
         return item == null || item.getType().equals(Material.AIR);
     }
 
-    public static ItemStack create(@Nonnull Material material, @Nullable String displayName, @Nullable List<String> lore) {
+    public static ItemStack create(@NotNull Material material, @Nullable String displayName, @Nullable List<String> lore) {
         ItemStack stack = new ItemStack(material);
 
         if (displayName != null) {
@@ -68,7 +68,7 @@ public class Items {
         return stack;
     }
 
-    public static ItemStack create(@Nonnull Material material, @Nullable String displayName, @Nullable String... lore) {
+    public static ItemStack create(@NotNull Material material, @Nullable String displayName, @Nullable String... lore) {
         return create(material, displayName, lore == null ? null : Arrays.asList(lore));
     }
 
@@ -345,7 +345,7 @@ public class Items {
         return itemEditor.getItem();
     }
 
-    public static ItemStack color(@Nonnull ItemStack stack) {
+    public static ItemStack color(@NotNull ItemStack stack) {
         return meta(stack, itemMeta -> {
             // Coloring item's display name
             if (itemMeta.hasDisplayName()) {
@@ -364,13 +364,13 @@ public class Items {
         });
     }
 
-    public static ItemStack setDisplayName(@Nonnull ItemStack stack, @Nonnull String name) {
+    public static ItemStack setDisplayName(@NotNull ItemStack stack, @NotNull String name) {
         return meta(stack, itemMeta -> {
             itemMeta.setDisplayName(Colors.color(name));
         });
     }
 
-    public static ItemStack setDurability(@Nonnull ItemStack stack, int durability) {
+    public static ItemStack setDurability(@NotNull ItemStack stack, int durability) {
         if (stack.getItemMeta() instanceof Damageable) {
             return meta(stack, Damageable.class, damageable -> {
                 damageable.setDamage(durability);
@@ -380,7 +380,7 @@ public class Items {
         return stack;
     }
 
-    public static ItemStack setLore(@Nonnull ItemStack stack, @Nonnull List<String> lore) {
+    public static ItemStack setLore(@NotNull ItemStack stack, @NotNull List<String> lore) {
         return meta(stack, itemMeta -> {
             final List<String> newLore = lore.stream()
                     .map(Colors::color)
@@ -390,20 +390,20 @@ public class Items {
         });
     }
 
-    public static ItemStack setLore(@Nonnull ItemStack stack, @Nonnull String... lore) {
+    public static ItemStack setLore(@NotNull ItemStack stack, @NotNull String... lore) {
         return setLore(stack, Arrays.asList(lore));
     }
 
-    public static ItemStack setLoreIf(boolean condition, @Nonnull ItemStack stack, @Nonnull List<String> lore) {
+    public static ItemStack setLoreIf(boolean condition, @NotNull ItemStack stack, @NotNull List<String> lore) {
         if (condition) return setLore(stack, lore);
         return stack;
     }
 
-    public static ItemStack setLoreIf(boolean condition, @Nonnull ItemStack stack, @Nonnull String... lore) {
+    public static ItemStack setLoreIf(boolean condition, @NotNull ItemStack stack, @NotNull String... lore) {
         return setLoreIf(condition, stack, Arrays.asList(lore));
     }
 
-    public static ItemStack addLore(@Nonnull ItemStack stack, @Nonnull List<String> lore) {
+    public static ItemStack addLore(@NotNull ItemStack stack, @NotNull List<String> lore) {
         final ItemMeta existingMeta = stack.getItemMeta();
         if (existingMeta == null) return setLore(stack, lore);
         if (!existingMeta.hasLore()) return setLore(stack, lore);
@@ -417,72 +417,72 @@ public class Items {
         });
     }
 
-    public static ItemStack addLore(@Nonnull ItemStack stack, @Nonnull String... lore) {
+    public static ItemStack addLore(@NotNull ItemStack stack, @NotNull String... lore) {
         return addLore(stack, Arrays.asList(lore));
     }
 
-    public static ItemStack addLoreIf(boolean condition, @Nonnull ItemStack stack, @Nonnull List<String> lore) {
+    public static ItemStack addLoreIf(boolean condition, @NotNull ItemStack stack, @NotNull List<String> lore) {
         if (condition) return addLore(stack, lore);
         return stack;
     }
 
-    public static ItemStack addLoreIf(boolean condition, @Nonnull ItemStack stack, @Nonnull String... lore) {
+    public static ItemStack addLoreIf(boolean condition, @NotNull ItemStack stack, @NotNull String... lore) {
         return addLoreIf(condition, stack, Arrays.asList(lore));
     }
 
-    public static ItemStack removeLore(@Nonnull ItemStack stack) {
+    public static ItemStack removeLore(@NotNull ItemStack stack) {
         return meta(stack, itemMeta -> {
             itemMeta.setLore(null);
         });
     }
 
-    public static ItemStack setFlags(@Nonnull ItemStack stack, @Nonnull List<ItemFlag> flags) {
+    public static ItemStack setFlags(@NotNull ItemStack stack, @NotNull List<ItemFlag> flags) {
         return meta(stack, itemMeta -> {
             itemMeta.getItemFlags().forEach(itemMeta::removeItemFlags);
             flags.forEach(itemMeta::addItemFlags);
         });
     }
 
-    public static ItemStack setFlags(@Nonnull ItemStack stack, @Nonnull ItemFlag... flags) {
+    public static ItemStack setFlags(@NotNull ItemStack stack, @NotNull ItemFlag... flags) {
         return setFlags(stack, Arrays.asList(flags));
     }
 
-    public static ItemStack addFlags(@Nonnull ItemStack stack, @Nonnull List<ItemFlag> flags) {
+    public static ItemStack addFlags(@NotNull ItemStack stack, @NotNull List<ItemFlag> flags) {
         return meta(stack, itemMeta -> {
             flags.forEach(itemMeta::addItemFlags);
         });
     }
 
-    public static ItemStack addFlags(@Nonnull ItemStack stack, @Nonnull ItemFlag... flags) {
+    public static ItemStack addFlags(@NotNull ItemStack stack, @NotNull ItemFlag... flags) {
         return addFlags(stack, Arrays.asList(flags));
     }
 
-    public static ItemStack removeFlags(@Nonnull ItemStack stack, @Nonnull List<ItemFlag> flags) {
+    public static ItemStack removeFlags(@NotNull ItemStack stack, @NotNull List<ItemFlag> flags) {
         return meta(stack, itemMeta -> {
             flags.forEach(itemMeta::removeItemFlags);
         });
     }
 
-    public static ItemStack removeFlags(@Nonnull ItemStack stack, @Nonnull ItemFlag... flags) {
+    public static ItemStack removeFlags(@NotNull ItemStack stack, @NotNull ItemFlag... flags) {
         return meta(stack, itemMeta -> {
             itemMeta.removeItemFlags(flags);
         });
     }
 
-    public static ItemStack clearFlags(@Nonnull ItemStack stack) {
+    public static ItemStack clearFlags(@NotNull ItemStack stack) {
         return meta(stack, itemMeta -> {
             itemMeta.removeItemFlags(itemMeta.getItemFlags().toArray(new ItemFlag[0]));
         });
     }
 
-    public static ItemStack glow(@Nonnull ItemStack stack) {
+    public static ItemStack glow(@NotNull ItemStack stack) {
         stack.addUnsafeEnchantment(stack.getType() != Material.BOW ? Enchantment.ARROW_INFINITE : Enchantment.LUCK, 10);
         addFlags(stack, ItemFlag.HIDE_ENCHANTS);
 
         return stack;
     }
 
-    public static ItemStack setGlow(@Nonnull ItemStack stack, boolean glow) {
+    public static ItemStack setGlow(@NotNull ItemStack stack, boolean glow) {
         if (glow) {
             return glow(stack);
         }
@@ -497,28 +497,28 @@ public class Items {
         return stack;
     }
 
-    public static ItemStack map(@Nonnull ItemStack stack, @Nonnull String target, @Nonnull String replacement) {
+    public static ItemStack map(@NotNull ItemStack stack, @NotNull String target, @NotNull String replacement) {
         mapName(stack, target, replacement);
         mapLore(stack, target, replacement);
 
         return stack;
     }
 
-    public static ItemStack map(@Nonnull ItemStack stack, @Nonnull String target, @Nonnull Supplier<String> replacement) {
+    public static ItemStack map(@NotNull ItemStack stack, @NotNull String target, @NotNull Supplier<String> replacement) {
         mapName(stack, target, replacement);
         mapLore(stack, target, replacement);
 
         return stack;
     }
 
-    public static ItemStack map(@Nonnull ItemStack stack, @Nonnull Function<String, String> mapper) {
+    public static ItemStack map(@NotNull ItemStack stack, @NotNull Function<String, String> mapper) {
         mapName(stack, mapper);
         mapLore(stack, mapper);
 
         return stack;
     }
 
-    public static ItemStack mapName(@Nonnull ItemStack stack, @Nonnull String target, @Nonnull String replacement) {
+    public static ItemStack mapName(@NotNull ItemStack stack, @NotNull String target, @NotNull String replacement) {
         return meta(stack, itemMeta -> {
             if (!itemMeta.hasDisplayName()) return;
 
@@ -526,7 +526,7 @@ public class Items {
         });
     }
 
-    public static ItemStack mapName(@Nonnull ItemStack stack, @Nonnull String target, @Nonnull Supplier<String> replacement) {
+    public static ItemStack mapName(@NotNull ItemStack stack, @NotNull String target, @NotNull Supplier<String> replacement) {
         return meta(stack, itemMeta -> {
             if (!itemMeta.hasDisplayName()) return;
 
@@ -536,7 +536,7 @@ public class Items {
         });
     }
 
-    public static ItemStack mapName(@Nonnull ItemStack stack, @Nonnull Function<String, String> mapper) {
+    public static ItemStack mapName(@NotNull ItemStack stack, @NotNull Function<String, String> mapper) {
         return meta(stack, itemMeta -> {
             if (!itemMeta.hasDisplayName()) return;
 
@@ -544,7 +544,7 @@ public class Items {
         });
     }
 
-    public static ItemStack mapLore(@Nonnull ItemStack stack, @Nonnull String target, @Nonnull String replacement) {
+    public static ItemStack mapLore(@NotNull ItemStack stack, @NotNull String target, @NotNull String replacement) {
         return meta(stack, itemMeta -> {
             if (!itemMeta.hasLore()) return;
 
@@ -557,7 +557,7 @@ public class Items {
         });
     }
 
-    public static ItemStack mapLore(@Nonnull ItemStack stack, @Nonnull String target, @Nonnull Supplier<String> replacement) {
+    public static ItemStack mapLore(@NotNull ItemStack stack, @NotNull String target, @NotNull Supplier<String> replacement) {
         return meta(stack, itemMeta -> {
             if (!itemMeta.hasLore()) return;
 
@@ -577,7 +577,7 @@ public class Items {
         });
     }
 
-    public static ItemStack mapLore(@Nonnull ItemStack stack, @Nonnull Function<String, String> mapper) {
+    public static ItemStack mapLore(@NotNull ItemStack stack, @NotNull Function<String, String> mapper) {
         return meta(stack, itemMeta -> {
             if (!itemMeta.hasLore()) return;
 
@@ -590,7 +590,7 @@ public class Items {
         });
     }
 
-    public static ItemStack mapLoreMulti(@Nonnull ItemStack stack, @Nonnull String target, @Nonnull List<String> replacement) {
+    public static ItemStack mapLoreMulti(@NotNull ItemStack stack, @NotNull String target, @NotNull List<String> replacement) {
         return meta(stack, itemMeta -> {
             if (!itemMeta.hasLore()) return;
 
@@ -608,7 +608,7 @@ public class Items {
         });
     }
 
-    public static ItemStack mapLoreMulti(@Nonnull ItemStack stack, @Nonnull String target, @Nonnull Supplier<List<String>> replacement) {
+    public static ItemStack mapLoreMulti(@NotNull ItemStack stack, @NotNull String target, @NotNull Supplier<List<String>> replacement) {
         return meta(stack, itemMeta -> {
             if (!itemMeta.hasLore()) return;
 
@@ -628,7 +628,7 @@ public class Items {
         });
     }
 
-    public static ItemStack meta(@Nonnull ItemStack stack, @Nonnull Consumer<ItemMeta> metaConsumer) {
+    public static ItemStack meta(@NotNull ItemStack stack, @NotNull Consumer<ItemMeta> metaConsumer) {
         ItemMeta itemMeta = stack.getItemMeta();
         if (itemMeta == null) return stack;
 
@@ -638,7 +638,7 @@ public class Items {
         return stack;
     }
 
-    public static <T extends ItemMeta> ItemStack meta(@Nonnull ItemStack stack, @Nonnull Class<T> metaClass, @Nonnull Consumer<T> metaConsumer) {
+    public static <T extends ItemMeta> ItemStack meta(@NotNull ItemStack stack, @NotNull Class<T> metaClass, @NotNull Consumer<T> metaConsumer) {
         ItemMeta itemMeta = stack.getItemMeta();
         if (itemMeta == null) return stack;
 
@@ -653,7 +653,7 @@ public class Items {
         return stack;
     }
 
-    public static <T extends ItemMeta> ItemStack metaOrThrow(@Nonnull ItemStack stack, @Nonnull Class<T> metaClass, @Nonnull Consumer<T> metaConsumer) {
+    public static <T extends ItemMeta> ItemStack metaOrThrow(@NotNull ItemStack stack, @NotNull Class<T> metaClass, @NotNull Consumer<T> metaConsumer) {
         ItemMeta itemMeta = stack.getItemMeta();
         if (itemMeta == null) return stack;
 
@@ -668,32 +668,32 @@ public class Items {
         return stack;
     }
 
-    public static ItemStack pdc(@Nonnull ItemStack stack, @Nonnull Consumer<PersistentDataContainer> container) {
+    public static ItemStack pdc(@NotNull ItemStack stack, @NotNull Consumer<PersistentDataContainer> container) {
         return meta(stack, itemMeta -> {
             container.accept(itemMeta.getPersistentDataContainer());
         });
     }
 
-    public static ItemEditor edit(@Nonnull ItemStack stack) {
+    public static ItemEditor edit(@NotNull ItemStack stack) {
         return new ItemEditor(stack);
     }
 
-    public static ItemEditor edit(@Nonnull Material material) {
+    public static ItemEditor edit(@NotNull Material material) {
         return new ItemEditor(material);
     }
 
-    public static ItemEditor edit(@Nonnull ConfigurationSection section) {
+    public static ItemEditor edit(@NotNull ConfigurationSection section) {
         return new ItemEditor(parse(section));
     }
 
-    @Nonnull
-    public static String toJson(@Nonnull ItemStack itemStack) {
+    @NotNull
+    public static String toJson(@NotNull ItemStack itemStack) {
         Objects.requireNonNull(itemStack, "ItemStack cannot be null");
         return GsonProvider.standard().toJson(itemStack);
     }
 
     @Nullable
-    public static ItemStack fromJson(@Nonnull String json) {
+    public static ItemStack fromJson(@NotNull String json) {
         Objects.requireNonNull(json, "JSON string cannot be null");
         return GsonProvider.standard().fromJson(json, ItemStack.class);
     }

@@ -11,7 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 /**
@@ -152,7 +152,7 @@ public class CustomBlockManager<CB extends CustomBlock> {
      * @param position the block position
      * @return optional containing the block, or empty if none exists
      */
-    public Optional<CB> getCustomBlock(@Nonnull BlockPosition position) {
+    public Optional<CB> getCustomBlock(@NotNull BlockPosition position) {
         Objects.requireNonNull(position, "position");
         return Optional.ofNullable(storage.get().get(position));
     }

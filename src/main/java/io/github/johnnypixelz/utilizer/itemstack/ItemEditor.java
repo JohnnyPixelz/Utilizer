@@ -11,7 +11,7 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -25,11 +25,11 @@ import java.util.stream.Stream;
 public class ItemEditor {
     private final ItemStack stack;
 
-    ItemEditor(@Nonnull ItemStack stack) {
+    ItemEditor(@NotNull ItemStack stack) {
         this.stack = stack;
     }
 
-    ItemEditor(@Nonnull Material material) {
+    ItemEditor(@NotNull Material material) {
         this.stack = new ItemStack(material);
     }
 
@@ -49,13 +49,13 @@ public class ItemEditor {
         });
     }
 
-    public ItemEditor setDisplayName(@Nonnull String name) {
+    public ItemEditor setDisplayName(@NotNull String name) {
         return meta(itemMeta -> {
             itemMeta.setDisplayName(Colors.color(name));
         });
     }
 
-    public ItemEditor setType(@Nonnull Material material) {
+    public ItemEditor setType(@NotNull Material material) {
         stack.setType(material);
 
         return this;
@@ -83,7 +83,7 @@ public class ItemEditor {
         return this;
     }
 
-    public ItemEditor setLore(@Nonnull List<String> lore) {
+    public ItemEditor setLore(@NotNull List<String> lore) {
         return meta(itemMeta -> {
             final List<String> newLore = lore.stream()
                     .map(Colors::color)
@@ -93,20 +93,20 @@ public class ItemEditor {
         });
     }
 
-    public ItemEditor setLore(@Nonnull String... lore) {
+    public ItemEditor setLore(@NotNull String... lore) {
         return setLore(Arrays.asList(lore));
     }
 
-    public ItemEditor setLoreIf(boolean condition, @Nonnull List<String> lore) {
+    public ItemEditor setLoreIf(boolean condition, @NotNull List<String> lore) {
         if (condition) return setLore(lore);
         return this;
     }
 
-    public ItemEditor setLoreIf(boolean condition, @Nonnull String... lore) {
+    public ItemEditor setLoreIf(boolean condition, @NotNull String... lore) {
         return setLoreIf(condition, Arrays.asList(lore));
     }
 
-    public ItemEditor addLore(@Nonnull List<String> lore) {
+    public ItemEditor addLore(@NotNull List<String> lore) {
         final ItemMeta existingMeta = stack.getItemMeta();
         if (existingMeta == null) return setLore(lore);
         if (!existingMeta.hasLore()) return setLore(lore);
@@ -120,16 +120,16 @@ public class ItemEditor {
         });
     }
 
-    public ItemEditor addLore(@Nonnull String... lore) {
+    public ItemEditor addLore(@NotNull String... lore) {
         return addLore(Arrays.asList(lore));
     }
 
-    public ItemEditor addLoreIf(boolean condition, @Nonnull List<String> lore) {
+    public ItemEditor addLoreIf(boolean condition, @NotNull List<String> lore) {
         if (condition) return addLore(lore);
         return this;
     }
 
-    public ItemEditor addLoreIf(boolean condition, @Nonnull String... lore) {
+    public ItemEditor addLoreIf(boolean condition, @NotNull String... lore) {
         return addLoreIf(condition, Arrays.asList(lore));
     }
 
@@ -139,34 +139,34 @@ public class ItemEditor {
         });
     }
 
-    public ItemEditor setFlags(@Nonnull List<ItemFlag> flags) {
+    public ItemEditor setFlags(@NotNull List<ItemFlag> flags) {
         return meta(itemMeta -> {
             itemMeta.getItemFlags().forEach(itemMeta::removeItemFlags);
             flags.forEach(itemMeta::addItemFlags);
         });
     }
 
-    public ItemEditor setFlags(@Nonnull ItemFlag... flags) {
+    public ItemEditor setFlags(@NotNull ItemFlag... flags) {
         return setFlags(Arrays.asList(flags));
     }
 
-    public ItemEditor addFlags(@Nonnull List<ItemFlag> flags) {
+    public ItemEditor addFlags(@NotNull List<ItemFlag> flags) {
         return meta(itemMeta -> {
             flags.forEach(itemMeta::addItemFlags);
         });
     }
 
-    public ItemEditor addFlags(@Nonnull ItemFlag... flags) {
+    public ItemEditor addFlags(@NotNull ItemFlag... flags) {
         return addFlags(Arrays.asList(flags));
     }
 
-    public ItemEditor removeFlags(@Nonnull List<ItemFlag> flags) {
+    public ItemEditor removeFlags(@NotNull List<ItemFlag> flags) {
         return meta(itemMeta -> {
             flags.forEach(itemMeta::removeItemFlags);
         });
     }
 
-    public ItemEditor removeFlags(@Nonnull ItemFlag... flags) {
+    public ItemEditor removeFlags(@NotNull ItemFlag... flags) {
         return meta(itemMeta -> {
             itemMeta.removeItemFlags(flags);
         });
@@ -195,19 +195,19 @@ public class ItemEditor {
         return this;
     }
 
-    public ItemEditor enchant(@Nonnull Enchantment enchantment, int level) {
+    public ItemEditor enchant(@NotNull Enchantment enchantment, int level) {
         Objects.requireNonNull(enchantment, "Enchantment cannot be null");
         stack.addUnsafeEnchantment(enchantment, level);
         return this;
     }
 
-    public ItemEditor enchant(@Nonnull Map<Enchantment, Integer> enchantments) {
+    public ItemEditor enchant(@NotNull Map<Enchantment, Integer> enchantments) {
         Objects.requireNonNull(enchantments, "Enchantments map cannot be null");
         enchantments.forEach((enchantment, level) -> stack.addUnsafeEnchantment(enchantment, level));
         return this;
     }
 
-    public ItemEditor removeEnchantment(@Nonnull Enchantment enchantment) {
+    public ItemEditor removeEnchantment(@NotNull Enchantment enchantment) {
         Objects.requireNonNull(enchantment, "Enchantment cannot be null");
         stack.removeEnchantment(enchantment);
         return this;
@@ -227,28 +227,28 @@ public class ItemEditor {
         return this;
     }
 
-    public ItemEditor map(@Nonnull Function<String, String> mapper) {
+    public ItemEditor map(@NotNull Function<String, String> mapper) {
         mapName(mapper);
         mapLore(mapper);
 
         return this;
     }
 
-    public ItemEditor map(@Nonnull String target, @Nonnull String replacement) {
+    public ItemEditor map(@NotNull String target, @NotNull String replacement) {
         mapName(target, replacement);
         mapLore(target, replacement);
 
         return this;
     }
 
-    public ItemEditor map(@Nonnull String target, @Nonnull Supplier<String> replacement) {
+    public ItemEditor map(@NotNull String target, @NotNull Supplier<String> replacement) {
         mapName(target, replacement);
         mapLore(target, replacement);
 
         return this;
     }
 
-    public ItemEditor mapName(@Nonnull String target, @Nonnull String replacement) {
+    public ItemEditor mapName(@NotNull String target, @NotNull String replacement) {
         return meta(itemMeta -> {
             if (!itemMeta.hasDisplayName()) return;
 
@@ -256,7 +256,7 @@ public class ItemEditor {
         });
     }
 
-    public ItemEditor mapName(@Nonnull String target, @Nonnull Supplier<String> replacement) {
+    public ItemEditor mapName(@NotNull String target, @NotNull Supplier<String> replacement) {
         return meta(itemMeta -> {
             if (!itemMeta.hasDisplayName()) return;
             if (!itemMeta.getDisplayName().contains(target)) return;
@@ -265,7 +265,7 @@ public class ItemEditor {
         });
     }
 
-    public ItemEditor mapName(@Nonnull Function<String, String> mapper) {
+    public ItemEditor mapName(@NotNull Function<String, String> mapper) {
         return meta(itemMeta -> {
             if (!itemMeta.hasDisplayName()) return;
 
@@ -273,7 +273,7 @@ public class ItemEditor {
         });
     }
 
-    public ItemEditor mapLore(@Nonnull String target, @Nonnull String replacement) {
+    public ItemEditor mapLore(@NotNull String target, @NotNull String replacement) {
         return meta(itemMeta -> {
             if (!itemMeta.hasLore()) return;
 
@@ -286,7 +286,7 @@ public class ItemEditor {
         });
     }
 
-    public ItemEditor mapLore(@Nonnull String target, @Nonnull Supplier<String> replacement) {
+    public ItemEditor mapLore(@NotNull String target, @NotNull Supplier<String> replacement) {
         return meta(itemMeta -> {
             if (!itemMeta.hasLore()) return;
 
@@ -306,7 +306,7 @@ public class ItemEditor {
         });
     }
 
-    public ItemEditor mapLore(@Nonnull Function<String, String> mapper) {
+    public ItemEditor mapLore(@NotNull Function<String, String> mapper) {
         return meta(itemMeta -> {
             if (!itemMeta.hasLore()) return;
 
@@ -319,7 +319,7 @@ public class ItemEditor {
         });
     }
 
-    public ItemEditor mapLoreMulti(@Nonnull String target, @Nonnull List<String> replacement) {
+    public ItemEditor mapLoreMulti(@NotNull String target, @NotNull List<String> replacement) {
         return meta(itemMeta -> {
             if (!itemMeta.hasLore()) return;
 
@@ -337,7 +337,7 @@ public class ItemEditor {
         });
     }
 
-    public ItemEditor mapLoreMulti(@Nonnull String target, @Nonnull Supplier<List<String>> replacement) {
+    public ItemEditor mapLoreMulti(@NotNull String target, @NotNull Supplier<List<String>> replacement) {
         return meta(itemMeta -> {
             if (!itemMeta.hasLore()) return;
 
@@ -357,7 +357,7 @@ public class ItemEditor {
         });
     }
 
-    public ItemEditor meta(@Nonnull Consumer<ItemMeta> metaConsumer) {
+    public ItemEditor meta(@NotNull Consumer<ItemMeta> metaConsumer) {
         ItemMeta itemMeta = stack.getItemMeta();
         if (itemMeta == null) return this;
 
@@ -367,7 +367,7 @@ public class ItemEditor {
         return this;
     }
 
-    public <T extends ItemMeta> ItemEditor meta(@Nonnull Class<T> metaClass, @Nonnull Consumer<T> metaConsumer) {
+    public <T extends ItemMeta> ItemEditor meta(@NotNull Class<T> metaClass, @NotNull Consumer<T> metaConsumer) {
         ItemMeta itemMeta = stack.getItemMeta();
         if (itemMeta == null) return this;
 
@@ -382,7 +382,7 @@ public class ItemEditor {
         return this;
     }
 
-    public <T extends ItemMeta> ItemEditor metaOrThrow(@Nonnull Class<T> metaClass, @Nonnull Consumer<T> metaConsumer) {
+    public <T extends ItemMeta> ItemEditor metaOrThrow(@NotNull Class<T> metaClass, @NotNull Consumer<T> metaConsumer) {
         ItemMeta itemMeta = stack.getItemMeta();
         if (itemMeta == null) return this;
 
@@ -397,7 +397,7 @@ public class ItemEditor {
         return this;
     }
 
-    public ItemEditor pdc(@Nonnull Consumer<PersistentDataContainer> container) {
+    public ItemEditor pdc(@NotNull Consumer<PersistentDataContainer> container) {
         return meta(itemMeta -> {
             container.accept(itemMeta.getPersistentDataContainer());
         });

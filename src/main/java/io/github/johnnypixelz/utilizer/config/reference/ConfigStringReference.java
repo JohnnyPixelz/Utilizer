@@ -2,8 +2,7 @@ package io.github.johnnypixelz.utilizer.config.reference;
 
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public class ConfigStringReference extends ConfigReference {
@@ -21,7 +20,7 @@ public class ConfigStringReference extends ConfigReference {
         return getConfig().getString(path);
     }
 
-    @Nonnull
+    @NotNull
     public String get(String defaultValue) {
         return getConfig().getString(path, defaultValue);
     }

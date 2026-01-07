@@ -15,13 +15,13 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class InventoryConfigItem {
 
-    public static InventoryConfigItem parse(@Nonnull ConfigurationSection section) {
+    public static InventoryConfigItem parse(@NotNull ConfigurationSection section) {
         final ItemStack parsedStack = Items.parse(section);
 
         final Map<String, Message> messages = new HashMap<>();
@@ -69,7 +69,7 @@ public class InventoryConfigItem {
                 .or(() -> extractSlot(section, "row", "column"));
     }
 
-    private static Optional<Slot> extractSlot(@Nullable ConfigurationSection section, @Nonnull String key) {
+    private static Optional<Slot> extractSlot(@Nullable ConfigurationSection section, @NotNull String key) {
         if (section == null) return Optional.empty();
 
         if (section.isString(key)) {
@@ -90,7 +90,7 @@ public class InventoryConfigItem {
         return Optional.empty();
     }
 
-    private static Optional<Slot> extractSlot(@Nullable ConfigurationSection section, @Nonnull String rowKey, @Nonnull String columnKey) {
+    private static Optional<Slot> extractSlot(@Nullable ConfigurationSection section, @NotNull String rowKey, @NotNull String columnKey) {
         if (section == null) return Optional.empty();
 
         if (section.isInt(rowKey) && section.isInt(columnKey)) {
@@ -163,12 +163,12 @@ public class InventoryConfigItem {
         return configurationSection;
     }
 
-    @Nonnull
+    @NotNull
     public List<Action> getActions() {
         return actions;
     }
 
-    @Nonnull
+    @NotNull
     public Condition getDisplayCondition() {
         return displayCondition;
     }

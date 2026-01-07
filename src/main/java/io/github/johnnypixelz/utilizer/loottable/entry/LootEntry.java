@@ -3,12 +3,12 @@ package io.github.johnnypixelz.utilizer.loottable.entry;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public interface LootEntry {
 
-    @Nonnull
+    @NotNull
     List<LootEntry> roll(); // Returns the result of rolling this entry
 
     double getChance(); // Used for weighted mode

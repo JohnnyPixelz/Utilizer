@@ -3,7 +3,7 @@ package io.github.johnnypixelz.utilizer.config.reference;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public class ConfigSectionReference extends ConfigReference {

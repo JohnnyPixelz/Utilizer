@@ -5,7 +5,7 @@ import io.github.johnnypixelz.utilizer.inventories.inventories.ConfigInventory;
 import io.github.johnnypixelz.utilizer.text.Colors;
 import org.bukkit.Bukkit;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;

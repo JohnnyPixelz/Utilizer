@@ -6,7 +6,7 @@ import io.github.johnnypixelz.utilizer.sql.handlers.PreparedStatementHandler;
 import io.github.johnnypixelz.utilizer.sql.handlers.ResultSetHandler;
 import io.github.johnnypixelz.utilizer.tasks.Tasks;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -48,7 +48,7 @@ public class SQLClient implements Closeable {
         this.hikariDataSource = new HikariDataSource(hikari);
     }
 
-    @Nonnull
+    @NotNull
     public HikariDataSource getHikari() {
         return hikariDataSource;
     }
@@ -57,7 +57,7 @@ public class SQLClient implements Closeable {
         return hikariDataSource.getConnection();
     }
 
-    public void execute(@Nonnull String statement) {
+    public void execute(@NotNull String statement) {
         try (Connection connection = this.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(statement)) {
             preparedStatement.execute();
         } catch (SQLException exception) {
@@ -65,7 +65,7 @@ public class SQLClient implements Closeable {
         }
     }
 
-    public void execute(@Nonnull String statement, @Nonnull PreparedStatementHandler preparer) {
+    public void execute(@NotNull String statement, @NotNull PreparedStatementHandler preparer) {
         try (Connection connection = this.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(statement)) {
             preparer.handle(preparedStatement);
             preparedStatement.execute();
@@ -74,15 +74,15 @@ public class SQLClient implements Closeable {
         }
     }
 
-    public void executeAsync(@Nonnull String statement) {
+    public void executeAsync(@NotNull String statement) {
         Tasks.async().run(() -> execute(statement));
     }
 
-    public void executeAsync(@Nonnull String statement, @Nonnull PreparedStatementHandler preparer) {
+    public void executeAsync(@NotNull String statement, @NotNull PreparedStatementHandler preparer) {
         Tasks.async().run(() -> execute(statement, preparer));
     }
 
-    public <R> Optional<R> executeQuery(@Nonnull String query, @Nonnull ResultSetHandler<R> handler) {
+    public <R> Optional<R> executeQuery(@NotNull String query, @NotNull ResultSetHandler<R> handler) {
         try (Connection connection = this.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 return Optional.ofNullable(handler.handle(resultSet));
@@ -95,7 +95,7 @@ public class SQLClient implements Closeable {
         }
     }
 
-    public <R> Optional<R> executeQuery(@Nonnull String query, @Nonnull PreparedStatementHandler preparer, @Nonnull ResultSetHandler<R> handler) {
+    public <R> Optional<R> executeQuery(@NotNull String query, @NotNull PreparedStatementHandler preparer, @NotNull ResultSetHandler<R> handler) {
         try (Connection connection = this.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparer.handle(preparedStatement);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {

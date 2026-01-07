@@ -6,7 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,7 @@ public abstract class UtilPlugin extends JavaPlugin implements Listener {
         return plugin;
     }
 
-    public <T extends Manager> T registerManager(@Nonnull T manager) {
+    public <T extends Manager> T registerManager(@NotNull T manager) {
         manager.load();
         managerList.add(manager);
         if (manager instanceof Listener) {
@@ -38,7 +38,7 @@ public abstract class UtilPlugin extends JavaPlugin implements Listener {
         return manager;
     }
 
-    public Manager[] registerManager(@Nonnull Manager... manager) {
+    public Manager[] registerManager(@NotNull Manager... manager) {
         for (Manager man : manager) {
             man.load();
             managerList.add(man);
@@ -54,24 +54,24 @@ public abstract class UtilPlugin extends JavaPlugin implements Listener {
         return managerList;
     }
 
-    public <T extends Listener> T registerListener(@Nonnull T listener) {
+    public <T extends Listener> T registerListener(@NotNull T listener) {
         getServer().getPluginManager().registerEvents(listener, this);
         return listener;
     }
 
-    public Listener[] registerListener(@Nonnull Listener... listener) {
+    public Listener[] registerListener(@NotNull Listener... listener) {
         for (Listener listener1 : listener) {
             getServer().getPluginManager().registerEvents(listener1, this);
         }
         return listener;
     }
 
-    public <T extends Listener> T unregisterListener(@Nonnull T listener) {
+    public <T extends Listener> T unregisterListener(@NotNull T listener) {
         HandlerList.unregisterAll(listener);
         return listener;
     }
 
-    public Listener[] unregisterListener(@Nonnull Listener... listener) {
+    public Listener[] unregisterListener(@NotNull Listener... listener) {
         for (Listener listener1 : listener) {
             HandlerList.unregisterAll(listener1);
         }
@@ -82,11 +82,11 @@ public abstract class UtilPlugin extends JavaPlugin implements Listener {
         HandlerList.unregisterAll((Plugin) this);
     }
 
-    public boolean isPluginPresent(@Nonnull String name) {
+    public boolean isPluginPresent(@NotNull String name) {
         return getServer().getPluginManager().getPlugin(name) != null;
     }
 
-    public <T> T getPlugin(@Nonnull String name, @Nonnull Class<T> pluginClass) {
+    public <T> T getPlugin(@NotNull String name, @NotNull Class<T> pluginClass) {
         return (T) getServer().getPluginManager().getPlugin(name);
     }
 
@@ -97,12 +97,12 @@ public abstract class UtilPlugin extends JavaPlugin implements Listener {
      * @param name File name
      * @return Associated file
      */
-    private File getRelativeFile(@Nonnull String name) {
+    private File getRelativeFile(@NotNull String name) {
         getDataFolder().mkdirs();
         return new File(getDataFolder(), name);
     }
 
-    public File getBundledFile(@Nonnull String name) {
+    public File getBundledFile(@NotNull String name) {
         File file = getRelativeFile(name);
         if (!file.exists()) {
             saveResource(name, false);
@@ -110,7 +110,7 @@ public abstract class UtilPlugin extends JavaPlugin implements Listener {
         return file;
     }
 
-    public YamlConfiguration loadConfig(@Nonnull String file) {
+    public YamlConfiguration loadConfig(@NotNull String file) {
         return YamlConfiguration.loadConfiguration(getBundledFile(file));
     }
 

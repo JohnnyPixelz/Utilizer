@@ -4,7 +4,7 @@ import io.github.johnnypixelz.utilizer.serialize.world.BlockPosition;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Factory for creating CustomBlock instances when a block is placed.

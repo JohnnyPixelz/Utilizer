@@ -6,7 +6,7 @@ import com.google.gson.JsonParser;
 import io.github.johnnypixelz.utilizer.gson.typeadapters.BukkitSerializableAdapterFactory;
 import io.github.johnnypixelz.utilizer.gson.typeadapters.GsonSerializableAdapterFactory;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public class GsonProvider {
     private static final Gson STANDARD_GSON = new GsonBuilder()
@@ -26,17 +26,17 @@ public class GsonProvider {
 
     private static final JsonParser PARSER = new JsonParser();
 
-    @Nonnull
+    @NotNull
     public static Gson standard() {
         return STANDARD_GSON;
     }
 
-    @Nonnull
+    @NotNull
     public static Gson prettyPrinting() {
         return PRETTY_PRINT_GSON;
     }
 
-    @Nonnull
+    @NotNull
     public static GsonBuilder builder() {
         return new GsonBuilder()
                 .registerTypeAdapterFactory(GsonSerializableAdapterFactory.INSTANCE)
@@ -45,7 +45,7 @@ public class GsonProvider {
                 .disableHtmlEscaping();
     }
 
-    @Nonnull
+    @NotNull
     public static JsonParser parser() {
         return PARSER;
     }

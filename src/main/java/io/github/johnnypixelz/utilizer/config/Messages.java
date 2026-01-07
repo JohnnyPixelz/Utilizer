@@ -10,7 +10,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -121,7 +121,7 @@ public class Messages {
         }
     }
 
-    @Nonnull
+    @NotNull
     public static Message parse(ConfigurationSection section, String path) {
         Message message = new Message();
 
@@ -198,13 +198,13 @@ public class Messages {
         return message;
     }
 
-    @Nonnull
-    public static Message cfg(@Nonnull String configPath) {
+    @NotNull
+    public static Message cfg(@NotNull String configPath) {
         return cfg("config", configPath);
     }
 
-    @Nonnull
-    public static Message cfg(@Nonnull String config, @Nonnull String configPath) {
+    @NotNull
+    public static Message cfg(@NotNull String config, @NotNull String configPath) {
         FileConfiguration fileConfiguration = Configs.get(config);
 
         return parse(fileConfiguration, configPath);

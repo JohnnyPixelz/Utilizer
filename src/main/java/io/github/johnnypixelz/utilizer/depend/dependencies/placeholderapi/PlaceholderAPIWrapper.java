@@ -5,7 +5,7 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class PlaceholderAPIWrapper {
@@ -16,8 +16,8 @@ public class PlaceholderAPIWrapper {
         expansion.register();
     }
 
-    @Nonnull
-    public PlaceholderAPIWrapper registerPlaceholder(@Nonnull String params, @Nonnull PlaceholderCallback callback) {
+    @NotNull
+    public PlaceholderAPIWrapper registerPlaceholder(@NotNull String params, @NotNull PlaceholderCallback callback) {
         if (expansion == null) {
             initializeExpansion();
         }
@@ -26,8 +26,8 @@ public class PlaceholderAPIWrapper {
         return this;
     }
 
-    @Nonnull
-    public PlaceholderAPIWrapper registerParameterizedPlaceholder(@Nonnull String params, @Nonnull ParameterizedPlaceholderCallback callback) {
+    @NotNull
+    public PlaceholderAPIWrapper registerParameterizedPlaceholder(@NotNull String params, @NotNull ParameterizedPlaceholderCallback callback) {
         if (expansion == null) {
             initializeExpansion();
         }
@@ -36,8 +36,8 @@ public class PlaceholderAPIWrapper {
         return this;
     }
 
-    @Nonnull
-    public PlaceholderAPIWrapper registerRelationalPlaceholder(@Nonnull String params, @Nonnull RelationalPlaceholderCallback callback) {
+    @NotNull
+    public PlaceholderAPIWrapper registerRelationalPlaceholder(@NotNull String params, @NotNull RelationalPlaceholderCallback callback) {
         if (expansion == null) {
             initializeExpansion();
         }
@@ -46,8 +46,8 @@ public class PlaceholderAPIWrapper {
         return this;
     }
 
-    @Nonnull
-    public PlaceholderAPIWrapper registerParameterizedRelationalPlaceholder(@Nonnull String params, @Nonnull ParameterizedRelationalPlaceholderCallback callback) {
+    @NotNull
+    public PlaceholderAPIWrapper registerParameterizedRelationalPlaceholder(@NotNull String params, @NotNull ParameterizedRelationalPlaceholderCallback callback) {
         if (expansion == null) {
             initializeExpansion();
         }
@@ -56,8 +56,8 @@ public class PlaceholderAPIWrapper {
         return this;
     }
 
-    @Nonnull
-    public PlaceholderAPIWrapper registerSystemPlaceholder(@Nonnull String params, @Nonnull SystemPlaceholderCallback callback) {
+    @NotNull
+    public PlaceholderAPIWrapper registerSystemPlaceholder(@NotNull String params, @NotNull SystemPlaceholderCallback callback) {
         if (expansion == null) {
             initializeExpansion();
         }
@@ -78,33 +78,33 @@ public class PlaceholderAPIWrapper {
         return this;
     }
 
-    @Nonnull
-    public String setPlaceholders(@Nonnull Player player, @Nonnull String text) {
+    @NotNull
+    public String setPlaceholders(@NotNull Player player, @NotNull String text) {
         return PlaceholderAPI.setPlaceholders(player, text);
     }
 
-    @Nonnull
-    public List<String> setPlaceholders(@Nonnull Player player, @Nonnull List<String> text) {
+    @NotNull
+    public List<String> setPlaceholders(@NotNull Player player, @NotNull List<String> text) {
         return PlaceholderAPI.setPlaceholders(player, text);
     }
 
-    @Nonnull
-    public String setPlaceholders(@Nonnull OfflinePlayer player, @Nonnull String text) {
+    @NotNull
+    public String setPlaceholders(@NotNull OfflinePlayer player, @NotNull String text) {
         return PlaceholderAPI.setPlaceholders(player, text);
     }
 
-    @Nonnull
-    public List<String> setPlaceholders(@Nonnull OfflinePlayer player, @Nonnull List<String> text) {
+    @NotNull
+    public List<String> setPlaceholders(@NotNull OfflinePlayer player, @NotNull List<String> text) {
         return PlaceholderAPI.setPlaceholders(player, text);
     }
 
-    @Nonnull
-    public String setRelationalPlaceholders(@Nonnull Player one, @Nonnull Player two, @Nonnull String text) {
+    @NotNull
+    public String setRelationalPlaceholders(@NotNull Player one, @NotNull Player two, @NotNull String text) {
         return PlaceholderAPI.setRelationalPlaceholders(one, two, text);
     }
 
-    @Nonnull
-    public List<String> setRelationalPlaceholders(@Nonnull Player one, @Nonnull Player two, @Nonnull List<String> text) {
+    @NotNull
+    public List<String> setRelationalPlaceholders(@NotNull Player one, @NotNull Player two, @NotNull List<String> text) {
         return PlaceholderAPI.setRelationalPlaceholders(one, two, text);
     }
 

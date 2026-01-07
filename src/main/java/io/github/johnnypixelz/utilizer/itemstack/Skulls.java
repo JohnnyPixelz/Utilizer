@@ -10,7 +10,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerProfile;
 import org.bukkit.profile.PlayerTextures;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -23,13 +23,13 @@ public class Skulls {
     private static Method metaSetProfileMethod;
     private static Field metaProfileField;
 
-    @Nonnull
+    @NotNull
     public static ItemStack createSkull() {
         return new ItemStack(Material.PLAYER_HEAD);
     }
 
-    @Nonnull
-    public static ItemStack getSkull(@Nonnull String identifier) {
+    @NotNull
+    public static ItemStack getSkull(@NotNull String identifier) {
         final ItemStack skull = createSkull();
 
         if (isUsername(identifier)) return mutateSkullFromName(skull, identifier);
@@ -38,21 +38,21 @@ public class Skulls {
         return skull;
     }
 
-    @Nonnull
-    public static ItemStack mutateSkull(@Nonnull ItemStack skull, @Nonnull String identifier) {
+    @NotNull
+    public static ItemStack mutateSkull(@NotNull ItemStack skull, @NotNull String identifier) {
         if (isUsername(identifier)) return mutateSkullFromName(skull, identifier);
         if (identifier.contains("https://")) return mutateSkullFromURL(skull, identifier);
         if (identifier.length() > 100 && isBase64(identifier)) return mutateSkullFromBase64(skull, identifier);
         return skull;
     }
 
-    @Nonnull
-    public static ItemStack getSkullFromUUID(@Nonnull UUID uuid) {
+    @NotNull
+    public static ItemStack getSkullFromUUID(@NotNull UUID uuid) {
         return mutateSkullFromUUID(createSkull(), uuid);
     }
 
-    @Nonnull
-    public static ItemStack mutateSkullFromUUID(@Nonnull ItemStack skull, @Nonnull UUID uuid) {
+    @NotNull
+    public static ItemStack mutateSkullFromUUID(@NotNull ItemStack skull, @NotNull UUID uuid) {
         if (!(skull.getItemMeta() instanceof SkullMeta meta)) {
             throw new IllegalArgumentException("Skull must be of type PLAYER_HEAD");
         }
@@ -63,13 +63,13 @@ public class Skulls {
         return skull;
     }
 
-    @Nonnull
-    public static ItemStack getSkullFromName(@Nonnull String name) {
+    @NotNull
+    public static ItemStack getSkullFromName(@NotNull String name) {
         return mutateSkullFromName(createSkull(), name);
     }
 
-    @Nonnull
-    public static ItemStack mutateSkullFromName(@Nonnull ItemStack skull, @Nonnull String name) {
+    @NotNull
+    public static ItemStack mutateSkullFromName(@NotNull ItemStack skull, @NotNull String name) {
         if (!(skull.getItemMeta() instanceof SkullMeta meta)) {
             throw new IllegalArgumentException("Skull must be of type PLAYER_HEAD");
         }
@@ -80,13 +80,13 @@ public class Skulls {
         return skull;
     }
 
-    @Nonnull
-    public static ItemStack getSkullFromURL(@Nonnull String url) {
+    @NotNull
+    public static ItemStack getSkullFromURL(@NotNull String url) {
         return mutateSkullFromURL(createSkull(), url);
     }
 
-    @Nonnull
-    public static ItemStack mutateSkullFromURL(@Nonnull ItemStack skull, @Nonnull String url) {
+    @NotNull
+    public static ItemStack mutateSkullFromURL(@NotNull ItemStack skull, @NotNull String url) {
         if (!(skull.getItemMeta() instanceof SkullMeta meta)) {
             throw new IllegalArgumentException("Skull must be of type PLAYER_HEAD");
         }
@@ -94,13 +94,13 @@ public class Skulls {
         return mutateSkullFromBase64(skull, urlToBase64(url));
     }
 
-    @Nonnull
-    public static ItemStack getSkullFromBase64(@Nonnull String base64) {
+    @NotNull
+    public static ItemStack getSkullFromBase64(@NotNull String base64) {
         return mutateSkullFromBase64(createSkull(), base64);
     }
 
-    @Nonnull
-    public static ItemStack mutateSkullFromBase64(@Nonnull ItemStack skull, @Nonnull String base64) {
+    @NotNull
+    public static ItemStack mutateSkullFromBase64(@NotNull ItemStack skull, @NotNull String base64) {
         if (!(skull.getItemMeta() instanceof SkullMeta meta)) {
             throw new IllegalArgumentException("Skull must be of type PLAYER_HEAD");
         }
@@ -123,8 +123,8 @@ public class Skulls {
         return skull;
     }
 
-    @Nonnull
-    private static String urlToBase64(@Nonnull String url) {
+    @NotNull
+    private static String urlToBase64(@NotNull String url) {
         URI actualUrl;
 
         try {
@@ -137,8 +137,8 @@ public class Skulls {
         return Base64.getEncoder().encodeToString(toEncode.getBytes());
     }
 
-    @Nonnull
-    private static String extractUrlFromBase64(@Nonnull String base64) {
+    @NotNull
+    private static String extractUrlFromBase64(@NotNull String base64) {
         try {
             String decoded = new String(Base64.getDecoder().decode(base64));
             // The decoded JSON format is: {"textures":{"SKIN":{"url":"http://..."}}}
@@ -150,7 +150,7 @@ public class Skulls {
         }
     }
 
-    private static void mutateItemMeta(@Nonnull SkullMeta meta, @Nonnull String b64) {
+    private static void mutateItemMeta(@NotNull SkullMeta meta, @NotNull String b64) {
         try {
             if (metaSetProfileMethod == null) {
                 metaSetProfileMethod = meta.getClass().getDeclaredMethod("setProfile", GameProfile.class);
@@ -173,8 +173,8 @@ public class Skulls {
         }
     }
 
-    @Nonnull
-    private static GameProfile makeProfile(@Nonnull String b64) {
+    @NotNull
+    private static GameProfile makeProfile(@NotNull String b64) {
         // random uuid based on the b64 string
         UUID id = new UUID(
                 b64.substring(b64.length() - 20).hashCode(),
@@ -190,7 +190,7 @@ public class Skulls {
      * While RegEx is a little faster for small strings, this always checks strings with a length
      * greater than 100, so it'll perform a lot better.
      */
-    private static boolean isBase64(@Nonnull String base64) {
+    private static boolean isBase64(@NotNull String base64) {
         try {
             Base64.getDecoder().decode(base64);
             return true;
@@ -205,7 +205,7 @@ public class Skulls {
      * @param name the username to check.
      * @return true if the string matches the Minecraft username rule, otherwise false.
      */
-    private static boolean isUsername(@Nonnull String name) {
+    private static boolean isUsername(@NotNull String name) {
         int len = name.length();
         if (len < 3 || len > 16) return false;
 

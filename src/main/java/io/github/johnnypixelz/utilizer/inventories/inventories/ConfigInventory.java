@@ -3,7 +3,7 @@ package io.github.johnnypixelz.utilizer.inventories.inventories;
 import io.github.johnnypixelz.utilizer.inventories.CustomInventory;
 import org.bukkit.configuration.ConfigurationSection;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class ConfigInventory extends CustomInventory {
 

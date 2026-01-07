@@ -3,7 +3,7 @@ package io.github.johnnypixelz.utilizer.gson;
 import com.google.gson.*;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 /**
  * Builder utilities for creating GSON Objects/Arrays.
  */
-@Nonnull
+@NotNull
 public final class JsonBuilder {
 
     /**

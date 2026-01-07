@@ -9,8 +9,8 @@ import io.github.johnnypixelz.utilizer.inventories.CustomInventory;
 import io.github.johnnypixelz.utilizer.inventories.CustomInventoryType;
 import org.bukkit.configuration.ConfigurationSection;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class InventoryConfig {
@@ -180,7 +180,7 @@ public class InventoryConfig {
         return refresh;
     }
 
-    @Nonnull
+    @NotNull
     public List<InventoryConfigItem> getItems() {
         return ImmutableList.copyOf(inventoryConfigItemMap.values());
     }

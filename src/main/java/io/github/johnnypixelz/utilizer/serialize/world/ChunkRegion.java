@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import io.github.johnnypixelz.utilizer.gson.GsonSerializable;
 import io.github.johnnypixelz.utilizer.gson.JsonBuilder;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 /**
@@ -77,7 +77,7 @@ public class ChunkRegion implements GsonSerializable {
         return this.depth;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public JsonObject serialize() {
         return JsonBuilder.object()

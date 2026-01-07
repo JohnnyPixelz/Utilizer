@@ -13,7 +13,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitTask;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -35,27 +35,27 @@ public class ChatInput<T> implements Listener {
     private boolean retryOnInvalid = false;
     private boolean runSync = true;
 
-    private ChatInput(@Nonnull Player player) {
+    private ChatInput(@NotNull Player player) {
         this.player = Objects.requireNonNull(player, "Player cannot be null");
     }
 
-    public static ChatInput<String> of(@Nonnull Player player) {
+    public static ChatInput<String> of(@NotNull Player player) {
         ChatInput<String> input = new ChatInput<>(player);
         input.parser = Function.identity();
         return input;
     }
 
-    public ChatInput<T> onMessage(@Nonnull Consumer<T> handler) {
+    public ChatInput<T> onMessage(@NotNull Consumer<T> handler) {
         this.messageHandler = Objects.requireNonNull(handler, "Message handler cannot be null");
         return this;
     }
 
-    public ChatInput<T> onCancel(@Nonnull Runnable handler) {
+    public ChatInput<T> onCancel(@NotNull Runnable handler) {
         this.cancelHandler = Objects.requireNonNull(handler, "Cancel handler cannot be null");
         return this;
     }
 
-    public ChatInput<T> timeout(long duration, @Nonnull TimeUnit unit) {
+    public ChatInput<T> timeout(long duration, @NotNull TimeUnit unit) {
         Objects.requireNonNull(unit, "TimeUnit cannot be null");
         this.timeoutTicks = unit.toSeconds(duration) * 20;
         return this;
@@ -65,7 +65,7 @@ public class ChatInput<T> implements Listener {
         return cancelWord("cancel");
     }
 
-    public ChatInput<T> cancelWord(@Nonnull String word) {
+    public ChatInput<T> cancelWord(@NotNull String word) {
         this.cancelWord = Objects.requireNonNull(word, "Cancel word cannot be null");
         return this;
     }
@@ -77,17 +77,17 @@ public class ChatInput<T> implements Listener {
 
     // String validation methods (only valid for ChatInput<String>)
     @SuppressWarnings("unchecked")
-    public ChatInput<String> validate(@Nonnull String errorMessage, @Nonnull Predicate<String> validator) {
+    public ChatInput<String> validate(@NotNull String errorMessage, @NotNull Predicate<String> validator) {
         this.errorMessage = Objects.requireNonNull(errorMessage, "Error message cannot be null");
         this.validator = (Predicate<T>) Objects.requireNonNull(validator, "Validator cannot be null");
         return (ChatInput<String>) this;
     }
 
-    public ChatInput<String> validateEnum(@Nonnull String errorMessage, @Nonnull String... options) {
+    public ChatInput<String> validateEnum(@NotNull String errorMessage, @NotNull String... options) {
         return validateEnum(errorMessage, Arrays.asList(options));
     }
 
-    public ChatInput<String> validateEnum(@Nonnull String errorMessage, @Nonnull List<String> options) {
+    public ChatInput<String> validateEnum(@NotNull String errorMessage, @NotNull List<String> options) {
         Objects.requireNonNull(options, "Options cannot be null");
         Set<String> optionSet = options.stream()
                 .map(String::toLowerCase)
@@ -96,7 +96,7 @@ public class ChatInput<T> implements Listener {
     }
 
     // Generic parsing method
-    public <R> ChatInput<R> parseAs(@Nonnull String errorMessage, @Nonnull Function<String, R> parser) {
+    public <R> ChatInput<R> parseAs(@NotNull String errorMessage, @NotNull Function<String, R> parser) {
         Objects.requireNonNull(errorMessage, "Error message cannot be null");
         Objects.requireNonNull(parser, "Parser cannot be null");
 
@@ -114,31 +114,31 @@ public class ChatInput<T> implements Listener {
     }
 
     // Typed parsing methods
-    public ChatInput<Integer> parseAsInt(@Nonnull String errorMessage) {
+    public ChatInput<Integer> parseAsInt(@NotNull String errorMessage) {
         return parseAs(errorMessage, Integer::parseInt);
     }
 
-    public ChatInput<Integer> parseAsInt(@Nonnull String errorMessage, int min, int max) {
+    public ChatInput<Integer> parseAsInt(@NotNull String errorMessage, int min, int max) {
         ChatInput<Integer> typed = parseAs(errorMessage, Integer::parseInt);
         typed.validator = value -> value >= min && value <= max;
         return typed;
     }
 
-    public ChatInput<Long> parseAsLong(@Nonnull String errorMessage) {
+    public ChatInput<Long> parseAsLong(@NotNull String errorMessage) {
         return parseAs(errorMessage, Long::parseLong);
     }
 
-    public ChatInput<Long> parseAsLong(@Nonnull String errorMessage, long min, long max) {
+    public ChatInput<Long> parseAsLong(@NotNull String errorMessage, long min, long max) {
         ChatInput<Long> typed = parseAs(errorMessage, Long::parseLong);
         typed.validator = value -> value >= min && value <= max;
         return typed;
     }
 
-    public ChatInput<Double> parseAsDouble(@Nonnull String errorMessage) {
+    public ChatInput<Double> parseAsDouble(@NotNull String errorMessage) {
         return parseAs(errorMessage, Double::parseDouble);
     }
 
-    public ChatInput<Double> parseAsDouble(@Nonnull String errorMessage, double min, double max) {
+    public ChatInput<Double> parseAsDouble(@NotNull String errorMessage, double min, double max) {
         ChatInput<Double> typed = parseAs(errorMessage, Double::parseDouble);
         typed.validator = value -> value >= min && value <= max;
         return typed;

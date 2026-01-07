@@ -6,7 +6,7 @@ import io.github.johnnypixelz.utilizer.loottable.entry.ItemEntry;
 import io.github.johnnypixelz.utilizer.loottable.entry.LootEntry;
 import org.bukkit.configuration.ConfigurationSection;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;

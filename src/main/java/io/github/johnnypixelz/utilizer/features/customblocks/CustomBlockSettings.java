@@ -3,7 +3,7 @@ package io.github.johnnypixelz.utilizer.features.customblocks;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.function.Function;
 
 /**

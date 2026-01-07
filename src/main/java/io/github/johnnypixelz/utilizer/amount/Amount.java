@@ -1,6 +1,6 @@
 package io.github.johnnypixelz.utilizer.amount;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public interface Amount {
 
@@ -14,7 +14,7 @@ public interface Amount {
         return new DynamicAmount(min, max);
     }
 
-    static Amount parse(@Nonnull String amount) {
+    static Amount parse(@NotNull String amount) {
         final String[] split = amount.split("-");
 
         if (split.length == 1) {

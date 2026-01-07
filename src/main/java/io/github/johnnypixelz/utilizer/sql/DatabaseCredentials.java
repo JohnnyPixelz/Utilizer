@@ -4,23 +4,23 @@ import com.zaxxer.hikari.HikariConfig;
 import io.github.johnnypixelz.utilizer.sql.drivers.SQLDriver;
 import org.bukkit.configuration.ConfigurationSection;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class DatabaseCredentials {
 
-    @Nonnull
-    public static DatabaseCredentials of(@Nonnull String address, int port, @Nonnull String database, @Nonnull String username, @Nonnull String password, @Nonnull SQLDriver driver) {
+    @NotNull
+    public static DatabaseCredentials of(@NotNull String address, int port, @NotNull String database, @NotNull String username, @NotNull String password, @NotNull SQLDriver driver) {
         return of(address, port, database, username, password, driver, new HashMap<>());
     }
 
-    @Nonnull
-    public static DatabaseCredentials of(@Nonnull String address, int port, @Nonnull String database, @Nonnull String username, @Nonnull String password, @Nonnull SQLDriver driver, @Nonnull Map<String, String> options) {
+    @NotNull
+    public static DatabaseCredentials of(@NotNull String address, int port, @NotNull String database, @NotNull String username, @NotNull String password, @NotNull SQLDriver driver, @NotNull Map<String, String> options) {
         return new DatabaseCredentials(address, port, database, username, password, driver, options);
     }
 
-    @Nonnull
-    public static DatabaseCredentials fromConfig(@Nonnull ConfigurationSection section, SQLDriver... supportedDrivers) {
+    @NotNull
+    public static DatabaseCredentials fromConfig(@NotNull ConfigurationSection section, SQLDriver... supportedDrivers) {
         if (supportedDrivers.length == 0) {
             throw new IllegalArgumentException("No supported drivers found.");
         }
@@ -67,7 +67,7 @@ public class DatabaseCredentials {
     private final SQLDriver sqlDriver;
     private final Map<String, String> options;
 
-    private DatabaseCredentials(@Nonnull String address, int port, @Nonnull String database, @Nonnull String username, @Nonnull String password, @Nonnull SQLDriver sqlDriver, @Nonnull Map<String, String> options) {
+    private DatabaseCredentials(@NotNull String address, int port, @NotNull String database, @NotNull String username, @NotNull String password, @NotNull SQLDriver sqlDriver, @NotNull Map<String, String> options) {
         this.address = Objects.requireNonNull(address);
         this.port = port;
         this.database = Objects.requireNonNull(database);
@@ -77,7 +77,7 @@ public class DatabaseCredentials {
         this.options = Objects.requireNonNull(options);
     }
 
-    @Nonnull
+    @NotNull
     public String getAddress() {
         return this.address;
     }
@@ -86,32 +86,32 @@ public class DatabaseCredentials {
         return this.port;
     }
 
-    @Nonnull
+    @NotNull
     public String getDatabase() {
         return this.database;
     }
 
-    @Nonnull
+    @NotNull
     public String getUsername() {
         return this.username;
     }
 
-    @Nonnull
+    @NotNull
     public String getPassword() {
         return this.password;
     }
 
-    @Nonnull
+    @NotNull
     public SQLDriver getSqlDriver() {
         return sqlDriver;
     }
 
-    @Nonnull
+    @NotNull
     public Map<String, String> getOptions() {
         return options;
     }
 
-    @Nonnull
+    @NotNull
     public HikariConfig getHikariConfig() {
         return sqlDriver.generateHikariConfig(this);
     }

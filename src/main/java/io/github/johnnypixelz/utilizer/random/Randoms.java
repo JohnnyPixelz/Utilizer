@@ -1,7 +1,7 @@
 package io.github.johnnypixelz.utilizer.random;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -79,7 +79,7 @@ public final class Randoms {
      */
     @SafeVarargs
     @Nullable
-    public static <T> T pick(@Nonnull T... items) {
+    public static <T> T pick(@NotNull T... items) {
         if (items.length == 0) return null;
         return items[ThreadLocalRandom.current().nextInt(items.length)];
     }
@@ -126,7 +126,7 @@ public final class Randoms {
      */
     @SafeVarargs
     @Nullable
-    public static <T> T weighted(@Nonnull Weighted<T>... items) {
+    public static <T> T weighted(@NotNull Weighted<T>... items) {
         if (items.length == 0) return null;
         return weighted(Arrays.asList(items));
     }

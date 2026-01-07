@@ -7,7 +7,7 @@ import io.github.johnnypixelz.utilizer.gson.GsonSerializable;
 import io.github.johnnypixelz.utilizer.gson.JsonBuilder;
 import org.bukkit.Location;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 /**
@@ -54,7 +54,7 @@ public class Direction implements GsonSerializable {
         return this.pitch;
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public JsonObject serialize() {
         return JsonBuilder.object()

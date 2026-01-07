@@ -3,7 +3,7 @@ package io.github.johnnypixelz.utilizer.hologram;
 import io.github.johnnypixelz.utilizer.plugin.Provider;
 import org.bukkit.Location;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.UUID;
 

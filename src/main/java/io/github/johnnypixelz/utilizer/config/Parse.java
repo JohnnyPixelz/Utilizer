@@ -6,8 +6,8 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.configuration.ConfigurationSection;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +21,7 @@ public class Parse {
      * @param color the RGB string, format: "int, int, int"
      * @return a color based on the RGB.
      */
-    @Nonnull
+    @NotNull
     public static Color color(@Nullable String color) {
         if (Strings.isNullOrEmpty(color)) return Color.BLACK;
 
@@ -41,7 +41,7 @@ public class Parse {
      * @param color the RGB string, format: "int, int, int"
      * @return a chat color based on the RGB.
      */
-    @Nonnull
+    @NotNull
     public static ChatColor chatColor(@Nullable String color) {
         if (Strings.isNullOrEmpty(color)) return ChatColor.BLACK;
 
@@ -55,7 +55,7 @@ public class Parse {
         );
     }
 
-    public static Optional<Integer> integer(@Nonnull String string) {
+    public static Optional<Integer> integer(@NotNull String string) {
         try {
             final int number = Integer.parseInt(string);
             return Optional.of(number);
@@ -64,7 +64,7 @@ public class Parse {
         }
     }
 
-    public static int integer(@Nonnull String string, int defaultValue) {
+    public static int integer(@NotNull String string, int defaultValue) {
         try {
             return Integer.parseInt(string);
         } catch (NumberFormatException exception) {
@@ -72,7 +72,7 @@ public class Parse {
         }
     }
 
-    public static Optional<Double> decimal(@Nonnull String string) {
+    public static Optional<Double> decimal(@NotNull String string) {
         try {
             final double number = Double.parseDouble(string);
             return Optional.of(number);
@@ -81,7 +81,7 @@ public class Parse {
         }
     }
 
-    public static double decimal(@Nonnull String string, double defaultValue) {
+    public static double decimal(@NotNull String string, double defaultValue) {
         try {
             return Double.parseDouble(string);
         } catch (NumberFormatException exception) {
