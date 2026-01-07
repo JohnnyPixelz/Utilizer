@@ -1,5 +1,6 @@
 package io.github.johnnypixelz.utilizer.config;
 
+import io.github.johnnypixelz.utilizer.depend.Placeholders;
 import io.github.johnnypixelz.utilizer.serialize.world.Point;
 import io.github.johnnypixelz.utilizer.text.ActionBar;
 import io.github.johnnypixelz.utilizer.text.Colors;
@@ -49,45 +50,48 @@ public class Message {
 
     @NotNull
     public Message send(@NotNull CommandSender commandSender) {
+        // Determine if we should process placeholders (only for Players)
+        Player player = commandSender instanceof Player ? (Player) commandSender : null;
+
         if (message != null) {
-            commandSender.sendMessage(Colors.color(message));
+            String processed = player != null ? Placeholders.set(player, message) : message;
+            commandSender.sendMessage(Colors.color(processed));
         }
 
         if (messageList != null) {
             for (String line : messageList) {
-                commandSender.sendMessage(Colors.color(line));
+                String processed = player != null ? Placeholders.set(player, line) : line;
+                commandSender.sendMessage(Colors.color(processed));
             }
         }
 
-        if (!(commandSender instanceof Player)) return this;
-
-        Player player = (Player) commandSender;
+        if (player == null) return this;
 
         if (sound != null) {
             player.playSound(player.getLocation(), sound, 1, 1);
         }
 
         if (title != null) {
+            String processedTitle = Placeholders.set(player, title);
+            String processedSubtitle = subtitle != null ? Placeholders.set(player, subtitle) : "";
+
             if (titleSettings != null) {
                 Title.title(
                         player,
-                        Colors.color(title),
-                        subtitle == null ? "" : Colors.color(subtitle),
+                        Colors.color(processedTitle),
+                        Colors.color(processedSubtitle),
                         titleSettings.getTitleFadeIn(),
                         titleSettings.getTitleStay(),
                         titleSettings.getTitleFadeOut()
                 );
             } else {
-                if (subtitle != null) {
-                    Title.title(player, Colors.color(title), Colors.color(subtitle));
-                } else {
-                    Title.title(player, Colors.color(title), "");
-                }
+                Title.title(player, Colors.color(processedTitle), Colors.color(processedSubtitle));
             }
         }
 
         if (actionbar != null) {
-            ActionBar.coloredActionbar(player, actionbar);
+            String processedActionbar = Placeholders.set(player, actionbar);
+            ActionBar.coloredActionbar(player, processedActionbar);
         }
 
         return this;
