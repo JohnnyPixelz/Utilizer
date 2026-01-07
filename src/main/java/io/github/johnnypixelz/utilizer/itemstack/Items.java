@@ -217,9 +217,13 @@ public class Items {
 
                 if (patterns != null) {
                     for (String pattern : patterns.getKeys(false)) {
-                        PatternType type = PatternType.getByIdentifier(pattern);
-                        if (type == null)
+                        PatternType type = null;
+                        if (Versions.isAtLeast(1, 16)) {
+                            type = PatternType.getByIdentifier(pattern);
+                        }
+                        if (type == null) {
                             type = Enums.getIfPresent(PatternType.class, pattern.toUpperCase(Locale.ENGLISH)).or(PatternType.BASE);
+                        }
                         DyeColor color = Enums.getIfPresent(DyeColor.class, patterns.getString(pattern, "").toUpperCase(Locale.ENGLISH)).or(DyeColor.WHITE);
 
                         banner.addPattern(new Pattern(color, type));
@@ -298,13 +302,13 @@ public class Items {
                     }
                 }
             }
-        } else if (meta instanceof AxolotlBucketMeta axolotlBucketMeta) {
+        } else if (Versions.isAtLeast(1, 17) && meta instanceof AxolotlBucketMeta axolotlBucketMeta) {
             String variantStr = section.getString("color");
             if (variantStr != null) {
                 Axolotl.Variant variant = Enums.getIfPresent(Axolotl.Variant.class, variantStr.toUpperCase(Locale.ENGLISH)).or(Axolotl.Variant.BLUE);
                 axolotlBucketMeta.setVariant(variant);
             }
-        } else if (meta instanceof CompassMeta compassMeta) {
+        } else if (Versions.isAtLeast(1, 16) && meta instanceof CompassMeta compassMeta) {
             compassMeta.setLodestoneTracked(section.getBoolean("tracked"));
 
             ConfigurationSection lodestone = section.getConfigurationSection("lodestone");
@@ -315,7 +319,7 @@ public class Items {
                 double z = lodestone.getDouble("z");
                 compassMeta.setLodestone(new Location(world, x, y, z));
             }
-        } else if (meta instanceof SuspiciousStewMeta suspiciousStewMeta) {
+        } else if (Versions.isAtLeast(1, 16) && meta instanceof SuspiciousStewMeta suspiciousStewMeta) {
             for (String effects : section.getStringList("effects")) {
                 XPotion.Effect effect = XPotion.parseEffect(effects);
                 if (effect == null) continue;
