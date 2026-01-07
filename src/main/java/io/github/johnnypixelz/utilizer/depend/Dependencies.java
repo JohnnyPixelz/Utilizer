@@ -9,6 +9,13 @@ import java.util.Optional;
 public class Dependencies {
     private static PlaceholderAPIWrapper placeholderAPIWrapper = null;
 
+    /**
+     * Get the PlaceholderAPI wrapper for registering placeholders.
+     *
+     * @return Optional containing the wrapper if PlaceholderAPI is enabled
+     * @deprecated Use {@link io.github.johnnypixelz.utilizer.papi.PlaceholderExpansion} instead
+     */
+    @Deprecated
     public static Optional<PlaceholderAPIWrapper> getPlaceholderAPI() {
         if (isEnabled("PlaceholderAPI")) {
             if (placeholderAPIWrapper == null) placeholderAPIWrapper = new PlaceholderAPIWrapper();

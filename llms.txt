@@ -1055,47 +1055,149 @@ database:
 - `MariaDBDriver` - MariaDB
 - `PostgresqlDriver` - PostgreSQL
 
-### 14. Plugin Hooks (io.github.johnnypixelz.utilizer.depend.Dependencies)
+### 14. Placeholders (io.github.johnnypixelz.utilizer.depend.Placeholders)
 
-The Plugin Hooks system (io.github.johnnypixelz.utilizer.depend.Dependencies class) provides easy integration with popular Bukkit plugins like PlaceholderAPI and Vault.
+The Placeholders system provides a unified way to register and use placeholders in text. It automatically integrates with PlaceholderAPI when available.
 
-#### PlaceholderAPI Integration
+#### Using Placeholders
 
-Use `Dependencies.getPlaceholderAPI()` to check if PlaceholderAPI is installed and register your custom placeholders.
+```java
+// Process placeholders in text
+String message = Placeholders.set(player, "Hello %player%! Online: %server_online%");
+player.sendMessage(message);
+
+// Works with null player (only static placeholders processed)
+String serverInfo = Placeholders.set(null, "Server: %server_name% (%server_online%/%server_max%)");
+
+// Process only static placeholders
+String staticOnly = Placeholders.setStatic("Online: %server_online%");
+```
+
+#### Registering Custom Placeholders
 
 ```java
 @Override
 public void onEnable() {
-    // Register PlaceholderAPI placeholders if available
-    Dependencies.getPlaceholderAPI().ifPresent(api -> {
-        // Simple placeholder: %yourplugin_status%
-        api.registerPlaceholder("status", player -> {
-            boolean enabled = getPlayerData(player).isEnabled();
-            return enabled ? "Enabled" : "Disabled";
-        });
+    // Player-based placeholder: %coins%
+    Placeholders.register("coins", player -> {
+        return String.valueOf(getCoins(player));
+    });
 
-        // Parameterized placeholder: %yourplugin_info_<param>%
-        api.registerPlaceholder("info", (player, params) -> {
-            if (params.isEmpty()) return "No parameter";
-            String type = params.get(0);
-            return getInfo(player, type);
-        });
-
-        // Relational placeholder: %rel_yourplugin_caninteract%
-        api.registerRelationalPlaceholder("caninteract", (player1, player2) -> {
-            return canInteract(player1, player2) ? "Yes" : "No";
-        });
-
-        // System placeholder: %yourplugin_total_players%
-        api.registerSystemPlaceholder("total_players", () -> {
-            return String.valueOf(getOnlineCount());
-        });
+    // Static placeholder (no player needed): %server_tps%
+    Placeholders.register("server_tps", () -> {
+        return String.format("%.1f", getTPS());
     });
 }
+```
 
-// Use placeholders in your code
-String parsed = io.github.johnnypixelz.utilizer.depend.Placeholders.set(player, "&aHello %player_name%!");
-player.sendMessage(parsed);
+#### Built-in Placeholders
+
+**Player placeholders** (require player context):
+- `%player%`, `%player_name%` - Player's name
+- `%player_displayname%` - Player's display name
+- `%player_uuid%` - Player's UUID
+- `%player_world%` - Player's current world
+- `%player_health%` - Player's health (integer)
+- `%player_food%` - Player's food level
+- `%player_level%` - Player's XP level
+- `%player_gamemode%` - Player's gamemode
+- `%player_x%`, `%player_y%`, `%player_z%` - Player's coordinates
+
+**Static placeholders** (no player needed):
+- `%server_online%` - Online player count
+- `%server_max%` - Max player count
+- `%server_name%` - Server name
+- `%server_version%` - Server version
+- `%server_motd%` - Server MOTD
+
+**Processing Order:**
+1. Internal registered placeholders are processed first
+2. PlaceholderAPI placeholders are processed second (if PAPI is installed)
+
+**Placeholders Methods:**
+- `Placeholders.set(Player, String)` - Process all placeholders (internal + PAPI)
+- `Placeholders.set(OfflinePlayer, String)` - Process placeholders (static + PAPI for offline)
+- `Placeholders.setStatic(String)` - Process only static placeholders (no PAPI)
+- `Placeholders.register(String, Function<Player, String>)` - Register player placeholder
+- `Placeholders.register(String, Supplier<String>)` - Register static placeholder
+- `Placeholders.unregister(String)` - Unregister a placeholder
+- `Placeholders.isRegistered(String)` - Check if placeholder exists
+
+### 15. PlaceholderAPI Expansion (io.github.johnnypixelz.utilizer.papi)
+
+Modern fluent API for creating PlaceholderAPI expansions with template pattern support.
+
+#### Creating an Expansion
+
+```java
+PlaceholderExpansion.create()
+    // Simple: %plugin_coins%
+    .placeholder("coins", player -> String.valueOf(getCoins(player)))
+
+    // With args: %plugin_stat_mining%
+    .placeholder("stat_{type}", (player, args) -> {
+        return getStat(player, args.getString("type"));
+    })
+
+    // Complex: %plugin_leaderboard_mining_top_1%
+    .placeholder("leaderboard_{skill}_top_{position}", (player, args) -> {
+        String skill = args.getString("skill");
+        int position = args.getInt("position");
+        return getLeaderboardEntry(skill, position);
+    })
+
+    // Relational: %rel_plugin_canattack%
+    .relational("canattack", (p1, p2) -> canAttack(p1, p2) ? "yes" : "no")
+
+    // Relational with args: %rel_plugin_relationship_friend%
+    .relational("relationship_{type}", (p1, p2, args) -> {
+        return getRelationship(p1, p2, args.getString("type"));
+    })
+
+    .register();
+```
+
+#### Template Patterns
+
+Use `{name}` syntax to capture dynamic parts:
+- `"stat_{type}"` - captures "type" from "stat_mining"
+- `"leaderboard_{skill}_top_{position}"` - captures "skill" and "position"
+
+Access captured values through `PlaceholderArgs`:
+- `args.getString("type")` - get as string
+- `args.getInt("position")` - get as int (returns 0 if invalid)
+- `args.getDouble("amount")` - get as double
+- `args.has("key")` - check if key exists
+
+**PlaceholderExpansion Methods:**
+- `PlaceholderExpansion.create()` - Create new builder
+- `.placeholder(String, Function<Player, String>)` - Simple placeholder
+- `.placeholder(String, BiFunction<Player, PlaceholderArgs, String>)` - With template args
+- `.relational(String, BiFunction<Player, Player, String>)` - Simple relational
+- `.relational(String, TriFunction<Player, Player, PlaceholderArgs, String>)` - Relational with args
+- `.register()` - Register with PlaceholderAPI
+
+**PlaceholderArgs Methods:**
+- `.getString(String key)` - Get string value (nullable)
+- `.getString(String key, String default)` - Get string with default
+- `.getInt(String key)` / `.getInt(String key, int default)` - Get int
+- `.getLong(String key)` / `.getLong(String key, long default)` - Get long
+- `.getDouble(String key)` / `.getDouble(String key, double default)` - Get double
+- `.has(String key)` - Check if key exists
+- `.keys()` - Get all keys
+- `.raw()` - Get original unparsed params string
+
+### 16. Plugin Hooks (io.github.johnnypixelz.utilizer.depend.Dependencies)
+
+The Plugin Hooks system provides integration with popular Bukkit plugins like Vault.
+
+#### Vault Integration
+
+```java
+// Get Vault wrapper for economy/permissions
+Dependencies.getVault().ifPresent(vault -> {
+    // Use Vault economy, permissions, etc.
+});
 ```
 
 #### Checking for Other Plugins
@@ -1110,48 +1212,15 @@ if (Dependencies.isLoaded("Vault")) {
 if (Dependencies.isEnabled("Vault")) {
     // Plugin is enabled and ready to use
 }
-
-// Get Vault wrapper
-Dependencies.getVault()
-    .ifPresent(vault -> {
-        // Use Vault economy, permissions, etc.
-    });
 ```
 
-**PlaceholderAPI Methods:**
-- `.registerPlaceholder(String, PlaceholderCallback)` - Register simple placeholder
-- `.registerParameterizedPlaceholder(String, ParameterizedPlaceholderCallback)` - With arguments
-- `.registerRelationalPlaceholder(String, RelationalPlaceholderCallback)` - Between two players
-- `.registerParameterizedRelationalPlaceholder(String, ParameterizedRelationalPlaceholderCallback)` - Relational with args
-- `.registerSystemPlaceholder(String, SystemPlaceholderCallback)` - No player context
-- `.setPlaceholders(Player, String)` - Parse placeholders in text
-- `.setPlaceholders(Player, List<String>)` - Parse placeholders in list
-- `.resetRegisteredPlaceholders()` - Clear all registered placeholders
-
 **Dependencies Methods:**
-- `Dependencies.getPlaceholderAPI()` - Returns `Optional<PlaceholderAPIWrapper>`
 - `Dependencies.getVault()` - Returns `Optional<VaultWrapper>`
 - `Dependencies.isLoaded(String)` - Check if plugin is loaded
 - `Dependencies.isEnabled(String)` - Check if plugin is enabled
+- `Dependencies.getPlaceholderAPI()` - **Deprecated**, use `PlaceholderExpansion` instead
 
-**Best Practices:**
-- Always check if the dependency is present using `.ifPresent()` or `.isEnabled()`
-- Register placeholders in `onEnable()` after loading configs
-- Use config values for placeholder outputs for easy customization
-- Store placeholder values in config for server owners to customize
-
-**Example Config for Placeholders:**
-```yaml
-placeholders:
-  ispvpmode:
-    enabled: "true"
-    disabled: "false"
-  pvpmode:
-    enabled: "&c&lPVP ON"
-    disabled: "&a&lPVP OFF"
-```
-
-### 15. Serialization (io.github.johnnypixelz.utilizer.serialize.world)
+### 17. Serialization (io.github.johnnypixelz.utilizer.serialize.world)
 
 The Serialization package provides immutable, JSON-serializable location objects that are safer to store and pass around than Bukkit's mutable Location.
 
@@ -1218,7 +1287,7 @@ Point restored = Point.deserialize(jsonElement);
 - Distance calculations
 - Relative operations (add, subtract, getRelative)
 
-### 16. Minigames (io.github.johnnypixelz.utilizer.minigame.Minigame)
+### 18. Minigames (io.github.johnnypixelz.utilizer.minigame.Minigame)
 
 The Minigames framework provides a structured approach to creating minigames with arenas, modules, and lifecycle events.
 
@@ -1309,7 +1378,7 @@ game.finish();  // Triggers cleanup after delay
 - `FFAArena` - Free-for-all arena
 - `TeamedArena` - Team-based arena
 
-### 18. Event Emitters (io.github.johnnypixelz.utilizer.event)
+### 19. Event Emitters (io.github.johnnypixelz.utilizer.event)
 
 The Event Emitters system provides a simple pub/sub pattern for custom events with priority support.
 
@@ -1377,7 +1446,7 @@ listener.unregister();
 - Decoupling components
 - Plugin API hooks
 
-### 19. Cooldowns (io.github.johnnypixelz.utilizer.cooldown.Cooldown)
+### 20. Cooldowns (io.github.johnnypixelz.utilizer.cooldown.Cooldown)
 
 The Cooldown system provides an easy way to manage time-based restrictions on objects. Behind the scenes, it's a thread-safe map that tracks when cooldowns expire.
 
@@ -1691,38 +1760,41 @@ player.sendMessage(message);
 ### Plugin Main Class
 ```java
 public class MyPlugin extends UtilPlugin {
-    
+
     @Override
     public void onEnable() {
         // ALWAYS load config.yml for settings and messages.yml for messages
         Configs.load("config").watch();
         Configs.load("messages").watch();
-        
+
         // Load any additional data configs
         Configs.load("data").watch();
-        
+
         // Register managers
         registerManager(new MyManager());
-        
+
         // Register commands
         CommandManager.registerCommands(MyCommand.class);
-        
-        // Register PlaceholderAPI placeholders
+
+        // Register custom placeholders
         registerPlaceholders();
-        
+
         Logs.info("Plugin enabled!");
     }
-    
+
     private void registerPlaceholders() {
-        Dependencies.getPlaceholderAPI()
-            .ifPresent(api -> {
-                api.registerPlaceholder("example", player -> {
-                    return Configs.get("config")
-                        .getString("placeholders.example", "default");
-                });
-            });
+        // Player-based placeholder: %example%
+        Placeholders.register("example", player -> {
+            return Configs.get("config")
+                .getString("placeholders.example", "default");
+        });
+
+        // Static placeholder (no player needed): %my_server_stat%
+        Placeholders.register("my_server_stat", () -> {
+            return String.valueOf(getServerStat());
+        });
     }
-    
+
     @Override
     public void onDisable() {
         Logs.info("Plugin disabled!");
@@ -2002,17 +2074,32 @@ Messages.cfg("messages", "achievements.unlock")
 - `.removeWithoutExecuting(T)` - Remove without triggering callback
 - `.terminate()` - Stop background task (DynamicCooldown)
 
+### Placeholders
+- `Placeholders.set(Player, String)` - Process all placeholders (internal + PAPI)
+- `Placeholders.set(OfflinePlayer, String)` - Process placeholders (static + PAPI for offline)
+- `Placeholders.setStatic(String)` - Process only static placeholders (no PAPI)
+- `Placeholders.register(String, Function<Player, String>)` - Register player placeholder
+- `Placeholders.register(String, Supplier<String>)` - Register static placeholder
+- `Placeholders.unregister(String)` - Unregister a placeholder
+- `Placeholders.isRegistered(String)` - Check if placeholder exists
+- Built-in: `%player%`, `%player_name%`, `%player_uuid%`, `%player_health%`, `%server_online%`, etc.
+- Automatically processes PlaceholderAPI placeholders when PAPI is installed
+
+### PlaceholderExpansion (PAPI)
+- `PlaceholderExpansion.create()` - Create new expansion builder
+- `.placeholder(String, Function<Player, String>)` - Simple placeholder
+- `.placeholder(String, BiFunction<Player, PlaceholderArgs, String>)` - With template args
+- `.relational(String, BiFunction<Player, Player, String>)` - Simple relational
+- `.relational(String, TriFunction<Player, Player, PlaceholderArgs, String>)` - Relational with args
+- `.register()` - Register with PlaceholderAPI
+- Template patterns: `"stat_{type}"`, `"leaderboard_{skill}_top_{position}"`
+- PlaceholderArgs: `.getString()`, `.getInt()`, `.getDouble()`, `.has()`, `.raw()`
+
 ### Dependencies (Plugin Hooks)
-- `Dependencies.getPlaceholderAPI()` - Get PlaceholderAPI wrapper (Optional)
 - `Dependencies.getVault()` - Get Vault wrapper (Optional)
 - `Dependencies.isLoaded(String)` - Check if plugin is loaded
 - `Dependencies.isEnabled(String)` - Check if plugin is enabled
-- PlaceholderAPIWrapper:
-  - `.registerPlaceholder(String, PlaceholderCallback)` - Register placeholder
-  - `.registerParameterizedPlaceholder(String, ParameterizedPlaceholderCallback)` - With args
-  - `.registerRelationalPlaceholder(String, RelationalPlaceholderCallback)` - Between players
-  - `.registerSystemPlaceholder(String, SystemPlaceholderCallback)` - No player context
-  - `.setPlaceholders(Player, String)` - Parse placeholders in text
+- `Dependencies.getPlaceholderAPI()` - **Deprecated**, use PlaceholderExpansion
 
 ### Number Formatting
 - `Numbers.toFormatted(long)` - Format with commas (e.g., "1,234,567")

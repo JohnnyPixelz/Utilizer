@@ -1,6 +1,6 @@
 package io.github.johnnypixelz.utilizer.inventories.config;
 
-import io.github.johnnypixelz.utilizer.depend.Dependencies;
+import io.github.johnnypixelz.utilizer.depend.Placeholders;
 import io.github.johnnypixelz.utilizer.inventories.inventories.ConfigInventory;
 import io.github.johnnypixelz.utilizer.text.Colors;
 import org.bukkit.Bukkit;
@@ -31,27 +31,15 @@ public enum ActionType {
                 .open(actionContext.getPlayer());
     }),
     PERFORM_CONSOLE_COMMAND(List.of("cmd", "command"), 1, actionContext -> {
-        final String command = actionContext.getArguments()
-                .replace("%player%", actionContext.getPlayer().getName());
-
-        final String placeholderedCommand = Dependencies.getPlaceholderAPI()
-                .map(papi -> papi.setPlaceholders(actionContext.getPlayer(), command))
-                .orElse(command);
-
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), placeholderedCommand);
+        final String command = Placeholders.set(actionContext.getPlayer(), actionContext.getArguments());
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
     }),
     PERFORM_PLAYER_COMMAND(List.of("playercmd", "playercommand"), 1, actionContext -> {
-        final String command = actionContext.getArguments()
-                .replace("%player%", actionContext.getPlayer().getName());
-
-        final String placeholderedCommand = Dependencies.getPlaceholderAPI()
-                .map(papi -> papi.setPlaceholders(actionContext.getPlayer(), command))
-                .orElse(command);
-
-        Bukkit.dispatchCommand(actionContext.getPlayer(), placeholderedCommand);
+        final String command = Placeholders.set(actionContext.getPlayer(), actionContext.getArguments());
+        Bukkit.dispatchCommand(actionContext.getPlayer(), command);
     }),
     MESSAGE(List.of("msg", "message", "text"), 1, actionContext -> {
-        final String message = actionContext.getArguments();
+        final String message = Placeholders.set(actionContext.getPlayer(), actionContext.getArguments());
         actionContext.getPlayer().sendMessage(Colors.color(message));
     });
 
