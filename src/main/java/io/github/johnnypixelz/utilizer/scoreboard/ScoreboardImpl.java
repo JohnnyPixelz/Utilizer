@@ -1,6 +1,6 @@
 package io.github.johnnypixelz.utilizer.scoreboard;
 
-import io.github.johnnypixelz.utilizer.depend.Dependencies;
+import io.github.johnnypixelz.utilizer.depend.Placeholders;
 import io.github.johnnypixelz.utilizer.tasks.Tasks;
 import io.github.johnnypixelz.utilizer.text.Colors;
 import io.papermc.paper.scoreboard.numbers.NumberFormat;
@@ -387,9 +387,7 @@ class ScoreboardImpl implements Scoreboard {
     }
 
     private String processPlaceholders(@NotNull Player player, @NotNull String text) {
-        return Dependencies.getPlaceholderAPI()
-                .map(papi -> papi.setPlaceholders(player, text))
-                .orElse(text);
+        return Placeholders.set(player, text);
     }
 
     /**
