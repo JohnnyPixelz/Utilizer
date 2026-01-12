@@ -1991,6 +1991,129 @@ result.amountChanged(); // double - actual amount changed
 - Custom currency registration
 - String-based currency IDs for flexibility
 
+### 27. Holograms (io.github.johnnypixelz.utilizer.hologram.Holograms)
+
+The Holograms API provides a unified interface for creating floating text displays with automatic provider detection and click handling support.
+
+```java
+// Create a hologram with a specific ID
+Hologram hologram = Holograms.create("my-hologram", location, List.of(
+    "&6&lWELCOME",
+    "&7to the server!",
+    "&ewww.example.com"
+));
+
+// Create with varargs
+Hologram shop = Holograms.create("shop", location, "&b&lSHOP", "&7Click to open");
+
+// Create with auto-generated ID
+Hologram temp = Holograms.create(location, "&aTemporary hologram");
+String id = temp.getId();  // Get generated UUID
+
+// Update hologram lines
+hologram.updateLines(List.of("&6&lUPDATED", "&7New content!"));
+
+// Teleport hologram
+hologram.teleport(newLocation);
+
+// Get hologram by ID
+Hologram found = Holograms.get("my-hologram");
+if (found != null) {
+    Location loc = found.getLocation();
+    List<String> lines = found.getLines();
+}
+
+// Check if hologram exists
+if (Holograms.exists("my-hologram")) {
+    // Do something
+}
+
+// Click handling (if supported by provider)
+if (Holograms.supportsClickHandling()) {
+    Holograms.onClick("shop", (player, hologramId, clickType) -> {
+        switch (clickType) {
+            case LEFT -> player.sendMessage("Left click!");
+            case RIGHT -> player.sendMessage("Right click!");
+            case SHIFT_LEFT -> player.sendMessage("Shift + left click!");
+            case SHIFT_RIGHT -> player.sendMessage("Shift + right click!");
+        }
+    });
+}
+
+// Remove click handler
+Holograms.removeClickHandler("shop");
+
+// Remove hologram by ID
+Holograms.remove("my-hologram");
+
+// Or remove via hologram object
+hologram.remove();
+
+// Remove all holograms
+Holograms.removeAll();
+
+// Get count
+int count = Holograms.count();
+
+// Check provider status
+boolean supported = Holograms.isSupported();
+String providerName = Holograms.getProviderName();
+
+// Plugin shutdown (cleanup)
+Holograms.shutdown();
+```
+
+**Key Methods:**
+- `Holograms.create(String id, Location, List<String>)` - Create hologram with ID
+- `Holograms.create(String id, Location, String...)` - Create with varargs
+- `Holograms.create(Location, List<String>)` - Create with auto-generated ID
+- `Holograms.create(Location, String...)` - Create with auto ID and varargs
+- `Holograms.get(String id)` - Get hologram by ID (nullable)
+- `Holograms.exists(String id)` - Check if hologram exists
+- `Holograms.remove(String id)` - Remove hologram by ID
+- `Holograms.removeAll()` - Remove all holograms
+- `Holograms.count()` - Get number of active holograms
+- `Holograms.isSupported()` - Check if any provider is available
+- `Holograms.getProviderName()` - Get active provider name
+- `Holograms.shutdown()` - Cleanup on plugin disable
+
+**Click Handling:**
+- `Holograms.supportsClickHandling()` - Check if clicks are supported
+- `Holograms.onClick(String id, HologramClickHandler)` - Set click handler
+- `Holograms.removeClickHandler(String id)` - Remove click handler
+
+**Hologram Interface:**
+- `.updateLines(List<String>)` - Update displayed lines
+- `.getLines()` - Get current lines
+- `.getLocation()` - Get hologram location
+- `.teleport(Location)` - Move hologram
+- `.remove()` - Remove this hologram
+- `.getId()` - Get hologram ID
+
+**Click Types (HologramClickHandler.ClickType):**
+- `LEFT` - Left mouse click
+- `RIGHT` - Right mouse click
+- `SHIFT_LEFT` - Left click while sneaking
+- `SHIFT_RIGHT` - Right click while sneaking
+
+**Supported Providers (auto-detected in priority order):**
+1. **DecentHolograms** - Full click support
+2. **HolographicDisplays** - Full click support
+3. **FancyHolograms** - Full click support
+4. **Native (TextDisplay)** - Built-in for 1.19.4+, full click support
+5. **Native (ArmorStand)** - Fallback for older versions, full click support
+
+**Key Features:**
+- Unified API across all providers
+- Automatic provider detection and fallback
+- No external plugin required (native fallback)
+- TextDisplay entities on 1.19.4+ for modern rendering
+- ArmorStand entities on older versions
+- Full click handling with all providers
+- Color code support (use Colors.color() for hex colors)
+- ID-based management for easy access
+- Auto-generated UUIDs when ID not specified
+
 ## Best Practices
 
 1. **Always extend io.github.johnnypixelz.utilizer.plugin.UtilPlugin**: This provides access to manager registration and lifecycle hooks.
