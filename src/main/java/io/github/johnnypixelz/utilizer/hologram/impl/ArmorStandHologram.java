@@ -33,6 +33,7 @@ public class ArmorStandHologram extends AbstractNativeHologram {
             String line = lines.get(i);
 
             ArmorStand stand = location.getWorld().spawn(lineLocation, ArmorStand.class, entity -> {
+                entity.setPersistent(false);
                 entity.setVisible(false);
                 entity.setGravity(false);
                 entity.setMarker(true);
@@ -74,6 +75,7 @@ public class ArmorStandHologram extends AbstractNativeHologram {
             String line = lines.get(i);
 
             ArmorStand stand = location.getWorld().spawn(lineLocation, ArmorStand.class, entity -> {
+                entity.setPersistent(false);
                 entity.setVisible(false);
                 entity.setGravity(false);
                 entity.setMarker(true);
@@ -109,6 +111,34 @@ public class ArmorStandHologram extends AbstractNativeHologram {
             }
         }
         armorStands.clear();
+    }
+
+    // ==================== Lifecycle ====================
+
+    @Override
+    public boolean isValid() {
+        if (armorStands.isEmpty()) return false;
+        for (ArmorStand stand : armorStands) {
+            if (stand == null || stand.isDead()) return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void despawn() {
+        armorStands.clear();
+    }
+
+    @Override
+    public void respawn() {
+        // Clean up any remaining alive entities
+        for (ArmorStand stand : armorStands) {
+            if (stand != null && !stand.isDead()) {
+                stand.remove();
+            }
+        }
+        armorStands.clear();
+        spawnArmorStands(lines);
     }
 
 }

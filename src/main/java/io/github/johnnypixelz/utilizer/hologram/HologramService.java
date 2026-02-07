@@ -1,8 +1,15 @@
 package io.github.johnnypixelz.utilizer.hologram;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
@@ -14,18 +21,32 @@ import java.util.logging.Level;
  * Service for managing holograms across different hologram plugins.
  * Automatically detects and uses available hologram plugins, falling back to native implementation.
  * <p>
+ * Features:
+ * <ul>
+ *   <li>Periodic health check that respawns dead hologram entities</li>
+ *   <li>Chunk load handling to respawn holograms when their chunk is loaded</li>
+ * </ul>
  * For static access, use the {@link Holograms} class instead.
  */
-public class HologramService {
+public class HologramService implements Listener {
+
+    private static final long TICK_INTERVAL = 20L; // 1 second
 
     private final Plugin plugin;
     private final Map<String, Hologram> holograms;
     private HologramProvider provider;
+    private BukkitTask tickTask;
 
     public HologramService(Plugin plugin) {
         this.plugin = plugin;
         this.holograms = new HashMap<>();
         this.provider = detectProvider();
+
+        // Start tick task for health checks
+        tickTask = Bukkit.getScheduler().runTaskTimer(plugin, this::tick, TICK_INTERVAL, TICK_INTERVAL);
+
+        // Register chunk load listener for respawning holograms
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @Nullable
@@ -79,6 +100,62 @@ public class HologramService {
     private boolean isPluginAvailable(String pluginName) {
         return Bukkit.getPluginManager().getPlugin(pluginName) != null;
     }
+
+    // ==================== Tick / Health Check ====================
+
+    private void tick() {
+        for (Hologram hologram : holograms.values()) {
+            if (!hologram.isValid()) {
+                try {
+                    Location loc = hologram.getLocation();
+                    if (loc.getWorld() != null && loc.getWorld().isChunkLoaded(loc.getBlockX() >> 4, loc.getBlockZ() >> 4)) {
+                        hologram.respawn();
+                    }
+                } catch (Exception e) {
+                    plugin.getLogger().log(Level.WARNING, "Failed to respawn hologram: " + hologram.getId(), e);
+                }
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onChunkUnload(ChunkUnloadEvent event) {
+        Chunk chunk = event.getChunk();
+        int chunkX = chunk.getX();
+        int chunkZ = chunk.getZ();
+
+        for (Hologram hologram : holograms.values()) {
+            Location loc = hologram.getLocation();
+            if (loc.getWorld() == chunk.getWorld()
+                    && (loc.getBlockX() >> 4) == chunkX
+                    && (loc.getBlockZ() >> 4) == chunkZ) {
+                hologram.despawn();
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onChunkLoad(ChunkLoadEvent event) {
+        Chunk chunk = event.getChunk();
+        int chunkX = chunk.getX();
+        int chunkZ = chunk.getZ();
+
+        for (Hologram hologram : holograms.values()) {
+            Location loc = hologram.getLocation();
+            if (loc.getWorld() == chunk.getWorld()
+                    && (loc.getBlockX() >> 4) == chunkX
+                    && (loc.getBlockZ() >> 4) == chunkZ
+                    && !hologram.isValid()) {
+                try {
+                    hologram.respawn();
+                } catch (Exception e) {
+                    plugin.getLogger().log(Level.WARNING, "Failed to respawn hologram on chunk load: " + hologram.getId(), e);
+                }
+            }
+        }
+    }
+
+    // ==================== Core API ====================
 
     /**
      * Check if holograms are supported.
@@ -219,8 +296,14 @@ public class HologramService {
      * Cleanup resources when the plugin is disabled.
      */
     public void shutdown() {
+        if (tickTask != null) {
+            tickTask.cancel();
+            tickTask = null;
+        }
         removeAllHolograms();
     }
+
+    // ==================== Click Handling ====================
 
     /**
      * Check if the current provider supports click handling.
