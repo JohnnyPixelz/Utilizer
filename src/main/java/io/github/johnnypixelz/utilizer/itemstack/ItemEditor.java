@@ -12,6 +12,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 
 import org.jetbrains.annotations.NotNull;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import java.util.stream.Stream;
 
 public class ItemEditor {
     private final ItemStack stack;
+    private boolean deferColoring;
 
     ItemEditor(@NotNull ItemStack stack) {
         this.stack = stack;
@@ -31,6 +33,22 @@ public class ItemEditor {
 
     ItemEditor(@NotNull Material material) {
         this.stack = new ItemStack(material);
+    }
+
+    /**
+     * Disables automatic color processing on {@code setDisplayName}, {@code setLore},
+     * and {@code addLore}. Strings are stored raw, allowing {@code map()} calls to
+     * perform placeholder replacement on unprocessed text (including MiniMessage
+     * gradient tags) before coloring is applied.
+     * <p>
+     * Call {@link #color()} explicitly before {@link #getItem()} to apply coloring
+     * after all replacements are done. Omit {@code color()} if no coloring is desired.
+     *
+     * @return this editor for chaining
+     */
+    public ItemEditor deferColoring() {
+        this.deferColoring = true;
+        return this;
     }
 
     public ItemEditor color() {
@@ -51,7 +69,7 @@ public class ItemEditor {
 
     public ItemEditor setDisplayName(@NotNull String name) {
         return meta(itemMeta -> {
-            itemMeta.setDisplayName(Colors.color(name));
+            itemMeta.setDisplayName(deferColoring ? name : Colors.color(name));
         });
     }
 
@@ -85,9 +103,9 @@ public class ItemEditor {
 
     public ItemEditor setLore(@NotNull List<String> lore) {
         return meta(itemMeta -> {
-            final List<String> newLore = lore.stream()
-                    .map(Colors::color)
-                    .collect(Collectors.toList());
+            final List<String> newLore = deferColoring
+                    ? new ArrayList<>(lore)
+                    : lore.stream().map(Colors::color).collect(Collectors.toList());
 
             itemMeta.setLore(newLore);
         });
@@ -115,7 +133,9 @@ public class ItemEditor {
         if (oldLore == null) return setLore(lore);
 
         return meta(itemMeta -> {
-            oldLore.addAll(lore.stream().map(Colors::color).toList());
+            oldLore.addAll(deferColoring
+                    ? lore
+                    : lore.stream().map(Colors::color).toList());
             itemMeta.setLore(oldLore);
         });
     }
