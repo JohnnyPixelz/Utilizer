@@ -18,8 +18,9 @@ import java.util.Map;
 import java.util.logging.Level;
 
 /**
- * Service for managing holograms across different hologram plugins.
- * Automatically detects and uses available hologram plugins, falling back to native implementation.
+ * Service for managing holograms using native TextDisplay/ArmorStand entities.
+ * Uses the built-in native provider by default. External plugin providers (DecentHolograms,
+ * HolographicDisplays, FancyHolograms) can be used by explicitly passing a provider to the constructor.
  * <p>
  * Features:
  * <ul>
@@ -38,9 +39,13 @@ public class HologramService implements Listener {
     private BukkitTask tickTask;
 
     public HologramService(Plugin plugin) {
+        this(plugin, null);
+    }
+
+    public HologramService(Plugin plugin, @Nullable HologramProvider provider) {
         this.plugin = plugin;
         this.holograms = new HashMap<>();
-        this.provider = detectProvider();
+        this.provider = provider != null ? provider : initNativeProvider();
 
         // Start tick task for health checks
         tickTask = Bukkit.getScheduler().runTaskTimer(plugin, this::tick, TICK_INTERVAL, TICK_INTERVAL);
@@ -50,55 +55,17 @@ public class HologramService implements Listener {
     }
 
     @Nullable
-    private HologramProvider detectProvider() {
-        // Try DecentHolograms first
-        if (isPluginAvailable("DecentHolograms")) {
-            try {
-                HologramProvider provider = new DecentHologramsProvider(plugin);
-                plugin.getLogger().info("Using DecentHolograms for holograms");
-                return provider;
-            } catch (Exception e) {
-                plugin.getLogger().log(Level.WARNING, "Failed to initialize DecentHolograms provider", e);
-            }
-        }
-
-        // Try HolographicDisplays
-        if (isPluginAvailable("HolographicDisplays")) {
-            try {
-                HologramProvider provider = new HolographicDisplaysProvider(plugin);
-                plugin.getLogger().info("Using HolographicDisplays for holograms");
-                return provider;
-            } catch (Exception e) {
-                plugin.getLogger().log(Level.WARNING, "Failed to initialize HolographicDisplays provider", e);
-            }
-        }
-
-        // Try FancyHolograms
-        if (isPluginAvailable("FancyHolograms")) {
-            try {
-                HologramProvider provider = new FancyHologramsProvider();
-                plugin.getLogger().info("Using FancyHolograms for holograms");
-                return provider;
-            } catch (Exception e) {
-                plugin.getLogger().log(Level.WARNING, "Failed to initialize FancyHolograms provider", e);
-            }
-        }
-
-        // Fallback to native provider
+    private HologramProvider initNativeProvider() {
         try {
             HologramProvider provider = new NativeHologramProvider(plugin);
-            plugin.getLogger().info("Using " + provider.getProviderName() + " for holograms (no external plugin)");
+            plugin.getLogger().info("Using hologram provider: " + provider.getProviderName());
             return provider;
         } catch (Exception e) {
             plugin.getLogger().log(Level.WARNING, "Failed to initialize native hologram provider", e);
         }
 
-        plugin.getLogger().info("Failed to initialize any hologram provider. Holograms will be disabled.");
+        plugin.getLogger().info("Failed to initialize hologram provider. Holograms will be disabled.");
         return null;
-    }
-
-    private boolean isPluginAvailable(String pluginName) {
-        return Bukkit.getPluginManager().getPlugin(pluginName) != null;
     }
 
     // ==================== Tick / Health Check ====================
