@@ -3,6 +3,7 @@ package io.github.johnnypixelz.utilizer.scoreboard;
 import io.github.johnnypixelz.utilizer.depend.Placeholders;
 import io.github.johnnypixelz.utilizer.tasks.Tasks;
 import io.github.johnnypixelz.utilizer.text.Colors;
+import io.github.johnnypixelz.utilizer.version.Versions;
 import io.papermc.paper.scoreboard.numbers.NumberFormat;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.Bukkit;
@@ -24,6 +25,14 @@ class ScoreboardImpl implements Scoreboard {
 
     // Unique invisible characters for each line (using color codes)
     private static final String[] LINE_IDENTIFIERS = new String[MAX_LINES];
+
+    // Legacy team prefix/suffix character cap enforced by CraftTeam before Minecraft 1.20.1.
+    private static final int LEGACY_PREFIX_LIMIT = 64;
+
+    // The 64-char prefix/suffix cap was removed in Minecraft 1.20.1 (CraftTeam#setPrefix, Spigot and
+    // Paper alike). From 1.20.1 the prefix is an unbounded chat component and the whole line is written
+    // at once; below 1.20.1 the cap is still enforced, so the line is split across prefix and suffix.
+    private static final boolean PREFIX_LENGTH_LIMITED = Versions.isBelow(1, 20, 1);
 
     static {
         // Generate unique invisible strings using color code combinations
@@ -356,29 +365,88 @@ class ScoreboardImpl implements Scoreboard {
         Team team = data.teams[index];
         String entry = LINE_IDENTIFIERS[index];
 
-        // For modern MC (1.13+), prefix can hold up to 64 chars
-        // Split if needed for longer text
-        if (processed.length() <= 64) {
-            team.setPrefix(processed);
-            team.setSuffix("");
-        } else {
-            // Split intelligently to preserve color codes
-            String prefix = processed.substring(0, 64);
-            String suffix = processed.substring(64);
-
-            // Get last color from prefix to apply to suffix
-            String lastColors = ChatColor.getLastColors(prefix);
-            suffix = lastColors + suffix;
-            if (suffix.length() > 64) {
-                suffix = suffix.substring(0, 64);
-            }
-
-            team.setPrefix(prefix);
-            team.setSuffix(suffix);
-        }
+        // Write the whole line into the team prefix (see applyLineText).
+        applyLineText(team, processed);
 
         // Set the score (this makes the line visible)
         data.objective.getScore(entry).setScore(score);
+    }
+
+    /**
+     * Writes the fully-processed line into the team.
+     * <p>
+     * From Minecraft 1.20.1 onward a team's prefix is an unbounded chat component: {@code
+     * CraftTeam#setPrefix} only null-checks the string and then parses it in full via {@code
+     * CraftChatMessage} (§x hex-gradient sequences included), on both Spigot and Paper, so the entire
+     * line goes into the prefix and renders intact however long it is.
+     * <p>
+     * Before 1.20.1 CraftTeam caps prefix/suffix at {@value #LEGACY_PREFIX_LIMIT} characters, so the
+     * line is split across prefix and suffix on a colour-code boundary — never inside a §x hex sequence,
+     * so it is not corrupted like the old fixed-offset split did. Each character of a hex gradient
+     * carries its own colour, so the suffix resumes correctly; anything past what prefix + suffix hold
+     * is truncated. Keeping lines short enough on legacy servers is left to the developer.
+     * <p>
+     * Example — gradient "Herobrine" serialises to 135 legacy chars (each visible character is prefixed
+     * by its own §x§R§R§G§G§B§B colour, i.e. up to 15 chars per character):
+     * <pre>
+     *   on >= 1.20.1:  setPrefix gets all 135 chars  ->  "Herobrine"  (full gradient)
+     *   on <  1.20.1:  prefix (60 chars) -> "Hero",  suffix (60 chars) -> "brin"
+     *                  result -> "Herobrin"   ("e" is past the ~128-char prefix+suffix room, dropped)
+     * </pre>
+     * The cut falls between whole §x groups, so every shown character keeps its own colour, never the
+     * corrupted mid-sequence colour the old fixed-offset split produced.
+     */
+    private void applyLineText(@NotNull Team team, @NotNull String processed) {
+        if (!PREFIX_LENGTH_LIMITED) {
+            team.setPrefix(processed);
+            team.setSuffix("");
+            return;
+        }
+
+        String prefix = trimToBoundary(processed, LEGACY_PREFIX_LIMIT);
+        String remainder = processed.substring(prefix.length());
+        team.setPrefix(prefix);
+        team.setSuffix(remainder.isEmpty() ? "" : trimToBoundary(remainder, LEGACY_PREFIX_LIMIT));
+    }
+
+    /**
+     * Returns the longest leading portion of {@code text} that is at most {@code cap} characters long
+     * and never ends inside a colour code or a §x hex sequence. It walks whole tokens (14 chars for a
+     * §x hex colour, 2 for a §-code, 1 for a visible char) and stops before the first token that would
+     * cross {@code cap}.
+     * <p>
+     * Example — a hex gradient prefixes every visible character with its own 14-char §x§R§R§G§G§B§B
+     * colour, so trimming a "Herobrine" gradient at cap 64 walks whole tokens:
+     * <pre>
+     *   §x(->14) H(->15) §x(->29) e(->30) §x(->44) r(->45) §x(->59) o(->60)   (all fit in 64)
+     *   the next §x would reach 74 > 64   ->   stop, cut at 60
+     *   returns the 60-char prefix (shows "Hero"); the cut is between §x groups, never inside one
+     * </pre>
+     */
+    private static String trimToBoundary(@NotNull String text, int cap) {
+        int i = 0;
+        int lastBoundary = 0;
+        while (i < text.length()) {
+            int token = tokenLength(text, i);
+            if (i + token > cap) {
+                break;
+            }
+            i += token;
+            lastBoundary = i;
+        }
+        return text.substring(0, lastBoundary);
+    }
+
+    /** Length of the formatting/character token starting at {@code i}: 14 for a §x hex sequence, 2 for a §code, else 1. */
+    private static int tokenLength(@NotNull String text, int i) {
+        if (text.charAt(i) == ChatColor.COLOR_CHAR && i + 1 < text.length()) {
+            char next = text.charAt(i + 1);
+            if ((next == 'x' || next == 'X') && i + 14 <= text.length()) {
+                return 14; // §x§R§R§G§G§B§B
+            }
+            return 2; // §<code>
+        }
+        return 1;
     }
 
     private void removeLine(@NotNull PlayerScoreboardData data, int index) {
