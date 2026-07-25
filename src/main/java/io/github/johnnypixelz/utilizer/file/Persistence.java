@@ -17,12 +17,16 @@ public class Persistence {
     }
 
     public static <T> T loadFile(@NotNull File file, @Nullable TypeToken<T> token) {
-        try {
-            Type type = token != null
-                    ? token.getType()
-                    : new TypeToken<T>(){}.getType();
-            return gson.fromJson(new FileReader(file), type);
+        Type type = token != null
+                ? token.getType()
+                : new TypeToken<T>(){}.getType();
+
+        try (Reader reader = new FileReader(file)) {
+            return gson.fromJson(reader, type);
         } catch (FileNotFoundException ignored) {
+            return null;
+        } catch (IOException ex) {
+            ex.printStackTrace();
             return null;
         }
     }
@@ -48,18 +52,17 @@ public class Persistence {
     }
 
     public static <T> boolean saveFile(@NotNull File file, @NotNull Object object, @Nullable TypeToken<T> token) {
-        try {
-            FileWriter writer = new FileWriter(file);
-            Type type = token != null
-                    ? token.getType()
-                    : new TypeToken<T>(){}.getType();
+        Type type = token != null
+                ? token.getType()
+                : new TypeToken<T>(){}.getType();
+
+        try (Writer writer = new FileWriter(file)) {
             gson.toJson(object, type, writer);
-            writer.close();
-        } catch (FileNotFoundException ignored) {
         } catch (IOException ex) {
             ex.printStackTrace();
             return false;
         }
+
         return true;
     }
 
