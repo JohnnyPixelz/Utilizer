@@ -61,6 +61,10 @@ public abstract class InventoryItem {
                 onClick.emit(event);
                 onShiftRightClick.emit(event);
             }
+            // Everything else — number keys, middle click, dropping, double clicks, offhand
+            // swaps — has no emitter of its own but still belongs to whoever asked for any
+            // click.
+            default -> onClick.emit(event);
         }
     }
 
@@ -80,6 +84,14 @@ public abstract class InventoryItem {
 
     }
 
+    /**
+     * Fires for every click on this item, including the ones without an emitter of their own:
+     * number keys, middle clicks, drops, double clicks and offhand swaps.
+     * <p>
+     * Worth knowing when the handler accumulates something: a double click arrives as a LEFT
+     * followed by a DOUBLE_CLICK, so it lands here twice for one action. Handlers that care
+     * should check {@link InventoryClickEvent#getClick()}.
+     */
     protected StatefulEventEmitter<InventoryClickEvent> getOnClick() {
         return onClick;
     }
