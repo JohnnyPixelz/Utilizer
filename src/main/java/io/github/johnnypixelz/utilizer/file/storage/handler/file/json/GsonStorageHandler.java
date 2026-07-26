@@ -12,8 +12,13 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class GsonStorageHandler<T> extends FileStorageHandler<T> {
+    private static final SimpleDateFormat BROKEN_SUFFIX = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+
     private final Type type;
     private final Gson gson;
 
@@ -27,8 +32,32 @@ public class GsonStorageHandler<T> extends FileStorageHandler<T> {
     protected T loadData(Path path) {
         try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
             return this.gson.fromJson(reader, this.type);
-        } catch (IOException e) {
+        } catch (IOException exception) {
             return null;
+        } catch (Exception exception) {
+//            Unparseable rather than missing. Containers read their file in the
+//            constructor, so letting this out takes the whole plugin down with
+//            it -- one broken file should cost its own data, not everything
+//            else the plugin does.
+            Logs.severe("Could not read " + path.getFileName() + ": " + exception.getMessage());
+            quarantine(path);
+
+            return null;
+        }
+    }
+
+    /**
+     * Renames a file we could not parse, so the next save does not overwrite
+     * whatever is still recoverable from it.
+     */
+    private void quarantine(Path path) {
+        final Path broken = path.resolveSibling(path.getFileName() + ".broken-" + BROKEN_SUFFIX.format(new Date()));
+
+        try {
+            Files.move(path, broken, StandardCopyOption.REPLACE_EXISTING);
+            Logs.severe("Moved it to " + broken.getFileName() + " and carried on with empty data.");
+        } catch (IOException exception) {
+            Logs.severe("Could not move it aside: " + exception.getMessage());
         }
     }
 
