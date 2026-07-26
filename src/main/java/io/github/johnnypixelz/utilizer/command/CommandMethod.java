@@ -4,6 +4,7 @@ import io.github.johnnypixelz.utilizer.command.exceptions.NotEnoughArgumentsExce
 import io.github.johnnypixelz.utilizer.command.exceptions.UnsupportedCommandArgumentException;
 import io.github.johnnypixelz.utilizer.plugin.Logs;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -45,7 +46,36 @@ public class CommandMethod {
         return method;
     }
 
+    /**
+     * Whether this method can be run by the given sender.
+     * <p>
+     * A method declaring {@code Player} as its first parameter cannot be
+     * invoked with a {@code ConsoleCommandSender}, so this has to be checked
+     * before reflection is involved.
+     */
+    public boolean accepts(CommandSender sender) {
+        return senderType == null || senderType.isInstance(sender);
+    }
+
+    /**
+     * Tells a sender why the command did nothing.
+     */
+    public void informWrongSender(CommandSender sender) {
+        final CommandMessage message = senderType != null && Player.class.isAssignableFrom(senderType)
+                ? CommandMessage.PLAYERS_ONLY
+                : CommandMessage.WRONG_SENDER;
+
+        CommandMessageManager.getMessage(message).send(sender);
+    }
+
     public void execute(CommandSender sender, List<String> arguments) throws UnsupportedCommandArgumentException, NotEnoughArgumentsException {
+        // Guarded here as well as at the call site: nothing below survives an
+        // invoke() with a sender the method cannot take.
+        if (!accepts(sender)) {
+            informWrongSender(sender);
+            return;
+        }
+
         final Queue<String> args = new LinkedList<>(arguments);
         final Queue<Parameter> parameters = new LinkedList<>(List.of(method.getParameters()));
 
