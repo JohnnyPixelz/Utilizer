@@ -2,11 +2,14 @@ package io.github.johnnypixelz.utilizer.file.storage.handler.file;
 
 import io.github.johnnypixelz.utilizer.file.storage.container.file.FileStorageContainer;
 import io.github.johnnypixelz.utilizer.file.storage.handler.StorageHandler;
+import io.github.johnnypixelz.utilizer.plugin.Logs;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
@@ -49,23 +52,13 @@ public abstract class FileStorageHandler<T> implements StorageHandler<T> {
 
     public void save(T data) {
         this.dataFolder.mkdirs();
-        File file = new File(this.dataFolder, this.fileName + this.fileExtension);
-        if (file.exists()) {
-            file.delete();
-        }
-
-        try {
-            file.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        saveData(file.toPath(), data);
+        writeAtomically(new File(this.dataFolder, this.fileName + this.fileExtension).toPath(), data);
     }
 
     public void saveAndBackup(T data) {
         this.dataFolder.mkdirs();
         File file = new File(this.dataFolder, this.fileName + this.fileExtension);
+
         if (file.exists()) {
             File backupDir = new File(this.dataFolder, "backups");
             backupDir.mkdirs();
@@ -73,19 +66,54 @@ public abstract class FileStorageHandler<T> implements StorageHandler<T> {
             File backupFile = new File(backupDir, this.fileName + "-" + DATE_FORMAT.format(new Date(System.currentTimeMillis())) + this.fileExtension);
 
             try {
-                Files.move(file.toPath(), backupFile.toPath());
+                Files.copy(file.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
+        writeAtomically(file.toPath(), data);
+    }
+
+    /**
+     * Writes beside the target and swaps it in once the file is complete.
+     * <p>
+     * Deleting the old file first and writing in its place loses everything the
+     * moment serialization fails partway -- there is no copy left and what did
+     * get flushed is half a document. Building the replacement separately means
+     * a failure leaves the previous file exactly as it was.
+     */
+    private void writeAtomically(Path target, T data) {
+        final Path temporary = target.resolveSibling(target.getFileName() + ".tmp");
+
         try {
-            file.createNewFile();
+            Files.deleteIfExists(temporary);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        saveData(file.toPath(), data);
+        saveData(temporary, data);
+
+        if (!Files.exists(temporary)) {
+            Logs.severe("Nothing was written for " + target.getFileName() + ", keeping the previous file");
+            return;
+        }
+
+        try {
+            Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+        } catch (AtomicMoveNotSupportedException exception) {
+            // Some filesystems cannot promise it; a plain replace is still
+            // better than having deleted the original up front.
+            try {
+                Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                Logs.severe("Failed to replace " + target.getFileName() + ": " + e.getMessage());
+                e.printStackTrace();
+            }
+        } catch (IOException exception) {
+            Logs.severe("Failed to replace " + target.getFileName() + ": " + exception.getMessage());
+            exception.printStackTrace();
+        }
     }
 
     public FileStorageContainer<T> container(Supplier<T> supplier) {
