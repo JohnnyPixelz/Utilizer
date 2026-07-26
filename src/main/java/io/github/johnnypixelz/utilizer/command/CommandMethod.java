@@ -47,6 +47,25 @@ public class CommandMethod {
     }
 
     /**
+     * How many arguments this method needs, not counting the sender.
+     */
+    public int getRequiredArgumentCount() {
+        return method.getParameterCount() - (senderType == null ? 0 : 1);
+    }
+
+    /**
+     * Whether the last parameter swallows every remaining argument, which
+     * {@link #execute} does for a trailing {@code String}. Such a method can
+     * serve a call carrying more arguments than it declares.
+     */
+    public boolean absorbsTrailingArguments() {
+        final Parameter[] parameters = method.getParameters();
+        if (parameters.length == 0 || getRequiredArgumentCount() == 0) return false;
+
+        return parameters[parameters.length - 1].getType() == String.class;
+    }
+
+    /**
      * Whether this method can be run by the given sender.
      * <p>
      * A method declaring {@code Player} as its first parameter cannot be

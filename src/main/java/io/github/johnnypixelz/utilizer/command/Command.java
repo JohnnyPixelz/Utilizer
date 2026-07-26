@@ -17,6 +17,7 @@ import java.util.function.Supplier;
 public class Command {
     private List<String> labels;
     private CommandMethod defaultMethod;
+    private final List<CommandMethod> methods;
     private final List<Command> subcommands;
     private String description;
     private final List<CommandPermission> requiredPermissions;
@@ -27,6 +28,7 @@ public class Command {
     public Command() {
         this.labels = new ArrayList<>();
         this.defaultMethod = null;
+        this.methods = new ArrayList<>();
         this.subcommands = new ArrayList<>();
         this.description = null;
         this.requiredPermissions = new ArrayList<>();
@@ -41,6 +43,83 @@ public class Command {
 
     public CommandMethod getDefaultMethod() {
         return defaultMethod;
+    }
+
+    /**
+     * Every method registered under this label, including overloads.
+     */
+    public List<CommandMethod> getMethods() {
+        return methods;
+    }
+
+    /**
+     * Registers a method for this label.
+     * <p>
+     * The shortest form becomes the default: it is what the syntax line shows
+     * and what a call too short for any overload falls back to, so the error a
+     * player sees describes the simplest way to use the command.
+     */
+    private void addMethod(CommandMethod method) {
+        methods.add(method);
+
+        if (defaultMethod == null || method.getRequiredArgumentCount() < defaultMethod.getRequiredArgumentCount()) {
+            defaultMethod = method;
+        }
+    }
+
+    /**
+     * Picks which overload should handle a call.
+     * <p>
+     * Methods sharing a label are overloads, not competitors -- without this
+     * whichever one the reflection API happened to return first won every call,
+     * so {@code /cmd sub} and {@code /cmd sub <arg>} could not coexist.
+     *
+     * @return the best match, or null if this command has no methods at all
+     */
+    public CommandMethod selectMethod(CommandSender sender, int argumentCount) {
+        if (methods.size() <= 1) return defaultMethod;
+
+        // A sender that can run none of them still gets an answer -- from the
+        // shortest one -- rather than silence.
+        final List<CommandMethod> runnable = methods.stream().filter(method -> method.accepts(sender)).toList();
+        final List<CommandMethod> pool = runnable.isEmpty() ? methods : runnable;
+
+        CommandMethod exact = null;
+        CommandMethod greedy = null;
+        CommandMethod shortest = null;
+
+        for (CommandMethod method : pool) {
+            final int required = method.getRequiredArgumentCount();
+
+            if (required == argumentCount && exact == null) {
+                exact = method;
+            } else if (required < argumentCount && method.absorbsTrailingArguments()
+                    && (greedy == null || required > greedy.getRequiredArgumentCount())) {
+                greedy = method;
+            }
+
+            if (shortest == null || required < shortest.getRequiredArgumentCount()) {
+                shortest = method;
+            }
+        }
+
+        if (exact != null) return exact;
+        if (greedy != null) return greedy;
+
+        return shortest;
+    }
+
+    /**
+     * An already-registered subcommand answering to any of these labels.
+     */
+    private Command findSubcommand(List<String> candidateLabels) {
+        for (Command subcommand : subcommands) {
+            for (String label : candidateLabels) {
+                if (subcommand.labels.contains(label)) return subcommand;
+            }
+        }
+
+        return null;
     }
 
     public List<Command> getSubcommands() {
@@ -108,7 +187,7 @@ public class Command {
         for (Method declaredMethod : clazz.getDeclaredMethods()) {
 //            Processing Default annotations
             if (declaredMethod.isAnnotationPresent(Default.class)) {
-                command.defaultMethod = new CommandMethod(command, declaredMethod);
+                command.addMethod(new CommandMethod(command, declaredMethod));
             }
 
             final String description = Optional.ofNullable(declaredMethod.getAnnotation(Description.class))
@@ -117,22 +196,32 @@ public class Command {
 
 //            Processing method Subcommand annotations
             if (declaredMethod.isAnnotationPresent(Subcommand.class)) {
-                final Command subcommand = new Command();
-
                 final Subcommand subcommandAnnotation = declaredMethod.getAnnotation(Subcommand.class);
                 final String label = subcommandAnnotation.value();
                 final List<String> labels = CommandUtil.parseLabel(label);
-                subcommand.labels = labels;
 
-                subcommand.defaultMethod = new CommandMethod(command, declaredMethod);
-                subcommand.description = description;
-                subcommand.parent = command;
+                // Another method already claimed this label, so this one is an
+                // overload of it rather than a second command competing for the
+                // same name.
+                final Command existing = command.findSubcommand(labels);
 
-                parsePermissionAnnotations(subcommand, declaredMethod);
+                if (existing != null) {
+                    existing.addMethod(new CommandMethod(command, declaredMethod));
+                    existing.generateSyntax();
+                } else {
+                    final Command subcommand = new Command();
+                    subcommand.labels = labels;
 
-                subcommand.generateSyntax();
+                    subcommand.addMethod(new CommandMethod(command, declaredMethod));
+                    subcommand.description = description;
+                    subcommand.parent = command;
 
-                command.subcommands.add(subcommand);
+                    parsePermissionAnnotations(subcommand, declaredMethod);
+
+                    subcommand.generateSyntax();
+
+                    command.subcommands.add(subcommand);
+                }
             }
 
 //            Processing method Label annotations
@@ -144,7 +233,7 @@ public class Command {
                 final List<String> labels = CommandUtil.parseLabel(label);
                 labelCommand.labels = labels;
 
-                labelCommand.defaultMethod = new CommandMethod(command, declaredMethod);
+                labelCommand.addMethod(new CommandMethod(command, declaredMethod));
                 labelCommand.description = description;
 
                 parsePermissionAnnotations(labelCommand, declaredMethod);

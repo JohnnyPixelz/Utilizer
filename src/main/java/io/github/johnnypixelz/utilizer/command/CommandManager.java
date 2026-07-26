@@ -108,14 +108,14 @@ public class CommandManager {
         }
 
         try {
-            final CommandMethod defaultMethod = currentCommand.getDefaultMethod();
-            if (defaultMethod == null) {
+            final CommandMethod method = currentCommand.selectMethod(sender, currentArgs.size());
+            if (method == null) {
                 final String unknownCommand = Bukkit.spigot().getConfig().getString("messages.unknown-command", "Unknown command. Type \"/help\" for help.");
                 sender.sendMessage(Colors.color(unknownCommand));
                 return;
             }
 
-            defaultMethod.execute(sender, currentArgs);
+            method.execute(sender, currentArgs);
         } catch (UnsupportedCommandArgumentException exception) {
             CommandMessageManager.getMessage(CommandMessage.INTERNAL_ERROR).send(sender);
             exception.printStackTrace();
