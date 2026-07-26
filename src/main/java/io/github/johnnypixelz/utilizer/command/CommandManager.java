@@ -87,17 +87,12 @@ public class CommandManager {
 
         if (!command.checkIfPermittedAndInform(sender)) return;
 
-        Logs.info("Executing command " + command.getLabels().get(0));
         while (!currentArgs.isEmpty()) {
             String label = currentArgs.get(0).toLowerCase();
             boolean found = false;
 
-            Logs.info("Searching for subcommands named " + label);
             for (Command subcommand : currentCommand.getSubcommands()) {
-                Logs.info("Checking for subcommand " + subcommand.getLabels().get(0));
                 if (subcommand.getLabels().contains(label)) {
-                    Logs.info("Found subcommand " + label);
-
                     if (!subcommand.checkIfPermittedAndInform(sender)) return;
 
                     currentCommand = subcommand;
@@ -107,10 +102,9 @@ public class CommandManager {
                 }
             }
 
-            if (!found) {
-                Logs.info("Didn't find subcommand with name " + label + ", current command is " + currentCommand.getLabels().get(0));
-                break;
-            }
+            // Not a subcommand -- everything left is arguments for the
+            // command we have walked down to.
+            if (!found) break;
         }
 
         try {

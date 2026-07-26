@@ -1,6 +1,5 @@
 package io.github.johnnypixelz.utilizer.command;
 
-import io.github.johnnypixelz.utilizer.plugin.Logs;
 import io.github.johnnypixelz.utilizer.plugin.Provider;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginIdentifiableCommand;
@@ -32,7 +31,6 @@ public class BukkitCommand extends org.bukkit.command.Command implements PluginI
 
     @Override
     public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, @NotNull String[] args) {
-        Logs.info("Executing command " + commandLabel + " with " + args.length + " args.");
         CommandManager.executeCommand(command, sender, List.of(args));
         return true;
     }
@@ -40,10 +38,6 @@ public class BukkitCommand extends org.bukkit.command.Command implements PluginI
     @NotNull
     @Override
     public List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException {
-        Logs.info("Tab Complete");
-        Logs.info("Alias: " + alias);
-        Logs.info("Args: " + String.join(", ", args));
-
         Command currentCommand = command;
 
         final Queue<String> arguments = new LinkedList<>(List.of(args));

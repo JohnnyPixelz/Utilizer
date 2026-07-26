@@ -105,9 +105,7 @@ public class Command {
     }
 
     private void parseMethodAnnotations(Command command, Class<? extends Command> clazz) {
-        Logs.info("Parsing method annotations for command " + command.getLabels().get(0) + ", class " + clazz.getCanonicalName());
         for (Method declaredMethod : clazz.getDeclaredMethods()) {
-            Logs.info("Method " + declaredMethod.getName());
 //            Processing Default annotations
             if (declaredMethod.isAnnotationPresent(Default.class)) {
                 command.defaultMethod = new CommandMethod(command, declaredMethod);
