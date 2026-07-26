@@ -108,7 +108,7 @@ public class Pane implements ContentHolder {
         this.panes.add(new ContainedPane(pane, rawSlot));
 
         pane.getRenderSignaller().listen(integer -> {
-            this.getRenderSignaller().emit(integer - rawSlot);
+            this.getRenderSignaller().emit(integer + rawSlot);
         });
     }
 
