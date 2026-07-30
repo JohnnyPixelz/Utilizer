@@ -42,7 +42,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.cryptomorin.xseries.XMaterial.supports;
 
 
 @SuppressWarnings("unused UnusedReturnValue")
@@ -271,7 +270,7 @@ public class Items {
 
             if (mapSection != null) {
                 mapMeta.setScaling(mapSection.getBoolean("scaling"));
-                if (supports(11)) {
+                if (Versions.isAtLeast(1, 11)) {
                     if (mapSection.isSet("location")) mapMeta.setLocationName(mapSection.getString("location"));
                     if (mapSection.isSet("color")) {
                         Color color = Parse.color(mapSection.getString("color"));
@@ -279,7 +278,7 @@ public class Items {
                     }
                 }
 
-                if (supports(14)) {
+                if (Versions.isAtLeast(1, 14)) {
                     ConfigurationSection view = mapSection.getConfigurationSection("view");
                     if (view != null) {
                         World world = Bukkit.getWorld(view.getString("world", ""));
