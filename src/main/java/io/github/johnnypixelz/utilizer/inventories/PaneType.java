@@ -1,32 +1,32 @@
 package io.github.johnnypixelz.utilizer.inventories;
 
-import com.cryptomorin.xseries.XMaterial;
+import org.bukkit.Material;
 
 public enum PaneType {
-    WHITE(XMaterial.WHITE_STAINED_GLASS_PANE),
-    ORANGE(XMaterial.ORANGE_STAINED_GLASS_PANE),
-    MAGENTA(XMaterial.MAGENTA_STAINED_GLASS_PANE),
-    LIGHT_BLUE(XMaterial.LIGHT_BLUE_STAINED_GLASS_PANE),
-    YELLOW(XMaterial.YELLOW_STAINED_GLASS_PANE),
-    LIME(XMaterial.LIME_STAINED_GLASS_PANE),
-    PINK(XMaterial.PINK_STAINED_GLASS_PANE),
-    GRAY(XMaterial.GRAY_STAINED_GLASS_PANE),
-    LIGHT_GRAY(XMaterial.LIGHT_GRAY_STAINED_GLASS_PANE),
-    CYAN(XMaterial.CYAN_STAINED_GLASS_PANE),
-    PURPLE(XMaterial.PURPLE_STAINED_GLASS_PANE),
-    BLUE(XMaterial.BLUE_STAINED_GLASS_PANE),
-    BROWN(XMaterial.BROWN_STAINED_GLASS_PANE),
-    GREEN(XMaterial.GREEN_STAINED_GLASS_PANE),
-    RED(XMaterial.RED_STAINED_GLASS_PANE),
-    BLACK(XMaterial.BLACK_STAINED_GLASS_PANE);
+    WHITE(Material.WHITE_STAINED_GLASS_PANE),
+    ORANGE(Material.ORANGE_STAINED_GLASS_PANE),
+    MAGENTA(Material.MAGENTA_STAINED_GLASS_PANE),
+    LIGHT_BLUE(Material.LIGHT_BLUE_STAINED_GLASS_PANE),
+    YELLOW(Material.YELLOW_STAINED_GLASS_PANE),
+    LIME(Material.LIME_STAINED_GLASS_PANE),
+    PINK(Material.PINK_STAINED_GLASS_PANE),
+    GRAY(Material.GRAY_STAINED_GLASS_PANE),
+    LIGHT_GRAY(Material.LIGHT_GRAY_STAINED_GLASS_PANE),
+    CYAN(Material.CYAN_STAINED_GLASS_PANE),
+    PURPLE(Material.PURPLE_STAINED_GLASS_PANE),
+    BLUE(Material.BLUE_STAINED_GLASS_PANE),
+    BROWN(Material.BROWN_STAINED_GLASS_PANE),
+    GREEN(Material.GREEN_STAINED_GLASS_PANE),
+    RED(Material.RED_STAINED_GLASS_PANE),
+    BLACK(Material.BLACK_STAINED_GLASS_PANE);
 
-    private final XMaterial material;
+    private final Material material;
 
-    PaneType(final XMaterial material) {
+    PaneType(final Material material) {
         this.material = material;
     }
 
-    public XMaterial getMaterial() {
+    public Material getMaterial() {
         return material;
     }
 }

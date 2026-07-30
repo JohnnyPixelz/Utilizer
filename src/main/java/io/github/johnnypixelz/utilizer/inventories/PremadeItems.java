@@ -6,7 +6,7 @@ import org.bukkit.inventory.ItemStack;
 public class PremadeItems {
 
     public static ItemStack getPane(PaneType type) {
-        return type.getMaterial().parseItem();
+        return new ItemStack(type.getMaterial());
     }
 
     public static ItemStack getCustomPane(PaneType type) {
